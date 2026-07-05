@@ -56,14 +56,36 @@ export interface SkillCategory {
   skills: string[];
 }
 
+export interface Publication {
+  title: string;
+  publisher: string | null;
+  date: string | null;
+  url: string | null;
+  description: string | null;
+}
+
+export interface CustomSectionItem {
+  title: string | null;
+  subtitle: string | null;
+  date: string | null;
+  description: string | null;
+}
+
+export interface CustomSection {
+  section_title: string;
+  items: CustomSectionItem[];
+}
+
 export interface ParsedResume {
   personal_info: PersonalInfo | null;
   education: Education[];
-  experience: Experience[];
+  experience: Experience[] | null;
   projects: Project[];
   certifications: Certification[];
   skills: SkillCategory[];
   languages: string[];
+  publications: Publication[];
+  custom_sections: CustomSection[];
   raw_text: string | null;
 }
 
@@ -81,35 +103,10 @@ export interface InferredJobRole {
   reasoning: string;
 }
 
-export interface SkillCategoryInference {
-  category: string;
-  skills: string[];
-  proficiency_level: string;
-}
-
-export interface ProfileCompleteness {
-  overall_score: number;
-  has_contact_info: boolean;
-  has_summary: boolean;
-  has_education: boolean;
-  has_experience: boolean;
-  has_skills: boolean;
-  has_projects: boolean;
-  has_certifications: boolean;
-  missing_sections: string[];
-  improvement_suggestions: string[];
-}
-
 export interface ProfileIntelligence {
   original_resume: ParsedResume;
-  inferred_job_roles: InferredJobRole[];
-  career_level: string;
-  total_years_experience: number;
-  skill_categories: SkillCategoryInference[];
-  profile_completeness: ProfileCompleteness;
-  industry_domains: string[];
-  key_strengths: string[];
-  professional_summary: string;
+  preferred_job_roles: InferredJobRole[];
+  strengths: string[];
 }
 
 export interface PipelineResponse {

@@ -1,10 +1,11 @@
 """
-Resume Parser — Core extraction logic.
+Resume Parser — Core extraction and profile intelligence logic.
 
 Pipeline:
   1. Extract raw text from PDF (PyMuPDF) or DOCX (python-docx)
-  2. Send text to NVIDIA NIM (OpenAI-compatible API) with a structured extraction prompt
-  3. Parse the JSON response into a ParsedResume model
+  2. Send text to NVIDIA NIM (Llama 3.1 70B) with a unified prompt to extract
+     the parsed resume AND generate profile intelligence in a single pass.
+  3. Parse the JSON response into a ProfileIntelligence model.
 """
 
 import json
@@ -17,13 +18,15 @@ import fitz  # PyMuPDF
 from openai import OpenAI
 from docx import Document
 
-from app.config import get_settings
-from app.models import ParsedResume
+from services.config import settings
+from services.resume_parsing.models import ParsedResume
 
 logger = logging.getLogger(__name__)
 
-EXTRACTION_PROMPT = """
-You are an expert resume parser. Given the raw text of a resume, extract all information and return it as a JSON object matching this exact schema:
+PARSE_RESUME_PROMPT = """
+You are an expert resume parser. Your task is to analyze the raw text of a resume and extract all structured data.
+
+Return a JSON object matching this EXACT schema (no extra keys, no markdown, no explanatory text):
 
 {{
   "personal_info": {{
@@ -57,7 +60,7 @@ You are an expert resume parser. Given the raw text of a resume, extract all inf
       "is_current": false,
       "responsibilities": ["string"]
     }}
-  ],
+  ] (or null if no explicit work experience exists),
   "projects": [
     {{
       "name": "string",
@@ -83,23 +86,43 @@ You are an expert resume parser. Given the raw text of a resume, extract all inf
       "skills": ["string"]
     }}
   ],
-  "languages": ["string"]
+  "languages": ["string"],
+  "publications": [
+    {{
+      "title": "string",
+      "publisher": "string or null",
+      "date": "string or null",
+      "url": "string or null",
+      "description": "string or null"
+    }}
+  ],
+  "custom_sections": [
+    {{
+      "section_title": "string (e.g., 'Awards', 'Volunteer Work', 'Patents')",
+      "items": [
+        {{
+          "title": "string or null",
+          "subtitle": "string or null",
+          "date": "string or null",
+          "description": "string or null"
+        }}
+      ]
+    }}
+  ]
 }}
 
 Rules:
-- Return ONLY valid JSON. No markdown, no code fences, no explanatory text.
-- Preserve original dates exactly as written in the resume.
-- Group skills by logical categories (e.g. "Programming Languages", "Frameworks", "Tools", "Databases").
-- If a field is missing, use null for scalars or [] for arrays.
-- For experience, split bullet points into separate strings in the responsibilities array.
-- Do not invent or infer data that is not present in the resume.
+1. Return ONLY valid JSON. No markdown, no code fences, no explanatory text.
+2. Link Extraction (CRITICAL): You MUST aggressively search the resume for a LinkedIn profile link and place it ONLY in the `linkedin` field. Carefully distinguish between LinkedIn and GitHub URLs. LinkedIn URLs always contain 'linkedin.com', GitHub URLs always contain 'github.com'. DO NOT SWAP THEM.
+3. If a field is missing, use null for scalars or [] for arrays. For experience, split bullet points into separate strings in the responsibilities array.
+4. Experience vs Projects: The `experience` section MUST ONLY contain real work experience or internships EXPLICITLY MENTIONED in the resume text. Do NOT assume, infer, or hallucinate any work experience. If there is no genuine work experience explicitly mentioned in the resume text, you MUST keep the `experience` field null. All projects MUST be placed in the `projects` section without duplication.
+5. Custom Sections: If the resume contains ANY sections that do not fit into the standard predefined arrays (e.g., Awards, Extracurriculars, Leadership, Hobbies), you MUST extract them into the `custom_sections` array. Do not lose any information.
 
 Resume text:
 ---
 {resume_text}
 ---
 """
-
 
 def extract_text_from_pdf(file_bytes: bytes) -> str:
     """Extract raw text from PDF bytes using PyMuPDF."""
@@ -126,7 +149,6 @@ def extract_text_from_docx(file_bytes: bytes) -> str:
 
 def _clean_json_response(response_text: str) -> str:
     """Strip markdown fences if the model wraps the JSON in them."""
-    # Remove ```json ... ``` or ``` ... ``` wrappers
     cleaned = re.sub(r"^```(?:json)?\s*", "", response_text.strip(), flags=re.IGNORECASE)
     cleaned = re.sub(r"\s*```$", "", cleaned.strip())
     return cleaned.strip()
@@ -134,11 +156,8 @@ def _clean_json_response(response_text: str) -> str:
 
 def parse_resume(file_bytes: bytes, content_type: str) -> ParsedResume:
     """
-    Main entry point: given raw file bytes and MIME type,
-    returns a structured ParsedResume.
+    Extracts raw text from the resume and parses it into structured data using an LLM.
     """
-    settings = get_settings()
-
     # 1. Extract raw text
     if content_type == "application/pdf":
         raw_text = extract_text_from_pdf(file_bytes)
@@ -155,17 +174,18 @@ def parse_resume(file_bytes: bytes, content_type: str) -> ParsedResume:
 
     logger.info("Extracted %d characters from resume", len(raw_text))
 
-    # 2. Call NVIDIA NIM (OpenAI-compatible API)
+    # 2. Call NVIDIA NIM (OpenAI-compatible API) with parse resume prompt
     client = OpenAI(
         base_url="https://integrate.api.nvidia.com/v1",
         api_key=settings.nvidia_api_key,
-        timeout=60.0,
+        timeout=120.0,
+        max_retries=1,
     )
 
-    prompt = EXTRACTION_PROMPT.format(resume_text=raw_text[:12000])  # token safety limit
+    prompt = PARSE_RESUME_PROMPT.format(resume_text=raw_text[:12000])
 
     completion = client.chat.completions.create(
-        model="meta/llama-3.1-70b-instruct",
+        model="meta/llama-3.1-8b-instruct",
         messages=[
             {
                 "role": "system",
@@ -175,13 +195,23 @@ def parse_resume(file_bytes: bytes, content_type: str) -> ParsedResume:
         ],
         temperature=0.1,
         max_tokens=4096,
+        response_format={"type": "json_object"},
     )
 
     response_text = completion.choices[0].message.content or ""
+    logger.info("Received profile analysis response (%d chars)", len(response_text))
 
     # 3. Parse JSON
     cleaned = _clean_json_response(response_text)
     data = json.loads(cleaned)
-    parsed = ParsedResume(**data, raw_text=raw_text)
+    
+    data["raw_text"] = raw_text
+    
+    if data.get("experience") is None:
+        data["experience"] = []
+        
+    parsed = ParsedResume(**data)
+    
+    logger.info("Resume parsing complete")
 
     return parsed

@@ -45,7 +45,7 @@ export default function ResumeUploader({ onParsed }: ResumeUploaderProps) {
     setProgress("Uploading resume…");
 
     try {
-      setProgress("Parsing with Gemini AI…");
+      setProgress("Parsing with AI…");
       const result = await parseResume(file);
 
       if (!result.success || !result.parsed_resume) {
@@ -115,34 +115,15 @@ export default function ResumeUploader({ onParsed }: ResumeUploaderProps) {
           <div className={styles.loadingState}>
             <div className={styles.spinner} aria-hidden="true" />
             <p className={styles.loadingText}>{progress}</p>
-            <p className={styles.loadingSubtext}>This may take 60–90 seconds for deep analysis…</p>
+            <p className={styles.loadingSubtext}>This may take 60–90 seconds…</p>
           </div>
         ) : (
           <div className={styles.idleState}>
-            <div className={styles.uploadIcon} aria-hidden="true">
-              <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-                <rect width="36" height="36" rx="10" fill="url(#upload-grad)" />
-                <path
-                  d="M18 23V13M18 13L14 17M18 13L22 17"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M12 26h12"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <defs>
-                  <linearGradient id="upload-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#6366f1" />
-                    <stop offset="1" stopColor="#06b6d4" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
+            <svg className={styles.uploadIcon} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
             <p className={styles.dropText}>
               {dragging ? "Drop your resume here" : "Drag & drop your resume"}
             </p>
@@ -154,9 +135,10 @@ export default function ResumeUploader({ onParsed }: ResumeUploaderProps) {
 
       {error && (
         <div className={styles.errorAlert} role="alert">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <circle cx="8" cy="8" r="7" stroke="#f87171" strokeWidth="1.5" />
-            <path d="M8 5v4M8 11v.5" stroke="#f87171" strokeWidth="1.5" strokeLinecap="round" />
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
           {error}
         </div>

@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     profile_data JSONB NOT NULL DEFAULT '{}'::jsonb,
     source_filename TEXT,
+    resume_url TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE(user_id)
@@ -43,3 +44,23 @@ CREATE TRIGGER profiles_updated_at
     BEFORE UPDATE ON public.profiles
     FOR EACH ROW
     EXECUTE FUNCTION public.update_updated_at();
+
+-- ============================================================
+-- CareerOS — Supabase Storage: Resumes bucket
+-- ============================================================
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('resumes', 'resumes', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Policy: Authenticated users can upload to resumes bucket
+CREATE POLICY "Users can upload resumes"
+    ON storage.objects
+    FOR INSERT
+    WITH CHECK (bucket_id = 'resumes' AND auth.role() = 'authenticated');
+
+-- Policy: Resumes are publicly viewable
+CREATE POLICY "Resumes are publicly viewable"
+    ON storage.objects
+    FOR SELECT
+    USING (bucket_id = 'resumes');

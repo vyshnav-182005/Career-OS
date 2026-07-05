@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import DashboardClient from "./DashboardClient";
+import type { ProfileIntelligence } from "@/lib/types/resume";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -12,6 +13,13 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  // Fetch existing profile from Supabase
+  const { data: profileRow } = await supabase
+    .from("profiles")
+    .select("profile_data, source_filename, resume_url")
+    .eq("user_id", user.id)
+    .single();
+
   const displayName =
     user.user_metadata?.full_name ||
     user.email?.split("@")[0] ||
@@ -19,5 +27,13 @@ export default async function DashboardPage() {
 
   const avatarChar = displayName[0].toUpperCase();
 
-  return <DashboardClient displayName={displayName} avatarChar={avatarChar} />;
+  return (
+    <DashboardClient 
+      displayName={displayName} 
+      avatarChar={avatarChar} 
+      initialProfileIntelligence={profileRow?.profile_data as ProfileIntelligence | null}
+      initialFilename={profileRow?.source_filename}
+      initialResumeUrl={profileRow?.resume_url ?? null}
+    />
+  );
 }

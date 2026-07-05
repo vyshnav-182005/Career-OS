@@ -2,10 +2,15 @@
   "name": "career-os",
   "private": true,
   "scripts": {
-    "dev": "npm run dev --prefix frontend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "venv\\Scripts\\python -m uvicorn services.main:app --reload --port 8000",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "build": "npm run build --prefix frontend",
     "install:frontend": "npm install --prefix frontend",
-    "install:python": "venv\\Scripts\\pip install -r services\\resume-parser\\requirements.txt",
-    "setup": "npm run install:frontend && python -m venv venv && npm run install:python"
+    "install:python": "venv\\Scripts\\pip install -r services\\requirements.txt",
+    "setup": "npm install && npm run install:frontend && python -m venv venv && npm run install:python"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

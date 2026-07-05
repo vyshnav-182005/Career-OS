@@ -14,7 +14,7 @@ class PersonalInfo(BaseModel):
 
 
 class Education(BaseModel):
-    institution: str
+    institution: Optional[str] = None
     degree: Optional[str] = None
     field_of_study: Optional[str] = None
     start_date: Optional[str] = None
@@ -24,8 +24,8 @@ class Education(BaseModel):
 
 
 class Experience(BaseModel):
-    company: str
-    title: str
+    company: Optional[str] = None
+    title: Optional[str] = None
     location: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
@@ -34,7 +34,7 @@ class Experience(BaseModel):
 
 
 class Project(BaseModel):
-    name: str
+    name: Optional[str] = None
     description: Optional[str] = None
     technologies: list[str] = Field(default_factory=list)
     url: Optional[str] = None
@@ -43,7 +43,7 @@ class Project(BaseModel):
 
 
 class Certification(BaseModel):
-    name: str
+    name: Optional[str] = None
     issuer: Optional[str] = None
     date: Optional[str] = None
     expiry: Optional[str] = None
@@ -51,8 +51,28 @@ class Certification(BaseModel):
 
 
 class SkillCategory(BaseModel):
-    category: str
+    category: Optional[str] = None
     skills: list[str] = Field(default_factory=list)
+
+
+class Publication(BaseModel):
+    title: Optional[str] = None
+    publisher: Optional[str] = None
+    date: Optional[str] = None
+    url: Optional[str] = None
+    description: Optional[str] = None
+
+
+class CustomSectionItem(BaseModel):
+    title: Optional[str] = None
+    subtitle: Optional[str] = None
+    date: Optional[str] = None
+    description: Optional[str] = None
+
+
+class CustomSection(BaseModel):
+    section_title: str
+    items: list[CustomSectionItem] = Field(default_factory=list)
 
 
 class ParsedResume(BaseModel):
@@ -63,6 +83,8 @@ class ParsedResume(BaseModel):
     certifications: list[Certification] = Field(default_factory=list)
     skills: list[SkillCategory] = Field(default_factory=list)
     languages: list[str] = Field(default_factory=list)
+    publications: list[Publication] = Field(default_factory=list)
+    custom_sections: list[CustomSection] = Field(default_factory=list)
     raw_text: Optional[str] = None
 
 

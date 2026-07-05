@@ -50,13 +50,11 @@ export default function RegisterPage() {
   if (success) {
     return (
       <div className={styles.page}>
-        <div className={styles.orb1} aria-hidden="true" />
-        <div className={styles.orb2} aria-hidden="true" />
         <div className={styles.card}>
           <div className={styles.successState}>
             <div className={styles.successIcon} aria-hidden="true">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <path d="M6 16L12 22L26 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
               </svg>
             </div>
             <h1 className={styles.title}>Check your inbox</h1>
@@ -75,41 +73,30 @@ export default function RegisterPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.orb1} aria-hidden="true" />
-      <div className={styles.orb2} aria-hidden="true" />
-
       <Link href="/" className={styles.backLink} aria-label="Back to home">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-          <path d="M11.25 13.5L6.75 9l4.5-4.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
         </svg>
         Back to home
       </Link>
 
       <div className={styles.card}>
         <div className={styles.logo}>
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
-            <rect width="36" height="36" rx="10" fill="url(#reg-logo-grad)" />
-            <path d="M10 18L15 23L26 13" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            <defs>
-              <linearGradient id="reg-logo-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#6366f1" />
-                <stop offset="1" stopColor="#06b6d4" />
-              </linearGradient>
-            </defs>
-          </svg>
           <span className={styles.logoText}>Career<span className="gradient-text">OS</span></span>
         </div>
 
         <div className={styles.heading}>
-          <h1 className={styles.title}>Create your account</h1>
-          <p className={styles.subtitle}>Start your AI-powered career journey today</p>
+          <h1 className={styles.title}>Create account</h1>
+          <p className={styles.subtitle}>Start your AI-powered career journey</p>
         </div>
 
         {error && (
           <div className={styles.errorAlert} role="alert">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <circle cx="8" cy="8" r="7" stroke="#f87171" strokeWidth="1.5" />
-              <path d="M8 5v4M8 11v.5" stroke="#f87171" strokeWidth="1.5" strokeLinecap="round" />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
             {error}
           </div>
@@ -172,12 +159,6 @@ export default function RegisterPage() {
             {loading ? "Creating account…" : "Create account"}
           </button>
         </form>
-
-        <p className={styles.termsNote}>
-          By signing up, you agree to our{" "}
-          <a href="#">Terms of Service</a> and{" "}
-          <a href="#">Privacy Policy</a>.
-        </p>
 
         <p className={styles.switchLink}>
           Already have an account?{" "}
