@@ -1,1 +1,0 @@
-# service.py for applications

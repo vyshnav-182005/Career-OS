@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "@/app/globals.css";
-import ThemeProvider from "@/components/ThemeProvider";
+import ThemeProvider from "@/components/shared/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "CareerOS — AI-Powered Career Guidance Platform",

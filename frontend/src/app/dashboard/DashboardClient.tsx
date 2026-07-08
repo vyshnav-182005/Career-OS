@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { ParsedResume, ProfileIntelligence } from "@/lib/types/resume";
-import ResumeUploader from "@/components/ResumeUploader";
-import ProfileView from "@/components/ProfileView";
-import ThemeToggle from "@/components/ThemeToggle";
+import ResumeUploader from "@/components/dashboard/ResumeUploader";
+import ProfileView from "@/components/dashboard/ProfileView";
+import ThemeToggle from "@/components/shared/ThemeToggle";
+import ResumeOptimizer from "@/components/dashboard/ResumeOptimizer";
 import styles from "./dashboard.module.css";
 
 interface DashboardClientProps {
+  userId: string;
   displayName: string;
   avatarChar: string;
   initialProfileIntelligence?: ProfileIntelligence | null;
@@ -17,6 +19,7 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ 
+  userId,
   displayName, 
   avatarChar,
   initialProfileIntelligence,
@@ -85,6 +88,9 @@ export default function DashboardClient({
     )},
     { label: "My Resume", icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    )},
+    { label: "Optimize", icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
     )},
   ];
 
@@ -196,6 +202,25 @@ export default function DashboardClient({
                   </div>
                 </div>
                 <ResumeUploader onParsed={handleParsed} />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Optimize Tab */}
+        {activeTab === "Optimize" && (
+          <div className={styles.optimizeSection}>
+            {profileIntelligence ? (
+              // Passing user's auth ID so the API knows whose profile to optimize
+              <ResumeOptimizer userId={userId} />
+            ) : (
+              <div className={styles.uploadCard}>
+                <div className={styles.uploadCardHeader}>
+                  <div>
+                    <h2 className={styles.uploadCardTitle}>Profile Required</h2>
+                    <p className={styles.uploadCardDesc}>Please upload and parse your resume in the Overview tab first before optimizing.</p>
+                  </div>
+                </div>
               </div>
             )}
           </div>

@@ -1,8 +1,8 @@
-import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
-import FeaturesSection from "@/components/FeaturesSection";
-import HowItWorksSection from "@/components/HowItWorksSection";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/shared/Navbar";
+import HeroSection from "@/components/landing/HeroSection";
+import FeaturesSection from "@/components/landing/FeaturesSection";
+import HowItWorksSection from "@/components/landing/HowItWorksSection";
+import Footer from "@/components/landing/Footer";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function HomePage() {
