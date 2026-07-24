@@ -3,7 +3,7 @@ import glob
 
 replacements = {
     "services.config": "backend.config",
-    "services.resume_parsing.agent": "backend.agents.resume_parsing_agent",
+    "services.resume_parsing.agent": "backend.agents.profile_intelligence_agent",
     "services.resume_optimization.agent": "backend.agents.resume_optimization_agent",
     "services.resume_parsing.models": "backend.models.resume",
     "services.resume_parsing.profile_models": "backend.models.profile",

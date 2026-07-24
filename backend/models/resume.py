@@ -35,7 +35,7 @@ class Experience(BaseModel):
 
 class Project(BaseModel):
     name: Optional[str] = None
-    description: Optional[str] = None
+    description: list[str] = Field(default_factory=list)
     technologies: list[str] = Field(default_factory=list)
     url: Optional[str] = None
     start_date: Optional[str] = None

@@ -15,10 +15,22 @@ from backend.routers.applications import router as applications_router
 from backend.routers.resume_parsing import router as resume_parsing_router
 from backend.routers.workflows import router as orchestrator_router
 
+from contextlib import asynccontextmanager
+from backend.services.scheduler import start_scheduler, stop_scheduler
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    start_scheduler()
+    yield
+    # Shutdown
+    stop_scheduler()
+
 app = FastAPI(
     title="CareerOS API Gateway",
     description="Main entry point for all CareerOS backend services.",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 app.add_middleware(

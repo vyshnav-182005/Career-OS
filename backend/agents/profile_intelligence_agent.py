@@ -30,8 +30,8 @@ Return a JSON object matching this EXACT schema (no markdown, no extra text):
     }}
   ],
   "github_project_summaries": {{
-    "repository_name_1": "- Point 1\\n- Point 2\\n- Point 3",
-    "repository_name_2": "- Point 1\\n- Point 2\\n- Point 3"
+    "repository_name_1": ["Point 1", "Point 2", "... up to {max_points} points"],
+    "repository_name_2": ["Point 1", "Point 2", "... up to {max_points} points"]
   }}
 }}
 
@@ -44,7 +44,7 @@ Rules:
    - Prioritize broad technical capabilities over project-specific implementations.
    - Limit to 8-12 strengths.
 2. preferred_job_roles: Infer suitable job roles with confidence levels and reasoning.
-3. github_project_summaries: For each NEW GitHub project (not in the resume), make a 3-point summary of the project explaining the project and its technical depth.
+3. github_project_summaries: For each NEW GitHub project (not in the resume), make a {max_points}-point summary of the project explaining the project and its technical depth. The format should be a list of strings matching the style of the resume projects.
 4. Return ONLY valid JSON.
 
 Candidate Data:
@@ -81,12 +81,30 @@ async def _fetch_github_repos() -> list[dict]:
     all_repos: list[dict] = []
     page = 1
 
+    async def _has_commits_by_user(client: httpx.AsyncClient, repo: dict, username: str) -> bool:
+        if not repo.get("size"):
+            return False
+        url = f"https://api.github.com/repos/{repo['owner']['login']}/{repo['name']}/commits"
+        try:
+            response = await client.get(url, params={"author": username, "per_page": 1})
+            if response.status_code == 200:
+                commits = response.json()
+                return len(commits) > 0
+            return False
+        except Exception:
+            return False
+
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(headers=headers) as client:
+            user_response = await client.get("https://api.github.com/user")
+            user_response.raise_for_status()
+            username = user_response.json().get("login")
+            if not username:
+                return []
+
             while True:
                 response = await client.get(
                     "https://api.github.com/user/repos",
-                    headers=headers,
                     params={"per_page": 100, "page": page, "sort": "updated", "affiliation": "owner"},
                 )
                 response.raise_for_status()
@@ -95,10 +113,15 @@ async def _fetch_github_repos() -> list[dict]:
                     break
                 all_repos.extend(repos)
                 page += 1
+
+            tasks = [_has_commits_by_user(client, repo, username) for repo in all_repos]
+            results = await asyncio.gather(*tasks)
+            
+            return [repo for repo, has_commits in zip(all_repos, results) if has_commits]
     except Exception as e:
         logger.error("Failed to fetch GitHub repos: %s", e)
 
-    return all_repos
+    return []
 
 
 async def run_profile_intelligence(user_id: str):
@@ -183,6 +206,12 @@ async def run_profile_intelligence(user_id: str):
     resume_projects_json = json.dumps([p.model_dump() for p in parsed_resume.projects], indent=2)
     github_projects_json = json.dumps(new_github_projects, indent=2)
 
+    max_points = 3
+    if parsed_resume.projects:
+        points_counts = [len(p.description) for p in parsed_resume.projects if isinstance(p.description, list)]
+        if points_counts:
+            max_points = max(points_counts) or 3
+
     # Run LLM
     client = OpenAI(
         base_url="https://integrate.api.nvidia.com/v1",
@@ -192,6 +221,7 @@ async def run_profile_intelligence(user_id: str):
     )
 
     prompt = PROFILE_INTELLIGENCE_PROMPT.format(
+        max_points=max_points,
         resume_json=resume_json,
         resume_projects=resume_projects_json,
         github_projects=github_projects_json,
@@ -230,7 +260,9 @@ async def run_profile_intelligence(user_id: str):
     # Append github projects to resume projects
     for repo in new_github_projects:
         repo_name = repo["name"]
-        summary = summaries.get(repo_name, repo["description"])
+        summary = summaries.get(repo_name)
+        if not summary or not isinstance(summary, list):
+            summary = [repo.get("description", "")] if repo.get("description") else []
 
         project = Project(
             name=repo_name,

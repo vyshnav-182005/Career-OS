@@ -108,12 +108,12 @@
 /* Main content */
 .main {
   flex: 1;
+  min-width: 0;
   margin-left: 220px;
-  padding: 2rem 2.5rem;
+  padding: 2rem clamp(1rem, 3vw, 3.5rem);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  max-width: 960px;
 }
 
 /* Header */

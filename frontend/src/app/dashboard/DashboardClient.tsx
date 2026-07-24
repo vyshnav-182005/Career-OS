@@ -7,9 +7,13 @@ import ResumeUploader from "@/components/dashboard/ResumeUploader";
 import ProfileView from "@/components/dashboard/ProfileView";
 import ThemeToggle from "@/components/shared/ThemeToggle";
 import ResumeOptimizer from "@/components/dashboard/ResumeOptimizer";
+import RecommendedJobs from "@/components/dashboard/RecommendedJobs";
+import JobSearch from "@/components/dashboard/JobSearch";
 import styles from "./dashboard.module.css";
 
 interface DashboardClientProps {
+// ... omitting some unchanged lines for space, wait, I shouldn't just paste random stuff, I need to be precise.
+// Let me use a smaller chunk for the import, and a smaller chunk for the JSX.
   userId: string;
   displayName: string;
   avatarChar: string;
@@ -91,6 +95,9 @@ export default function DashboardClient({
     )},
     { label: "Optimize", icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    )},
+    { label: "Jobs", icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 8v8"/></svg>
     )},
   ];
 
@@ -223,6 +230,14 @@ export default function DashboardClient({
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Jobs Tab */}
+        {activeTab === "Jobs" && (
+          <div className={styles.jobsSection} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            <RecommendedJobs userId={userId} />
+            <JobSearch />
           </div>
         )}
       </main>

@@ -1,19 +1,13 @@
-"""
-Supabase Client — persistence layer for profile intelligence data.
-
-Upserts enriched profile data into the `profiles` table and uploads
-resumes to the `resumes` storage bucket.
-"""
-
 import logging
 import uuid
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 from supabase import create_client
 
 from backend.config import settings
 from backend.models.resume import ParsedResume
 from backend.models.profile import ProfileIntelligence
+from backend.models.job import JobFilter
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +49,6 @@ def upsert_parsed_resume(
         raise e
 
     # 2. Upsert Initial Profile Data
-    # At this point, we just save original_resume. 
-    # ProfileIntelligence will be fully populated later.
     initial_profile_data = {
         "original_resume": parsed_resume.model_dump(),
         "preferred_job_roles": [],
@@ -109,3 +101,102 @@ def update_profile_intelligence(user_id: str, profile_intelligence: ProfileIntel
         logger.exception("Failed to update profile intelligence for user_id=%s", user_id)
         raise
 
+
+# --- Jobs DB Operations ---
+
+def get_active_provider_job_ids(provider: str) -> List[str]:
+    """
+    Returns a list of provider_job_ids for jobs that are currently active for a given provider.
+    """
+    client = get_supabase_client()
+    try:
+        result = (
+            client.table("jobs")
+            .select("provider_job_id")
+            .eq("provider", provider)
+            .eq("status", "ACTIVE")
+            .execute()
+        )
+        return [row["provider_job_id"] for row in result.data]
+    except Exception:
+        logger.exception("Failed to fetch active provider job ids for %s", provider)
+        return []
+
+def upsert_jobs(jobs_data: List[Dict[str, Any]]) -> None:
+    """
+    Upserts a batch of jobs into the jobs table.
+    """
+    if not jobs_data:
+        return
+    client = get_supabase_client()
+    try:
+        client.table("jobs").upsert(
+            jobs_data, 
+            on_conflict="provider,provider_job_id"
+        ).execute()
+        logger.info("Successfully upserted %d jobs.", len(jobs_data))
+    except Exception:
+        logger.exception("Failed to upsert jobs.")
+        raise
+
+def delete_expired_jobs(provider: str, provider_job_ids: List[str]) -> None:
+    """
+    Deletes jobs that are expired for the given provider and provider_job_ids.
+    """
+    if not provider_job_ids:
+        return
+    client = get_supabase_client()
+    try:
+        client.table("jobs").delete().eq("provider", provider).in_("provider_job_id", provider_job_ids).execute()
+        logger.info("Deleted %d expired jobs for provider %s.", len(provider_job_ids), provider)
+    except Exception:
+        logger.exception("Failed to delete expired jobs for provider %s.", provider)
+        raise
+
+def get_jobs_by_filter(filter_params: JobFilter) -> List[Dict[str, Any]]:
+    """
+    Retrieves active jobs based on filters using PostgreSQL functionality.
+    """
+    client = get_supabase_client()
+    query = client.table("jobs").select("*").eq("status", "ACTIVE")
+    
+    if filter_params.title:
+        query = query.ilike("title", f"%{filter_params.title}%")
+    if filter_params.company:
+        query = query.ilike("company", f"%{filter_params.company}%")
+    if filter_params.location:
+        query = query.ilike("location", f"%{filter_params.location}%")
+    if filter_params.employment_type:
+        query = query.eq("employment_type", filter_params.employment_type)
+    if filter_params.skills:
+        # Check if skills array contains the requested skills
+        query = query.contains("skills", filter_params.skills)
+
+    try:
+        result = query.execute()
+        return result.data
+    except Exception:
+        logger.exception("Failed to fetch jobs by filter.")
+        return []
+
+def match_jobs(profile_embedding: List[float], match_threshold: float = 0.0, match_count: int = 15) -> List[Dict[str, Any]]:
+    """
+    Calls the match_jobs RPC to get recommended jobs based on profile embedding.
+    """
+    if not profile_embedding:
+        return []
+        
+    client = get_supabase_client()
+    try:
+        response = client.rpc(
+            "match_jobs",
+            {
+                "query_embedding": profile_embedding,
+                "match_threshold": match_threshold,
+                "match_count": match_count
+            }
+        ).execute()
+        return response.data
+    except Exception:
+        logger.exception("Failed to match jobs by profile embedding.")
+        return []

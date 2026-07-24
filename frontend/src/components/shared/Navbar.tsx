@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import ThemeToggle from "./ThemeToggle";
 import styles from "./Navbar.module.css";
@@ -11,6 +12,8 @@ export default function Navbar() {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -28,6 +31,20 @@ export default function Navbar() {
       window.removeEventListener("pageshow", handlePageShow);
     };
   }, [router]);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [supabase.auth]);
 
   return (
     <nav className={`${styles.navbar} ${scrolled ? styles.scrolled : ""}`}>
@@ -48,12 +65,25 @@ export default function Navbar() {
             </ul>
 
             <div className={styles.authButtons}>
-              <Link href="/login" className="btn btn-ghost btn-sm">
-                Log in
-              </Link>
-              <Link href="/register" className="btn btn-primary btn-sm">
-                Get started
-              </Link>
+              {user ? (
+                <>
+                  <Link href="/login" className="btn btn-ghost btn-sm">
+                    Log in
+                  </Link>
+                  <Link href="/dashboard" className="btn btn-primary btn-sm">
+                    Go to Dashboard
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="btn btn-ghost btn-sm">
+                    Log in
+                  </Link>
+                  <Link href="/register" className="btn btn-primary btn-sm">
+                    Get started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -80,8 +110,17 @@ export default function Navbar() {
             <span className={styles.mobileThemeText}>Toggle theme</span>
           </div>
           <div className={styles.mobileCta}>
-            <Link href="/login" className="btn btn-ghost btn-sm" style={{ width: "100%", marginBottom: "0.5rem" }}>Log in</Link>
-            <Link href="/register" className="btn btn-primary btn-sm" style={{ width: "100%" }}>Get started</Link>
+            {user ? (
+              <>
+                <Link href="/login" className="btn btn-ghost btn-sm" style={{ width: "100%", marginBottom: "0.5rem" }}>Log in</Link>
+                <Link href="/dashboard" className="btn btn-primary btn-sm" style={{ width: "100%" }}>Go to Dashboard</Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="btn btn-ghost btn-sm" style={{ width: "100%", marginBottom: "0.5rem" }}>Log in</Link>
+                <Link href="/register" className="btn btn-primary btn-sm" style={{ width: "100%" }}>Get started</Link>
+              </>
+            )}
           </div>
         </div>
       )}

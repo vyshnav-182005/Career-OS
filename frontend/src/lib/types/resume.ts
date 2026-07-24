@@ -36,7 +36,7 @@ export interface Experience {
 
 export interface Project {
   name: string;
-  description: string | null;
+  description: string[];
   technologies: string[];
   url: string | null;
   start_date: string | null;

@@ -109,6 +109,7 @@
 }
 
 html {
+  min-height: 100%;
   scroll-behavior: smooth;
   font-size: 16px;
   color-scheme: dark;
@@ -119,6 +120,7 @@ html {
 }
 
 body {
+  min-height: 100dvh;
   font-family: var(--font-sans);
   background-color: var(--color-bg);
   color: var(--color-text-primary);
@@ -165,14 +167,13 @@ h1, h2, h3, h4, h5, h6 {
 
 .container {
   width: 100%;
-  max-width: 1120px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding-inline: clamp(1rem, 3vw, 3.5rem);
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 1rem;
+    padding-inline: 1rem;
   }
 }
 

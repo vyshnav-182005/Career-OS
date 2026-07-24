@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@/app/globals.css";
 import ThemeProvider from "@/components/shared/ThemeProvider";
+import AuthSessionGuard from "@/components/shared/AuthSessionGuard";
 
 export const metadata: Metadata = {
   title: "CareerOS — AI-Powered Career Guidance Platform",
@@ -27,7 +28,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <AuthSessionGuard>
+          <ThemeProvider>{children}</ThemeProvider>
+        </AuthSessionGuard>
       </body>
     </html>
   );

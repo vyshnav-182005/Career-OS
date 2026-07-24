@@ -1,6 +1,6 @@
 import logging
 from uuid import uuid4
-from backend.agents.resume_parsing_agent import run_profile_intelligence
+from backend.agents.profile_intelligence_agent import run_profile_intelligence
 from backend.agents.resume_optimization_agent import ResumeOptimizationTimeoutError
 from backend.services.resume_optimizer import optimize_resume_service
 from backend.models.schemas import OptimizationRequest, OptimizationResponse

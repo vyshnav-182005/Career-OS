@@ -62,13 +62,13 @@ Return a JSON object matching this EXACT schema (no extra keys, no markdown, no 
       "start_date": "string or null",
       "end_date": "string or null",
       "is_current": false,
-      "responsibilities": ["string"]
+      "responsibilities": ["string (split bullet points into separate strings exactly as they appear in the resume. DO NOT summarize or omit any data)"]
     }}
   ] (or null if no explicit work experience exists),
   "projects": [
     {{
       "name": "string",
-      "description": "string or null",
+      "description": ["string (split bullet points into separate strings exactly as they appear in the resume. DO NOT summarize or omit any data)"],
       "technologies": ["string"],
       "url": "string or null",
       "start_date": "string or null",

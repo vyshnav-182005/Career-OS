@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import type { ParsedResume, ProfileIntelligence } from "@/lib/types/resume";
 import styles from "./ProfileView.module.css";
 
@@ -11,6 +13,8 @@ interface ProfileViewProps {
 }
 
 export default function ProfileView({ resume, filename, intelligence, onReset }: ProfileViewProps) {
+  const [selectedProjectIndex, setSelectedProjectIndex] = useState<number | null>(null);
+
   const {
     personal_info,
     experience,
@@ -225,11 +229,11 @@ export default function ProfileView({ resume, filename, intelligence, onReset }:
             <h2 className={styles.sectionTitle}>Projects</h2>
             <div className={styles.projectsGrid}>
               {projects.map((proj, i) => (
-                <div key={i} className={styles.projectCard}>
+                <div key={i} className={styles.projectCard} onClick={() => setSelectedProjectIndex(i)} style={{ cursor: "pointer" }}>
                   <div className={styles.projectHeader}>
                     <p className={styles.projectName}>{proj.name}</p>
                     {proj.url && (
-                      <a href={proj.url} target="_blank" rel="noopener noreferrer" className={styles.externalLink} aria-label={`Visit ${proj.name}`}>
+                      <a href={proj.url} target="_blank" rel="noopener noreferrer" className={styles.externalLink} aria-label={`Visit ${proj.name}`} onClick={(e) => e.stopPropagation()}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                           <polyline points="15 3 21 3 21 9" />
@@ -238,19 +242,57 @@ export default function ProfileView({ resume, filename, intelligence, onReset }:
                       </a>
                     )}
                   </div>
-                  {proj.description && (
-                    <p className={styles.projectDesc}>{proj.description}</p>
-                  )}
-                  {proj.technologies.length > 0 && (
-                    <div className={styles.pillRow}>
-                      {proj.technologies.map((t) => (
-                        <span key={t} className={styles.techPill}>{t}</span>
-                      ))}
-                    </div>
-                  )}
+                  {/* Preview text if we want, otherwise leave just title for cleaner look */}
                 </div>
               ))}
             </div>
+            
+            {/* Project Modal Overlay */}
+            {selectedProjectIndex !== null && projects[selectedProjectIndex] && (
+              <div className={styles.modalOverlay} onClick={() => setSelectedProjectIndex(null)}>
+                <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                  <button className={styles.closeButton} onClick={() => setSelectedProjectIndex(null)} aria-label="Close modal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                  
+                  <div className={styles.projectHeader} style={{ paddingRight: '2rem', alignItems: 'flex-start' }}>
+                    <h2 className={styles.sectionTitle} style={{ margin: 0, paddingRight: '1rem' }}>{projects[selectedProjectIndex].name}</h2>
+                    {projects[selectedProjectIndex].url && (
+                      <a href={projects[selectedProjectIndex].url} target="_blank" rel="noopener noreferrer" className={styles.externalLink} style={{ fontSize: '0.875rem', whiteSpace: 'nowrap', flexShrink: 0, marginTop: '0.25rem' }}>
+                        View Project
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                          <polyline points="15 3 21 3 21 9" />
+                          <line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+
+                  {projects[selectedProjectIndex].description && projects[selectedProjectIndex].description.length > 0 && (
+                    <ul className={styles.bullets} style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
+                      {projects[selectedProjectIndex].description.map((desc, j) => (
+                        <li key={j} className={styles.projectDesc} style={{ fontSize: '0.9375rem' }}>{desc}</li>
+                      ))}
+                    </ul>
+                  )}
+                  
+                  {projects[selectedProjectIndex].technologies && projects[selectedProjectIndex].technologies.length > 0 && (
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-tertiary)', marginBottom: '0.5rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tech Stack</p>
+                      <div className={styles.pillRow}>
+                        {projects[selectedProjectIndex].technologies.map((t) => (
+                          <span key={t} className={styles.techPill} style={{ fontSize: '0.8125rem', padding: '0.3rem 0.6rem' }}>{t}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </section>
         )}
 
