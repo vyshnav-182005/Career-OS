@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { signIn } from "next-auth/react";
 import styles from "../auth.module.css";
 
 function LoginForm() {
@@ -15,20 +15,20 @@ function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const supabase = createClient();
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const result = await signIn("credentials", { email, password, redirect: false });
 
-    if (error) {
-      setError(error.message);
+    if (result?.error) {
+      setError("Invalid email or password.");
       setLoading(false);
     } else {
       router.push(redirectTo);
@@ -76,9 +76,10 @@ function LoginForm() {
 
         <div className="form-group">
           <label htmlFor="login-password" className="form-label">Password</label>
+          <div className={styles.passwordField}>
           <input
             id="login-password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             className="form-input"
             placeholder="••••••••"
             value={password}
@@ -87,7 +88,20 @@ function LoginForm() {
             autoComplete="current-password"
             disabled={loading}
           />
+          <button
+            type="button"
+            className={styles.passwordToggle}
+            onClick={() => setShowPassword((visible) => !visible)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+            disabled={loading}
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+          </div>
         </div>
+
+        <Link href="/forgot-password" className={styles.forgotPassword}>Forgot password?</Link>
 
         <button
           type="submit"

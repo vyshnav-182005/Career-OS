@@ -60,33 +60,39 @@ New GitHub Projects (not in resume):
 """
 
 
-async def _fetch_github_repos() -> list[dict]:
+async def _fetch_github_repos(github_url: str) -> list[dict]:
     """
-    Fetch all repos for the authenticated user via the GitHub PAT.
-    Uses GET /user/repos (authenticated endpoint) which:
-      - Doesn't require a username
-      - Returns private repos too
-      - Paginates automatically (up to 100 per page)
+    Fetch all repos for the candidate's GitHub username.
+    Uses the candidate's GitHub URL from their resume.
     """
-    if not settings.github_token:
-        logger.warning("No GITHUB_TOKEN configured — skipping GitHub repo fetch")
+    if not github_url:
+        logger.warning("No GitHub URL found in resume — skipping GitHub repo fetch")
+        return []
+
+    # Extract username from url (e.g., https://github.com/username)
+    username = github_url.rstrip('/').split('/')[-1]
+    if not username:
         return []
 
     headers = {
         "Accept": "application/vnd.github.v3+json",
         "User-Agent": "Career-OS-Agent",
-        "Authorization": f"Bearer {settings.github_token}",
     }
+    
+    if settings.github_token:
+        headers["Authorization"] = f"Bearer {settings.github_token}"
+    else:
+        logger.warning("No GITHUB_TOKEN configured — API rate limits will apply")
 
     all_repos: list[dict] = []
     page = 1
 
-    async def _has_commits_by_user(client: httpx.AsyncClient, repo: dict, username: str) -> bool:
+    async def _has_commits_by_user(client: httpx.AsyncClient, repo: dict, candidate_username: str) -> bool:
         if not repo.get("size"):
             return False
         url = f"https://api.github.com/repos/{repo['owner']['login']}/{repo['name']}/commits"
         try:
-            response = await client.get(url, params={"author": username, "per_page": 1})
+            response = await client.get(url, params={"author": candidate_username, "per_page": 1})
             if response.status_code == 200:
                 commits = response.json()
                 return len(commits) > 0
@@ -96,16 +102,16 @@ async def _fetch_github_repos() -> list[dict]:
 
     try:
         async with httpx.AsyncClient(headers=headers) as client:
-            user_response = await client.get("https://api.github.com/user")
-            user_response.raise_for_status()
-            username = user_response.json().get("login")
-            if not username:
+            # Verify user exists
+            user_response = await client.get(f"https://api.github.com/users/{username}")
+            if user_response.status_code != 200:
+                logger.warning("GitHub user %s not found", username)
                 return []
 
             while True:
                 response = await client.get(
-                    "https://api.github.com/user/repos",
-                    params={"per_page": 100, "page": page, "sort": "updated", "affiliation": "owner"},
+                    f"https://api.github.com/users/{username}/repos",
+                    params={"per_page": 100, "page": page, "sort": "updated", "type": "owner"},
                 )
                 response.raise_for_status()
                 repos = response.json()
@@ -140,9 +146,18 @@ async def run_profile_intelligence(user_id: str):
 
     new_github_projects = []
 
-    if settings.github_token:
-        repos = await _fetch_github_repos()
+    github_url = parsed_resume.personal_info.github if parsed_resume.personal_info else None
+    
+    # Fallback to regex if LLM failed to extract a valid GitHub URL
+    if not github_url or github_url.strip().strip('/').lower() in ["https://github.com", "github.com"]:
+        if parsed_resume.raw_text:
+            match = re.search(r'github\.com/([a-zA-Z0-9-]+)', parsed_resume.raw_text, re.IGNORECASE)
+            if match:
+                github_url = f"https://github.com/{match.group(1)}"
 
+    repos = await _fetch_github_repos(github_url)
+
+    if repos:
         existing_urls = {p.url.lower().rstrip('/') for p in parsed_resume.projects if p.url}
         raw_text_lower = parsed_resume.raw_text.lower() if parsed_resume.raw_text else ""
 

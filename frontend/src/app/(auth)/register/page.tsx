@@ -1,25 +1,21 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import styles from "../auth.module.css";
 
 export default function RegisterPage() {
-  const router = useRouter();
-
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
+
     setLoading(true);
     setError(null);
 
@@ -29,18 +25,15 @@ export default function RegisterPage() {
       return;
     }
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
-      },
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, fullName })
     });
+    const data = await res.json();
 
-    if (error) {
-      setError(error.message);
+    if (!res.ok) {
+      setError(data.error || 'Registration failed.');
       setLoading(false);
     } else {
       setSuccess(true);
@@ -135,9 +128,10 @@ export default function RegisterPage() {
 
           <div className="form-group">
             <label htmlFor="reg-password" className="form-label">Password</label>
+            <div className={styles.passwordField}>
             <input
               id="reg-password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               className="form-input"
               placeholder="Minimum 8 characters"
               value={password}
@@ -147,6 +141,17 @@ export default function RegisterPage() {
               autoComplete="new-password"
               disabled={loading}
             />
+            <button
+              type="button"
+              className={styles.passwordToggle}
+              onClick={() => setShowPassword((visible) => !visible)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              disabled={loading}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+            </div>
           </div>
 
           <button

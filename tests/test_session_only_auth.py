@@ -11,6 +11,15 @@ def test_login_page_is_never_redirected_for_an_authenticated_user():
     assert 'pathname === "/register"' not in proxy
 
 
+def test_register_page_is_public_for_unauthenticated_users():
+    guard = (ROOT / "frontend/src/components/shared/AuthSessionGuard.tsx").read_text(
+        encoding="utf-8"
+    )
+
+    assert 'pathname !== "/register"' not in guard
+    assert 'pathname === "/register"' in guard
+
+
 def test_supabase_auth_cookies_are_session_only_everywhere():
     for relative_path in (
         "frontend/src/lib/supabase/client.ts",
@@ -29,4 +38,3 @@ def test_new_browser_tabs_clear_any_stale_authenticated_session():
 
     assert "sessionStorage" in guard
     assert "supabase.auth.signOut()" in guard
-

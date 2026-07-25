@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { signOut } from "next-auth/react";
 import type { ParsedResume, ProfileIntelligence } from "@/lib/types/resume";
 import ResumeUploader from "@/components/dashboard/ResumeUploader";
 import ProfileView from "@/components/dashboard/ProfileView";
@@ -40,30 +40,28 @@ export default function DashboardClient({
   useEffect(() => {
     if (!isPolling) return;
     
-    const supabase = createClient();
     const interval = setInterval(async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      
-      const { data } = await supabase
-        .from('profiles')
-        .select('profile_data, resume_url')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (data?.resume_url) {
-        setResumeUrl(data.resume_url);
-      }
-      
-      if (data?.profile_data) {
-        const pd = data.profile_data as ProfileIntelligence;
-        if ((pd.strengths && pd.strengths.length > 0) || (pd.preferred_job_roles && pd.preferred_job_roles.length > 0)) {
-          setProfileIntelligence(pd);
-          if (pd.original_resume) {
-            setParsedResume(pd.original_resume);
-          }
-          setIsPolling(false);
+      try {
+        const res = await fetch('/api/profile');
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        if (data.resume_url) {
+          setResumeUrl(data.resume_url);
         }
+        
+        if (data.profile_data) {
+          const pd = data.profile_data as ProfileIntelligence;
+          if ((pd.strengths && pd.strengths.length > 0) || (pd.preferred_job_roles && pd.preferred_job_roles.length > 0)) {
+            setProfileIntelligence(pd);
+            if (pd.original_resume) {
+              setParsedResume(pd.original_resume);
+            }
+            setIsPolling(false);
+          }
+        }
+      } catch {
+        // Ignore polling errors
       }
     }, 3000);
     
@@ -126,9 +124,7 @@ export default function DashboardClient({
           <div className={styles.sidebarBottomRow}>
             <ThemeToggle />
           </div>
-          <form action="/auth/signout" method="post">
-            <button type="submit" className={styles.signoutBtn}>Sign out</button>
-          </form>
+          <button type="button" className={styles.signoutBtn} onClick={() => signOut({ callbackUrl: '/' })}>Sign out</button>
         </div>
       </aside>
 

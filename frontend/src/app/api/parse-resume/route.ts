@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/auth";
 
 export const maxDuration = 300;
 
 export async function POST(request: NextRequest) {
   /* ── 1. Authenticate ─────────────────────────────────────────── */
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const session = await auth();
 
-  if (authError || !user) {
+  if (!session?.user?.id) {
     return NextResponse.json(
       { success: false, error: "Unauthorized" },
       { status: 401 }
@@ -38,7 +34,7 @@ export async function POST(request: NextRequest) {
   }
 
   /* ── 3. Append user_id and forward to FastAPI Gateway ───────── */
-  formData.append("user_id", user.id);
+  formData.append("user_id", session.user.id);
 
   try {
     const backendResponse = await fetch("http://localhost:8000/resume-parsing/parse", {
@@ -71,4 +67,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
