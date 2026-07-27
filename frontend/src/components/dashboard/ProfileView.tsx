@@ -303,11 +303,33 @@ export default function ProfileView({ resume, filename, intelligence, onReset }:
             <div className={styles.entryList}>
               {certifications.map((cert, i) => (
                 <div key={i} className={styles.entry}>
-                  <p className={styles.entryTitle}>{cert.name}</p>
-                  <p className={styles.entryOrg}>
-                    {[cert.issuer, cert.date].filter(Boolean).join(" · ")}
-                    {cert.credential_id ? ` · ID: ${cert.credential_id}` : ""}
-                  </p>
+                  {(() => {
+                    let displayName = cert.name;
+                    let displayIssuer = cert.issuer;
+                    
+                    if (displayIssuer) {
+                      if (displayName.endsWith(` - ${displayIssuer}`)) displayName = displayName.slice(0, -(` - ${displayIssuer}`.length));
+                      else if (displayName.endsWith(` – ${displayIssuer}`)) displayName = displayName.slice(0, -(` – ${displayIssuer}`.length));
+                      else if (displayName.endsWith(` — ${displayIssuer}`)) displayName = displayName.slice(0, -(` — ${displayIssuer}`.length));
+                    } else {
+                      // Fallback: Try to extract issuer from the title if missing
+                      const match = displayName.match(/^(.*?)\s+[-–—]\s+(.+)$/);
+                      if (match) {
+                        displayName = match[1];
+                        displayIssuer = match[2];
+                      }
+                    }
+
+                    return (
+                      <>
+                        <p className={styles.entryTitle}>{displayName}</p>
+                        <p className={styles.entryOrg}>
+                          {[displayIssuer, cert.date].filter(Boolean).join(" · ")}
+                          {cert.credential_id ? ` · ID: ${cert.credential_id}` : ""}
+                        </p>
+                      </>
+                    );
+                  })()}
                 </div>
               ))}
             </div>

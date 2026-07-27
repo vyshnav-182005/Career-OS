@@ -33,7 +33,7 @@ export default function RecommendedJobs({ userId }: RecommendedJobsProps) {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`http://localhost:8000/jobs/recommended?user_id=${userId}`);
+        const res = await fetch(`http://127.0.0.1:8000/jobs/recommended?user_id=${userId}`);
         if (!res.ok) throw new Error("Failed to fetch recommended jobs");
         const data = await res.json();
         setJobs(data.data || []);

@@ -1,60 +1,77 @@
 # CareerOS
 
-> An AI-powered multi-agent career guidance platform. Analyze your resume, discover matched jobs, and generate ATS-optimized applications.
+> CareerOS is a multi-agent career guidance platform which helps in profile analysis, search for jobs aligned with the user profile and optimize the resume based on the JD and available information on the user.
 
-## Project Structure
+- **Services**: handle deterministic operations such as file management, database interactions, API integrations, and parsing.
+- **Agents**: handle reasoning tasks using Large Language Models (LLMs) and produce intelligent outputs.
 
+## System Architecture
+
+### Workflow Diagram
+
+```mermaid
+flowchart TD
+A[Next.js Dashboard] --> B[FastAPI Gateway]
+
+B --> C[Authentication Service]
+B --> D[Resume Management Service]
+B --> E[Application Service]
+
+D --> F[Resume Parsing Service]
+F --> G[Verification Engine]
+G --> H[User Profile Service]
+
+H --> I[Workflow Orchestrator]
+
+I --> J[Profile Intelligence Agent]
+J --> K[Verification Engine]
+K --> L[User Profile Service]
+
+I --> M[Job Service]
+M --> N[Job Matching Agent]
+N --> O[Verification Engine]
+O --> P[Application Tracking Service]
+P --> Q[Dashboard Update]
+
+I --> R[Resume Optimization Agent]
+R --> S[Verification Engine]
+S --> T[Resume Management Service]
 ```
-Career-OS/
-├── package.json                     # Root — `npm run dev` starts everything
-├── venv/                            # Python virtual environment (project root)
-├── supabase_migration.sql           # Run in Supabase SQL Editor
-│
-├── frontend/                        # Next.js 16 App Router (TypeScript)
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── page.tsx             # Landing page
-│   │   │   ├── layout.tsx           # Root layout (SEO, fonts)
-│   │   │   ├── globals.css          # Design system (dark theme)
-│   │   │   ├── api/
-│   │   │   │   └── parse-resume/
-│   │   │   │       └── route.ts     # API route → spawns Python pipeline
-│   │   │   ├── (auth)/
-│   │   │   │   ├── login/page.tsx
-│   │   │   │   └── register/page.tsx
-│   │   │   ├── dashboard/page.tsx
-│   │   │   └── auth/signout/route.ts
-│   │   ├── components/
-│   │   │   ├── Navbar.tsx / .module.css
-│   │   │   ├── HeroSection.tsx / .module.css
-│   │   │   ├── FeaturesSection.tsx / .module.css
-│   │   │   ├── HowItWorksSection.tsx / .module.css
-│   │   │   ├── Footer.tsx / .module.css
-│   │   │   ├── ResumeUploader.tsx / .module.css
-│   │   │   ├── ParsedResumeView.tsx / .module.css
-│   │   │   └── ProfileIntelligenceView.tsx / .module.css
-│   │   ├── lib/
-│   │   │   ├── api/resumeParser.ts  # Calls /api/parse-resume
-│   │   │   ├── types/resume.ts      # TS types (ParsedResume, ProfileIntelligence)
-│   │   │   └── supabase/
-│   │   │       ├── client.ts        # Browser Supabase client
-│   │   │       └── server.ts        # Server Supabase client
-│   │   └── proxy.ts                 # Route protection (Next.js 16)
-│   └── .env                         # Supabase keys + server-only secrets
-│
-└── services/
-    └── resume-parser/               # Python 3.11 parsing + intelligence
-        ├── run_pipeline.py          # CLI entry point (subprocess)
-        ├── app/
-        │   ├── main.py              # FastAPI app (legacy, kept for reference)
-        │   ├── parser.py            # PDF/DOCX extraction + NVIDIA NIM
-        │   ├── models.py            # Pydantic: ParsedResume schemas
-        │   ├── profile_models.py    # Pydantic: ProfileIntelligence schemas
-        │   ├── profile_agent.py     # Profile Intelligence Agent
-        │   ├── supabase_client.py   # Supabase JSONB persistence
-        │   └── config.py            # Settings from env vars
-        └── requirements.txt
-```
+
+### Services
+- **Authentication Service**: Handles user registration, login, JWT/session validation (NextAuth v5).
+- **Resume Management Service**: Manages resume upload, storage, versioning, retrieval and optimized resume versions.
+- **Resume Parsing Service**: Extracts structured information from resumes (PyMuPDF, python-docx) and converts it into a validated ResumeSchema.
+- **User Profile Service**: Stores and manages the canonical user profile including the parsed ResumeSchema and AI-generated Career Profile.
+- **Job Service**: Fetches jobs from providers (Adzuna), normalizes them, stores recommendations and exposes search/filter functionality.
+- **Application Service**: Tracks job applications, interview stages, offers and application history.
+
+### AI Agents
+- **Profile Intelligence Agent**: 
+  - Infers career level, preferred roles, strengths, weaknesses, domains and career summary from the ResumeSchema.
+  - Uses the Github Link from the resume to get information about the projects.
+- **Job Matching Agent**: 
+  - Matches the user's career profile with available jobs, ranks them and provides reasons and missing skills (Sentence-Transformers).
+- **Resume Optimization Agent**: 
+  - Generates a job-specific ATS-optimized resume while preserving factual correctness.
+
+### Verification Engine
+The Verification Engine is reused after parsing and after every AI agent. It performs schema validation (Pydantic), rule validation, cross-validation and optional LLM verification before data is persisted.
+
+### Why a Workflow Orchestrator?
+The Workflow Orchestrator coordinates agent execution without making agents depend on each other. It determines which agent should run for a given user action, manages retries and failures, tracks workflow progress, logs execution, and allows agents to be reused independently in different workflows (resume upload, job refresh, resume optimization, future roadmap generation, etc.). This keeps the architecture modular, extensible and easier to maintain.
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 16 (App Router, TypeScript, React 19) |
+| Auth | NextAuth v5 (Auth.js) |
+| Database | Supabase (PostgreSQL, JSONB) |
+| Backend & Gateway | FastAPI (Python 3.11), Uvicorn |
+| Data Processing | PyMuPDF, python-docx, Pydantic, Playwright |
+| AI & Embedding | NVIDIA NIM (Llama 3.1), OpenAI SDK, Sentence-Transformers |
+| Concurrency | Concurrently (Node), APScheduler (Python) |
 
 ## Getting Started
 
@@ -62,93 +79,78 @@ Career-OS/
 
 - **Node.js** (v18+)
 - **Python 3.11+**
-- A **Supabase** project (free tier works)
+- A **Supabase** project
 - An **NVIDIA NIM** API key
+- **Adzuna** API credentials (for Job Service)
+- **GitHub** Personal Access Token (for Profile Intelligence Agent)
 
-### 2. Fill in environment variables
+### 2. Configure Environment Variables
 
-Edit `frontend/.env`:
+Create `.env` in both the `frontend/` and `backend/` directories.
+
+**frontend/.env**:
 ```env
-# Public (browser)
+# Auth.js (NextAuth v5)
+AUTH_SECRET=<your-auth-secret>
+NEXTAUTH_URL=http://localhost:3000
+
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=<your-supabase-url>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-
-# Server-only (API routes only — never sent to browser)
-NVIDIA_API_KEY=<your-nvidia-nim-key>
 SUPABASE_SERVICE_KEY=<your-service-role-key>
+
+# External APIs
+NVIDIA_API_KEY=<your-nvidia-nim-key>
+GITHUB_TOKEN=<your-github-token>
+MODEL=meta/llama-3.1-8b-instruct
+
+# Job API
+ADZUNA_APP_ID=<your-adzuna-id>
+ADZUNA_APP_KEY=<your-adzuna-key>
+JOB_API_KEY_2=<your-job-api-key>
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-### 3. Run the Supabase migration
+**backend/.env**:
+```env
+# Supabase
+SUPABASE_URL=<your-supabase-url>
+SUPABASE_PUBLISHABLE_KEY=<your-publishable-key>
+SUPABASE_SERVICE_KEY=<your-service-role-key>
 
-Go to your Supabase Dashboard → **SQL Editor** → paste the contents of `supabase_migration.sql` → Run.
+# Config
+ALLOWED_ORIGINS=http://localhost:3000
+MAX_FILE_SIZE_MB=10
 
-This creates the `profiles` table with a `profile_data JSONB` column for storing enriched profile data.
+# External APIs
+NVIDIA_API_KEY=<your-nvidia-nim-key>
+MODEL=meta/llama-3.1-8b-instruct
+ADZUNA_APP_ID=<your-adzuna-id>
+ADZUNA_APP_KEY=<your-adzuna-key>
+JOB_API_KEY_2=<your-job-api-key>
+```
 
-### 4. One-time setup
+### 3. Database Migration
 
+Go to your Supabase Dashboard → **SQL Editor** and run the following migration scripts found in the `database/` folder in order:
+1. `supabase_migration.sql`
+2. `nextauth_migration.sql`
+3. `jobs_migration.sql`
+4. `match_jobs.sql`
+
+### 4. Setup Project
+
+Install dependencies for both frontend and backend (creates Python virtual environment automatically):
 ```bash
-cd Career-OS
 npm run setup
 ```
 
-This installs frontend npm packages, creates a Python venv at the project root, and installs Python dependencies.
+### 5. Start Development Server
 
-### 5. Start development
-
+Run both Next.js frontend and FastAPI backend concurrently:
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — that's it. No separate backend commands needed.
-
-## Architecture
-
-```
-Browser → Next.js API Route (/api/parse-resume) → Python subprocess
-                                                     ├── Resume Parser        → ParsedResume (Pydantic)
-                                                     ├── Profile Intelligence → ProfileIntelligence (Pydantic)
-                                                     ├── Supabase upsert      → profiles.profile_data (JSONB)
-                                                     └── stdout JSON          → API route → Browser
-```
-
-- **Single server**: Next.js on `:3000` handles both frontend and API
-- **No CORS**: frontend and API share the same origin
-- **Python as subprocess**: parsing/intelligence runs on-demand, not as a persistent server
-
-## Pipeline Flow
-
-1. User uploads resume (PDF/DOCX) in the dashboard
-2. Next.js API route validates the file and authenticates the user
-3. Python subprocess extracts text (PyMuPDF / python-docx) and calls NVIDIA NIM
-4. **Resume Parser** produces a validated `ParsedResume` Pydantic model
-5. `ParsedResume` is automatically passed to the **Profile Intelligence Agent**
-6. Agent infers: suitable job roles, career level, skill categories, profile completeness
-7. Agent produces a validated `ProfileIntelligence` Pydantic model
-8. `ProfileIntelligence` is serialized to JSON and persisted in Supabase `profiles.profile_data` JSONB column
-9. Complete result is returned to the browser and displayed in the dashboard
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js 16 (App Router, TypeScript) |
-| Auth | Supabase Auth |
-| Database | Supabase (PostgreSQL, JSONB) |
-| Resume Parsing | Python 3.11 + PyMuPDF + python-docx |
-| AI Extraction | NVIDIA NIM (Llama 3.1 70B Instruct) |
-| Profile Intelligence | Python 3.11 + NVIDIA NIM |
-| Persistence | supabase-py (service role) |
-
-## Phase 1 Status
-
-- [x] Landing page (Hero, Features, How It Works, Footer)
-- [x] Authentication (Login, Register, Protected Dashboard)
-- [x] Resume Parsing Service (PDF/DOCX → structured JSON via NVIDIA NIM)
-- [x] Profile Intelligence Agent (enriched career profile with JSONB persistence)
-- [x] Unified dev command (`npm run dev` from root)
-- [ ] Resume Management Service
-- [ ] User Profile Service
-- [ ] Job Service
-- [ ] Job Matching Agent
-- [ ] Resume Optimization Agent
+- Frontend will be available at [http://localhost:3000](http://localhost:3000)
+- Backend API will run on [http://localhost:8000](http://localhost:8000)

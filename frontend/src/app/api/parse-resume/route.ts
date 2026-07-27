@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   formData.append("user_id", session.user.id);
 
   try {
-    const backendResponse = await fetch("http://localhost:8000/resume-parsing/parse", {
+    const backendResponse = await fetch("http://127.0.0.1:8000/resume-parsing/parse", {
       method: "POST",
       body: formData,
     });

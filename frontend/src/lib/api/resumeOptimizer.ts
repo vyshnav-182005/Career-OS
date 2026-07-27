@@ -26,7 +26,7 @@ function delay(ms: number) {
 }
 
 async function getResumeOptimizationStatus(workflowId: string): Promise<WorkflowStatusResponse> {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
 
   const response = await fetch(`${backendUrl}/workflows/${workflowId}`, {
     method: "GET",
@@ -70,7 +70,7 @@ export async function optimizeResume(
   jobDescription: string,
   onStatus?: (status: WorkflowStatusResponse) => void,
 ): Promise<OptimizationResponse> {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
   
   const response = await fetch(`${backendUrl}/workflows/resume-optimize`, {
     method: "POST",

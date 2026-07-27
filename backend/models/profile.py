@@ -21,3 +21,4 @@ class ProfileIntelligence(BaseModel):
     original_resume: ParsedResume
     preferred_job_roles: list[InferredJobRole] = Field(default_factory=list)
     strengths: list[str] = Field(default_factory=list)
+    insights: list[str] = Field(default_factory=list)

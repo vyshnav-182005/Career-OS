@@ -29,7 +29,7 @@ export default function JobSearch() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:8000/jobs${query ? `?title=${encodeURIComponent(query)}` : ''}`);
+      const res = await fetch(`http://127.0.0.1:8000/jobs${query ? `?title=${encodeURIComponent(query)}` : ''}`);
       if (!res.ok) throw new Error("Failed to fetch jobs");
       const data = await res.json();
       setJobs(data.data || []);
@@ -53,7 +53,7 @@ export default function JobSearch() {
     setIngesting(true);
     setStats(null);
     try {
-      const res = await fetch("http://localhost:8000/jobs/ingest", { method: "POST" });
+      const res = await fetch("http://127.0.0.1:8000/jobs/ingest", { method: "POST" });
       if (!res.ok) throw new Error("Ingestion failed");
       const data = await res.json();
       setStats(data);
