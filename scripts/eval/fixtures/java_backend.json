@@ -1,0 +1,84 @@
+{
+  "personal_info": {
+    "name": "Daniel Okafor",
+    "email": "daniel.okafor.eng@example.com",
+    "phone": "+1-415-555-0134",
+    "location": "Austin, TX",
+    "linkedin": "linkedin.com/in/danielokafor",
+    "github": "github.com/dokafor",
+    "website": null,
+    "summary": "Backend engineer with 4 years of experience designing and scaling Java/Spring Boot microservices handling millions of daily transactions. Strong in API design, relational data modeling, and system reliability."
+  },
+  "education": [
+    {
+      "institution": "University of Texas at Austin",
+      "degree": "B.S.",
+      "field_of_study": "Computer Science",
+      "start_date": "2016-08",
+      "end_date": "2020-05",
+      "gpa": "3.6/4.0",
+      "description": null
+    }
+  ],
+  "experience": [
+    {
+      "company": "HomeAway",
+      "title": "Backend Engineer",
+      "location": "Austin, TX",
+      "start_date": "2022-03",
+      "end_date": null,
+      "is_current": true,
+      "responsibilities": [
+        "Designed and built REST APIs in Java/Spring Boot for the booking-payments service handling 2M+ requests/day",
+        "Migrated a monolith payment module into an independently deployable microservice, cutting deploy time from 40 to 8 minutes",
+        "Optimized PostgreSQL queries and added composite indexes, reducing p99 latency by 35%",
+        "Introduced contract testing between services using Pact, catching breaking changes before release"
+      ]
+    },
+    {
+      "company": "Indeed",
+      "title": "Software Engineer I",
+      "location": "Austin, TX",
+      "start_date": "2020-06",
+      "end_date": "2022-02",
+      "is_current": false,
+      "responsibilities": [
+        "Built internal REST services in Java and Spring Boot for job-listing search infrastructure",
+        "Wrote JUnit test suites achieving 85% coverage on core service modules",
+        "Set up Kafka consumers to process listing-update events at scale"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Task Queue Service",
+      "description": [
+        "Built a lightweight distributed task queue in Java backed by PostgreSQL and Redis",
+        "Supported at-least-once delivery and exponential backoff retries"
+      ],
+      "technologies": ["Java", "Spring Boot", "PostgreSQL", "Redis"],
+      "url": "github.com/dokafor/task-queue",
+      "start_date": "2023-02",
+      "end_date": "2023-05"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "AWS Certified Developer - Associate",
+      "issuer": "Amazon Web Services",
+      "date": "2023-06",
+      "expiry": "2026-06",
+      "credential_id": "AWS-DEV-2023-0947"
+    }
+  ],
+  "skills": [
+    {"category": "Languages", "skills": ["Java", "SQL", "Python"]},
+    {"category": "Frameworks", "skills": ["Spring Boot", "REST", "gRPC"]},
+    {"category": "Data", "skills": ["PostgreSQL", "MySQL", "Redis", "Kafka"]},
+    {"category": "Tools", "skills": ["Git", "JUnit", "Docker", "Jenkins"]}
+  ],
+  "languages": ["English", "Igbo"],
+  "publications": [],
+  "custom_sections": [],
+  "raw_text": "Daniel Okafor - Backend Engineer with 4 years building Java/Spring Boot microservices."
+}

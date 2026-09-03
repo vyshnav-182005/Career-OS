@@ -1,0 +1,83 @@
+{
+  "personal_info": {
+    "name": "Priya Nair",
+    "email": "priya.nair.dev@example.com",
+    "phone": "+91-98765-43210",
+    "location": "Bengaluru, India",
+    "linkedin": "linkedin.com/in/priyanair",
+    "github": "github.com/priyanair",
+    "website": null,
+    "summary": "Frontend developer with 3 years of experience building responsive, accessible web applications with React and TypeScript. Focused on component architecture, performance, and design-system consistency."
+  },
+  "education": [
+    {
+      "institution": "R.V. College of Engineering",
+      "degree": "B.E.",
+      "field_of_study": "Information Science",
+      "start_date": "2017-08",
+      "end_date": "2021-05",
+      "gpa": "8.4/10",
+      "description": null
+    }
+  ],
+  "experience": [
+    {
+      "company": "Chargebee",
+      "title": "Frontend Developer",
+      "location": "Bengaluru, India",
+      "start_date": "2022-06",
+      "end_date": null,
+      "is_current": true,
+      "responsibilities": [
+        "Built and maintained customer-facing dashboards in React and TypeScript, serving 50k+ monthly active users",
+        "Led migration of legacy class components to React hooks, cutting bundle size by 18%",
+        "Implemented a shared component library in Storybook adopted across three product teams",
+        "Collaborated with design on a Tailwind-based design system and improved Lighthouse accessibility score from 78 to 96"
+      ]
+    },
+    {
+      "company": "Freshworks",
+      "title": "Associate UI Developer",
+      "location": "Chennai, India",
+      "start_date": "2021-06",
+      "end_date": "2022-05",
+      "is_current": false,
+      "responsibilities": [
+        "Developed reusable React components for a support-ticketing SaaS product",
+        "Wrote unit and integration tests with Jest and React Testing Library, raising coverage from 40% to 75%",
+        "Fixed cross-browser CSS issues and improved page load time by 25% via code-splitting"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Recipe Finder",
+      "description": [
+        "Built a recipe search app with Next.js, TypeScript, and Tailwind CSS consuming a public recipes API",
+        "Added client-side caching with React Query to cut redundant API calls by 60%"
+      ],
+      "technologies": ["React", "Next.js", "TypeScript", "Tailwind CSS", "React Query"],
+      "url": "github.com/priyanair/recipe-finder",
+      "start_date": "2023-01",
+      "end_date": "2023-03"
+    },
+    {
+      "name": "Portfolio Site",
+      "description": ["Personal portfolio built with Vue.js and deployed on Vercel"],
+      "technologies": ["Vue.js", "CSS", "HTML"],
+      "url": "priyanair.dev",
+      "start_date": "2022-01",
+      "end_date": "2022-01"
+    }
+  ],
+  "certifications": [],
+  "skills": [
+    {"category": "Languages", "skills": ["JavaScript", "TypeScript", "HTML", "CSS"]},
+    {"category": "Frameworks", "skills": ["React", "Next.js", "Vue.js", "Redux", "Tailwind CSS"]},
+    {"category": "Tools", "skills": ["Git", "Jest", "Figma", "Webpack"]}
+  ],
+  "languages": ["English", "Hindi", "Kannada"],
+  "publications": [],
+  "custom_sections": [],
+  "raw_text": "Priya Nair - Frontend Developer with 3 years building React/TypeScript web applications."
+}

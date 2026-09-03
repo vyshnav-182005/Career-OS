@@ -1,0 +1,8 @@
+{
+  "react_frontend": ["frontend"],
+  "java_backend": ["backend"],
+  "data_analyst": ["data-science"],
+  "ml_engineer": ["ml-engineering"],
+  "qa_automation": ["qa-testing"],
+  "devops_control": ["devops-sre"]
+}

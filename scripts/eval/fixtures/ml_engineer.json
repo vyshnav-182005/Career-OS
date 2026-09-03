@@ -1,0 +1,83 @@
+{
+  "personal_info": {
+    "name": "Wei Zhang",
+    "email": "wei.zhang.ml@example.com",
+    "phone": "+1-206-555-0176",
+    "location": "Seattle, WA",
+    "linkedin": "linkedin.com/in/weizhangml",
+    "github": "github.com/weizhang",
+    "website": null,
+    "summary": "Machine learning engineer with 3 years of experience taking models from research notebooks to production, specializing in NLP and recommendation systems using PyTorch and TensorFlow."
+  },
+  "education": [
+    {
+      "institution": "University of Washington",
+      "degree": "M.S.",
+      "field_of_study": "Computer Science (Machine Learning)",
+      "start_date": "2019-09",
+      "end_date": "2021-06",
+      "gpa": "3.8/4.0",
+      "description": null
+    }
+  ],
+  "experience": [
+    {
+      "company": "Redfin",
+      "title": "Machine Learning Engineer",
+      "location": "Seattle, WA",
+      "start_date": "2022-01",
+      "end_date": null,
+      "is_current": true,
+      "responsibilities": [
+        "Built and deployed a PyTorch-based home-price recommendation model serving 500k+ predictions/day",
+        "Fine-tuned a BERT-based NLP model to extract structured features from listing descriptions",
+        "Built a feature store and model-serving pipeline with Airflow and Docker on top of an MLOps stack",
+        "Ran A/B tests to measure model impact on user engagement, driving a 6% lift in click-through rate"
+      ]
+    },
+    {
+      "company": "University of Washington",
+      "title": "Machine Learning Research Assistant",
+      "location": "Seattle, WA",
+      "start_date": "2020-09",
+      "end_date": "2021-06",
+      "is_current": false,
+      "responsibilities": [
+        "Researched transformer-based text classification models under a faculty advisor",
+        "Co-authored a workshop paper on low-resource NLP fine-tuning techniques"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Movie Recommendation Engine",
+      "description": [
+        "Built a collaborative-filtering recommendation system in PyTorch trained on the MovieLens dataset",
+        "Deployed as a FastAPI service with a Redis-backed feature cache"
+      ],
+      "technologies": ["Python", "PyTorch", "FastAPI", "Redis", "scikit-learn"],
+      "url": "github.com/weizhang/movie-rec",
+      "start_date": "2021-09",
+      "end_date": "2021-12"
+    }
+  ],
+  "certifications": [],
+  "skills": [
+    {"category": "Languages", "skills": ["Python", "SQL"]},
+    {"category": "ML Frameworks", "skills": ["PyTorch", "TensorFlow", "scikit-learn"]},
+    {"category": "MLOps", "skills": ["Airflow", "Docker", "MLflow"]},
+    {"category": "Data", "skills": ["Pandas", "NumPy", "Spark"]}
+  ],
+  "languages": ["English", "Mandarin"],
+  "publications": [
+    {
+      "title": "Low-Resource Fine-Tuning Strategies for Transformer Text Classifiers",
+      "publisher": "NLP for Real-World Applications Workshop",
+      "date": "2021-05",
+      "url": null,
+      "description": "Workshop paper on data-efficient fine-tuning techniques for low-resource text classification."
+    }
+  ],
+  "custom_sections": [],
+  "raw_text": "Wei Zhang - Machine Learning Engineer with 3 years building and deploying NLP/recommendation models."
+}

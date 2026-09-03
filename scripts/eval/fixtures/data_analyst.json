@@ -1,0 +1,75 @@
+{
+  "personal_info": {
+    "name": "Maria Gonzalez",
+    "email": "maria.gonzalez.data@example.com",
+    "phone": "+1-312-555-0198",
+    "location": "Chicago, IL",
+    "linkedin": "linkedin.com/in/mariagonzalezdata",
+    "github": null,
+    "website": null,
+    "summary": "Data analyst with 2 years of experience turning raw business data into dashboards and reports that drive product and marketing decisions. Skilled in SQL, Python, and data visualization."
+  },
+  "education": [
+    {
+      "institution": "University of Illinois at Chicago",
+      "degree": "B.S.",
+      "field_of_study": "Statistics",
+      "start_date": "2018-08",
+      "end_date": "2022-05",
+      "gpa": "3.7/4.0",
+      "description": null
+    }
+  ],
+  "experience": [
+    {
+      "company": "Grubhub",
+      "title": "Data Analyst",
+      "location": "Chicago, IL",
+      "start_date": "2022-07",
+      "end_date": null,
+      "is_current": true,
+      "responsibilities": [
+        "Built and maintained Tableau dashboards tracking order volume, churn, and delivery SLAs for the ops leadership team",
+        "Wrote complex SQL queries against a Snowflake warehouse to answer ad-hoc business questions",
+        "Automated a weekly revenue report with Python and Pandas, saving ~5 hours/week of manual work",
+        "Partnered with product managers to define and track key funnel metrics for a new checkout flow"
+      ]
+    },
+    {
+      "company": "Chicago Public Media",
+      "title": "Data Analyst Intern",
+      "location": "Chicago, IL",
+      "start_date": "2021-06",
+      "end_date": "2021-08",
+      "is_current": false,
+      "responsibilities": [
+        "Cleaned and analyzed donor data in Python/Pandas to identify membership renewal trends",
+        "Built a Power BI dashboard summarizing campaign performance for the fundraising team"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "City Bike-Share Demand Analysis",
+      "description": [
+        "Analyzed two years of public bike-share trip data to model ridership demand by weather and time of day",
+        "Built visualizations in Tableau and a summary report for a civic-data hackathon"
+      ],
+      "technologies": ["Python", "Pandas", "SQL", "Tableau"],
+      "url": "github.com/mgonzalez/bikeshare-analysis",
+      "start_date": "2022-02",
+      "end_date": "2022-03"
+    }
+  ],
+  "certifications": [],
+  "skills": [
+    {"category": "Languages", "skills": ["SQL", "Python", "R"]},
+    {"category": "Analysis", "skills": ["Pandas", "NumPy", "Excel"]},
+    {"category": "Visualization", "skills": ["Tableau", "Power BI"]},
+    {"category": "Data Warehousing", "skills": ["Snowflake", "BigQuery"]}
+  ],
+  "languages": ["English", "Spanish"],
+  "publications": [],
+  "custom_sections": [],
+  "raw_text": "Maria Gonzalez - Data Analyst with 2 years building SQL/Python reporting and dashboards."
+}

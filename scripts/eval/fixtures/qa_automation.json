@@ -1,0 +1,84 @@
+{
+  "personal_info": {
+    "name": "Fatima Al-Sayed",
+    "email": "fatima.alsayed.qa@example.com",
+    "phone": "+1-617-555-0142",
+    "location": "Boston, MA",
+    "linkedin": "linkedin.com/in/fatimaalsayed",
+    "github": "github.com/falsayed",
+    "website": null,
+    "summary": "QA automation engineer with 3 years of experience designing test frameworks and CI-integrated automated test suites that catch regressions before release. Strong in Selenium, Cypress, and API testing."
+  },
+  "education": [
+    {
+      "institution": "Northeastern University",
+      "degree": "B.S.",
+      "field_of_study": "Computer Science",
+      "start_date": "2017-09",
+      "end_date": "2021-05",
+      "gpa": "3.5/4.0",
+      "description": null
+    }
+  ],
+  "experience": [
+    {
+      "company": "Wayfair",
+      "title": "QA Automation Engineer",
+      "location": "Boston, MA",
+      "start_date": "2022-04",
+      "end_date": null,
+      "is_current": true,
+      "responsibilities": [
+        "Designed and maintained a Cypress end-to-end test suite covering the checkout flow, running on every PR via GitHub Actions",
+        "Built API test coverage with Postman/Newman for internal pricing services, catching 40+ regressions pre-release",
+        "Reduced full regression suite runtime from 90 to 25 minutes by parallelizing test execution",
+        "Mentored two junior QA engineers on writing maintainable Page Object Model test code"
+      ]
+    },
+    {
+      "company": "Toast",
+      "title": "Test Engineer",
+      "location": "Boston, MA",
+      "start_date": "2021-06",
+      "end_date": "2022-03",
+      "is_current": false,
+      "responsibilities": [
+        "Wrote Selenium-based automated UI tests for a restaurant POS web application",
+        "Built a Jenkins pipeline to run nightly regression suites and report failures to Slack",
+        "Performed manual exploratory testing for new feature releases"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "API Contract Test Framework",
+      "description": [
+        "Built a reusable Python framework for contract-testing internal REST APIs using pytest and JSON schema validation",
+        "Adopted by two other teams for their own service test suites"
+      ],
+      "technologies": ["Python", "PyTest", "REST"],
+      "url": "github.com/falsayed/api-contract-tests",
+      "start_date": "2022-08",
+      "end_date": "2022-10"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "ISTQB Certified Tester - Foundation Level",
+      "issuer": "ISTQB",
+      "date": "2021-09",
+      "expiry": null,
+      "credential_id": "ISTQB-CTFL-2021-3321"
+    }
+  ],
+  "skills": [
+    {"category": "Languages", "skills": ["Python", "JavaScript"]},
+    {"category": "Testing Tools", "skills": ["Selenium", "Cypress", "PyTest", "Jest"]},
+    {"category": "CI/CD", "skills": ["Jenkins", "GitHub Actions"]},
+    {"category": "Other", "skills": ["REST", "Git", "Postman"]}
+  ],
+  "languages": ["English", "Arabic"],
+  "publications": [],
+  "custom_sections": [],
+  "raw_text": "Fatima Al-Sayed - QA Automation Engineer with 3 years building Selenium/Cypress test frameworks."
+}

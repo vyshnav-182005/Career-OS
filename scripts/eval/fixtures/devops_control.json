@@ -1,0 +1,85 @@
+{
+  "personal_info": {
+    "name": "Jonas Berg",
+    "email": "jonas.berg.devops@example.com",
+    "phone": "+46-70-555-0123",
+    "location": "Stockholm, Sweden",
+    "linkedin": "linkedin.com/in/jonasberg",
+    "github": "github.com/jberg",
+    "website": null,
+    "summary": "DevOps/SRE engineer with 4 years of experience running Kubernetes platforms and CI/CD pipelines at scale, with a focus on observability, infrastructure-as-code, and on-call reliability."
+  },
+  "education": [
+    {
+      "institution": "KTH Royal Institute of Technology",
+      "degree": "M.S.",
+      "field_of_study": "Computer Engineering",
+      "start_date": "2016-09",
+      "end_date": "2018-06",
+      "gpa": null,
+      "description": null
+    }
+  ],
+  "experience": [
+    {
+      "company": "Klarna",
+      "title": "Site Reliability Engineer",
+      "location": "Stockholm, Sweden",
+      "start_date": "2021-09",
+      "end_date": null,
+      "is_current": true,
+      "responsibilities": [
+        "Operate a multi-region Kubernetes platform serving 200+ microservices, owning on-call rotation and incident response",
+        "Wrote Terraform modules to provision AWS infrastructure across three environments, cutting environment setup time from days to hours",
+        "Built Prometheus/Grafana dashboards and alerting rules that cut mean-time-to-detect for production incidents by 50%",
+        "Migrated CI pipelines from Jenkins to GitHub Actions, reducing average build time by 30%"
+      ]
+    },
+    {
+      "company": "Spotify",
+      "title": "DevOps Engineer",
+      "location": "Stockholm, Sweden",
+      "start_date": "2018-07",
+      "end_date": "2021-08",
+      "is_current": false,
+      "responsibilities": [
+        "Maintained Ansible playbooks and Docker images for internal platform services",
+        "Automated deployment pipelines with Jenkins and Kubernetes, enabling multiple daily releases",
+        "Set up centralized logging with the ELK stack for platform-wide debugging"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Homelab GitOps Cluster",
+      "description": [
+        "Set up a self-hosted Kubernetes cluster managed via ArgoCD and Terraform for personal projects",
+        "Automated certificate renewal and DNS with cert-manager and external-dns"
+      ],
+      "technologies": ["Kubernetes", "Terraform", "Docker", "ArgoCD"],
+      "url": "github.com/jberg/homelab-gitops",
+      "start_date": "2022-05",
+      "end_date": "2022-08"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "Certified Kubernetes Administrator (CKA)",
+      "issuer": "Cloud Native Computing Foundation",
+      "date": "2022-11",
+      "expiry": "2025-11",
+      "credential_id": "CKA-2022-8841"
+    }
+  ],
+  "skills": [
+    {"category": "Cloud", "skills": ["AWS", "Azure"]},
+    {"category": "Infra", "skills": ["Kubernetes", "Terraform", "Docker", "Ansible"]},
+    {"category": "CI/CD", "skills": ["Jenkins", "GitHub Actions", "GitLab CI"]},
+    {"category": "Observability", "skills": ["Prometheus", "Grafana"]},
+    {"category": "Languages", "skills": ["Python", "Bash", "Go"]}
+  ],
+  "languages": ["English", "Swedish"],
+  "publications": [],
+  "custom_sections": [],
+  "raw_text": "Jonas Berg - Site Reliability Engineer with 4 years running Kubernetes platforms and CI/CD at scale."
+}
