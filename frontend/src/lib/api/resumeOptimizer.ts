@@ -26,9 +26,7 @@ function delay(ms: number) {
 }
 
 async function getResumeOptimizationStatus(workflowId: string): Promise<WorkflowStatusResponse> {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
-
-  const response = await fetch(`${backendUrl}/workflows/${workflowId}`, {
+  const response = await fetch(`/api/workflows/${workflowId}`, {
     method: "GET",
   });
 
@@ -64,31 +62,24 @@ async function waitForResumeOptimization(
   throw new Error("Resume optimization is still running. Please check back shortly.");
 }
 
-export async function optimizeResume(
-  userId: string,
-  jobTitle: string,
-  jobDescription: string,
+async function submitOptimization(
+  body: { jobId: string } | { jobTitle: string; jobDescription: string },
   onStatus?: (status: WorkflowStatusResponse) => void,
 ): Promise<OptimizationResponse> {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
-  
-  const response = await fetch(`${backendUrl}/workflows/resume-optimize`, {
+  const response = await fetch("/api/resume/optimize", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      user_id: userId,
-      job_title: jobTitle,
-      job_description: jobDescription,
-    }),
+    body: JSON.stringify(body),
   });
 
+  const queued: OptimizationResponse = await response.json();
+
   if (!response.ok) {
-    throw new Error(`Failed to optimize resume: ${response.statusText}`);
+    throw new Error(queued.message || `Failed to optimize resume: ${response.statusText}`);
   }
 
-  const queued: OptimizationResponse = await response.json();
   const workflowId = queued.data?.workflow_id;
 
   if (!workflowId) {
@@ -103,4 +94,21 @@ export async function optimizeResume(
   });
 
   return waitForResumeOptimization(workflowId, onStatus);
+}
+
+/** Manual "paste a job description" flow (Optimize tab). */
+export async function optimizeResume(
+  jobTitle: string,
+  jobDescription: string,
+  onStatus?: (status: WorkflowStatusResponse) => void,
+): Promise<OptimizationResponse> {
+  return submitOptimization({ jobTitle, jobDescription }, onStatus);
+}
+
+/** Generate a resume tailored to a specific job listing already stored in the DB. */
+export async function generateResumeForJob(
+  jobId: string,
+  onStatus?: (status: WorkflowStatusResponse) => void,
+): Promise<OptimizationResponse> {
+  return submitOptimization({ jobId }, onStatus);
 }

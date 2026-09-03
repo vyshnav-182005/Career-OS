@@ -7,14 +7,10 @@ import ResumeUploader from "@/components/dashboard/ResumeUploader";
 import ProfileView from "@/components/dashboard/ProfileView";
 import ThemeToggle from "@/components/shared/ThemeToggle";
 import ResumeOptimizer from "@/components/dashboard/ResumeOptimizer";
-import RecommendedJobs from "@/components/dashboard/RecommendedJobs";
-import JobSearch from "@/components/dashboard/JobSearch";
+import JobsBoard from "@/components/dashboard/JobsBoard";
 import styles from "./dashboard.module.css";
 
 interface DashboardClientProps {
-// ... omitting some unchanged lines for space, wait, I shouldn't just paste random stuff, I need to be precise.
-// Let me use a smaller chunk for the import, and a smaller chunk for the JSX.
-  userId: string;
   displayName: string;
   avatarChar: string;
   initialProfileIntelligence?: ProfileIntelligence | null;
@@ -22,9 +18,8 @@ interface DashboardClientProps {
   initialResumeUrl?: string | null;
 }
 
-export default function DashboardClient({ 
-  userId,
-  displayName, 
+export default function DashboardClient({
+  displayName,
   avatarChar,
   initialProfileIntelligence,
   initialFilename,
@@ -214,8 +209,7 @@ export default function DashboardClient({
         {activeTab === "Optimize" && (
           <div className={styles.optimizeSection}>
             {profileIntelligence ? (
-              // Passing user's auth ID so the API knows whose profile to optimize
-              <ResumeOptimizer userId={userId} />
+              <ResumeOptimizer />
             ) : (
               <div className={styles.uploadCard}>
                 <div className={styles.uploadCardHeader}>
@@ -231,9 +225,8 @@ export default function DashboardClient({
 
         {/* Jobs Tab */}
         {activeTab === "Jobs" && (
-          <div className={styles.jobsSection} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            <RecommendedJobs userId={userId} />
-            <JobSearch />
+          <div className={styles.jobsSection}>
+            <JobsBoard hasProfile={!!profileIntelligence} />
           </div>
         )}
       </main>

@@ -1,14 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { optimizeResume, type OptimizationResponse } from "@/lib/api/resumeOptimizer";
+import { optimizeResume } from "@/lib/api/resumeOptimizer";
 import styles from "./ResumeOptimizer.module.css";
 
-interface ResumeOptimizerProps {
-  userId: string;
-}
-
-export default function ResumeOptimizer({ userId }: ResumeOptimizerProps) {
+export default function ResumeOptimizer() {
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +22,7 @@ export default function ResumeOptimizer({ userId }: ResumeOptimizerProps) {
     setPdfContent(null);
 
     try {
-      const result = await optimizeResume(userId, jobTitle, jobDescription, (status) => {
+      const result = await optimizeResume(jobTitle, jobDescription, (status) => {
         setStatusMessage(status.message);
       });
       const pdf = result.data?.pdf_content;

@@ -28,9 +28,8 @@ export default async function DashboardPage() {
   const avatarChar = displayName[0].toUpperCase();
 
   return (
-    <DashboardClient 
-      userId={user.id!}
-      displayName={displayName} 
+    <DashboardClient
+      displayName={displayName}
       avatarChar={avatarChar} 
       initialProfileIntelligence={profileRow?.profile_data as ProfileIntelligence | null}
       initialFilename={profileRow?.source_filename}
