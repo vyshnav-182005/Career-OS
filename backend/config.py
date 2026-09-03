@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     adzuna_app_id: str = Field(default="", alias="ADZUNA_APP_ID")
     adzuna_app_key: str = Field(default="", alias="ADZUNA_APP_KEY")
     job_api_key_2: str = Field(default="", alias="JOB_API_KEY_2")
+    # Comma-separated provider names; see services/job_providers/registry.py
+    job_providers: str = Field(default="jooble,greenhouse,lever", alias="JOB_PROVIDERS")
+    internal_api_secret: str = Field(default="", alias="INTERNAL_API_SECRET")
     allowed_origins: str = "http://localhost:3000"
     max_file_size_mb: int = 10
     model: str = Field(default="meta/llama-3.1-8b-instruct", alias="MODEL")

@@ -32,10 +32,19 @@ class NormalizedJob(BaseModel):
     # External apply URL
     url: Optional[str] = None
 
+    # Job-matching taxonomy (Phase 1)
+    role_family: Optional[str] = None
+    source_query: Optional[str] = None
+    last_seen_at: Optional[datetime] = None
+    content_hash: Optional[str] = None
+
 class MatchedJob(NormalizedJob):
     """
     Schema for a job returned from vector similarity search.
     """
+    # Present once persisted (every match_jobs*/search_jobs_fulltext row); absent
+    # on a NormalizedJob that hasn't been upserted yet.
+    id: Optional[str] = None
     similarity: Optional[float] = None
 
 class JobFilter(BaseModel):

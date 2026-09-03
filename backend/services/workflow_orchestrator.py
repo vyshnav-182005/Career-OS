@@ -9,6 +9,7 @@ from backend.models.schemas import WorkflowResponse, WorkflowStatusResponse
 logger = logging.getLogger(__name__)
 
 workflow_runs: dict[str, WorkflowStatusResponse] = {}
+workflow_owners: dict[str, str] = {}
 
 async def trigger_profile_intelligence_workflow(user_id: str):
     """
@@ -32,6 +33,7 @@ async def submit_resume_optimization_workflow(request: OptimizationRequest) -> W
         status="queued",
         message="Resume optimization workflow queued.",
     )
+    workflow_owners[workflow_id] = request.user_id
     logger.info("Orchestrator: Queued Resume Optimization Workflow id=%s user=%s", workflow_id, request.user_id)
     return WorkflowResponse(
         success=True,
@@ -39,7 +41,17 @@ async def submit_resume_optimization_workflow(request: OptimizationRequest) -> W
         data={"workflow_id": workflow_id, "status": "queued"},
     )
 
-def get_resume_optimization_workflow_status(workflow_id: str) -> WorkflowStatusResponse | None:
+def get_resume_optimization_workflow_status(
+    workflow_id: str, user_id: str | None = None
+) -> WorkflowStatusResponse | None:
+    """
+    Looks up a workflow's status. When `user_id` is supplied, the caller must
+    own the workflow (or None is returned, as if it didn't exist) — protects
+    against one user polling/reading another user's generated resume by
+    guessing a workflow id.
+    """
+    if user_id is not None and workflow_owners.get(workflow_id) != user_id:
+        return None
     return workflow_runs.get(workflow_id)
 
 async def run_resume_optimization_workflow(workflow_id: str, request: OptimizationRequest) -> None:

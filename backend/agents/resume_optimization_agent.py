@@ -23,7 +23,11 @@ Constraints:
 2. TAILORING: Rephrase existing bullet points and summaries to highlight experiences, skills, and projects most relevant to the JD keywords.
 3. KEYWORDS: Ensure that keywords mentioned in the JD are naturally integrated into the resume content.
 4. SELECTION: Select and prioritize the most relevant sentences, skills, and projects based on the user's stored data.
-5. SCHEMA MATCHING: Return a JSON object matching the EXACT schema of the input (no markdown, no extra text).
+5. PROJECTS: For each project, keep only the 2-4 bullet points most relevant to the JD, reordered so the most relevant comes first. Drop projects that are clearly irrelevant to this JD rather than forcing a connection.
+6. BULLET FORMAT: `projects[].description` and `experience[].responsibilities` MUST be JSON arrays of separate strings - one complete, self-contained sentence per element. Never return a single string containing list syntax, brackets, newlines, or leading "-"/"*"/"bullet" markers. Correct: ["Built X, cutting latency 40%.", "Led Y."]  Wrong: "['Built X', 'Led Y']".
+7. COVERAGE: Carry through every section the base resume provides - education, skills, certifications, languages, publications and custom sections. Dropping a section only shortens the page; drop individual items only when they are genuinely irrelevant to this JD.
+8. SUBSTANCE: Aim for roughly one full page of content: keep 3-4 bullets for each retained role and project, each a specific, quantified sentence drawn from the source material. Never pad with filler or generic claims the base resume does not support.
+9. SCHEMA MATCHING: Return a JSON object matching the EXACT schema of the input (no markdown, no extra text).
 
 Base Resume JSON:
 {resume_json}

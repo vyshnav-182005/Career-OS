@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from backend.models.schemas import OptimizationRequest
 from backend.models.schemas import WorkflowResponse, WorkflowStatusResponse
 from backend.services.workflow_orchestrator import (
@@ -6,10 +6,12 @@ from backend.services.workflow_orchestrator import (
     run_resume_optimization_workflow,
     submit_resume_optimization_workflow,
 )
+from backend.security import verify_internal_request
 
 router = APIRouter(
     prefix="/workflows",
     tags=["Workflow Orchestrator"],
+    dependencies=[Depends(verify_internal_request)],
 )
 
 @router.post("/resume-optimize", response_model=WorkflowResponse, status_code=status.HTTP_202_ACCEPTED)
@@ -26,11 +28,12 @@ async def optimize_resume_workflow(request: OptimizationRequest, background_task
     return response
 
 @router.get("/{workflow_id}", response_model=WorkflowStatusResponse)
-async def get_workflow_status(workflow_id: str):
+async def get_workflow_status(workflow_id: str, user_id: str):
     """
-    Get the current status of a queued workflow.
+    Get the current status of a queued workflow. Only the user who submitted
+    the workflow may poll its status/result.
     """
-    response = get_resume_optimization_workflow_status(workflow_id)
+    response = get_resume_optimization_workflow_status(workflow_id, user_id=user_id)
     if response is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
