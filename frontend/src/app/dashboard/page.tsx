@@ -29,6 +29,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
+      userId={user.id}
       displayName={displayName}
       avatarChar={avatarChar} 
       initialProfileIntelligence={profileRow?.profile_data as ProfileIntelligence | null}

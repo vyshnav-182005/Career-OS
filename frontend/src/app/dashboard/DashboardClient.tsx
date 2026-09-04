@@ -11,6 +11,7 @@ import JobsBoard from "@/components/dashboard/JobsBoard";
 import styles from "./dashboard.module.css";
 
 interface DashboardClientProps {
+  userId: string;
   displayName: string;
   avatarChar: string;
   initialProfileIntelligence?: ProfileIntelligence | null;
@@ -19,6 +20,7 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({
+  userId,
   displayName,
   avatarChar,
   initialProfileIntelligence,
@@ -226,7 +228,7 @@ export default function DashboardClient({
         {/* Jobs Tab */}
         {activeTab === "Jobs" && (
           <div className={styles.jobsSection}>
-            <JobsBoard hasProfile={!!profileIntelligence} />
+            <JobsBoard hasProfile={!!profileIntelligence} cacheScope={userId} />
           </div>
         )}
       </main>

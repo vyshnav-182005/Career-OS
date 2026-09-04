@@ -8,6 +8,7 @@ import styles from "./JobsBoard.module.css";
 
 interface JobsBoardProps {
   hasProfile: boolean;
+  cacheScope: string;
 }
 
 /** Profile matches shown when the search box is empty. */
@@ -18,6 +19,78 @@ const SEARCH_LIMIT = 20;
 const SEARCH_DEBOUNCE_MS = 400;
 
 type Mode = "recommended" | "search";
+
+interface JobCacheEntry {
+  jobs: Job[];
+  mode: Mode;
+  activeQuery: string;
+  sourcing: boolean;
+  createdAt: number;
+}
+
+const JOB_CACHE_TTL_MS = 15 * 60 * 1000;
+const JOB_CACHE_PREFIX = "career-os:jobs:";
+const memoryJobCache = new Map<string, JobCacheEntry>();
+
+function cacheKeyFor(cacheScope: string, searchTerm: string): string {
+  const trimmed = searchTerm.trim();
+  const mode: Mode = trimmed ? "search" : "recommended";
+  return `${cacheScope}:${mode}:${trimmed.toLowerCase()}`;
+}
+
+async function errorMessageFor(response: Response, fallback: string): Promise<string> {
+  try {
+    const data: unknown = await response.json();
+    if (data && typeof data === "object") {
+      const detail = "detail" in data ? data.detail : undefined;
+      const error = "error" in data ? data.error : undefined;
+      const message = "message" in data ? data.message : undefined;
+
+      if (typeof detail === "string") return detail;
+      if (typeof error === "string") return error;
+      if (typeof message === "string") return message;
+    }
+  } catch {
+    // Some proxy/backend failures are plain text or empty; fall through.
+  }
+
+  return fallback;
+}
+
+function getCachedJobs(cacheKey: string): JobCacheEntry | null {
+  const memoryEntry = memoryJobCache.get(cacheKey);
+  if (memoryEntry && Date.now() - memoryEntry.createdAt < JOB_CACHE_TTL_MS) {
+    return memoryEntry;
+  }
+
+  memoryJobCache.delete(cacheKey);
+
+  try {
+    const serialized = window.sessionStorage.getItem(`${JOB_CACHE_PREFIX}${cacheKey}`);
+    if (!serialized) return null;
+
+    const entry = JSON.parse(serialized) as JobCacheEntry;
+    if (!entry.createdAt || Date.now() - entry.createdAt >= JOB_CACHE_TTL_MS) {
+      window.sessionStorage.removeItem(`${JOB_CACHE_PREFIX}${cacheKey}`);
+      return null;
+    }
+
+    memoryJobCache.set(cacheKey, entry);
+    return entry;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedJobs(cacheKey: string, entry: JobCacheEntry) {
+  memoryJobCache.set(cacheKey, entry);
+
+  try {
+    window.sessionStorage.setItem(`${JOB_CACHE_PREFIX}${cacheKey}`, JSON.stringify(entry));
+  } catch {
+    // Storage can be unavailable or full; the in-memory cache still covers tab switches.
+  }
+}
 
 function scoreTier(score: number): "good" | "fair" | "poor" {
   if (score >= 75) return "good";
@@ -35,7 +108,7 @@ function applyUrlFor(job: Job): string | undefined {
   );
 }
 
-export default function JobsBoard({ hasProfile }: JobsBoardProps) {
+export default function JobsBoard({ hasProfile, cacheScope }: JobsBoardProps) {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [mode, setMode] = useState<Mode>("recommended");
   const [loading, setLoading] = useState(false);
@@ -55,12 +128,25 @@ export default function JobsBoard({ hasProfile }: JobsBoardProps) {
 
   const load = useCallback(
     async (searchTerm: string) => {
+      const trimmed = searchTerm.trim();
+      const nextMode: Mode = trimmed ? "search" : "recommended";
+      const cacheKey = cacheKeyFor(cacheScope, trimmed);
+      const cached = getCachedJobs(cacheKey);
+
+      if (cached) {
+        abortRef.current?.abort();
+        setJobs(cached.jobs);
+        setMode(cached.mode);
+        setActiveQuery(cached.activeQuery);
+        setSourcing(cached.sourcing);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
-
-      const trimmed = searchTerm.trim();
-      const nextMode: Mode = trimmed ? "search" : "recommended";
 
       setLoading(true);
       setError(null);
@@ -72,26 +158,41 @@ export default function JobsBoard({ hasProfile }: JobsBoardProps) {
           : `/api/jobs/recommended?limit=${TOP_MATCHES_LIMIT}`;
 
         const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) throw new Error(trimmed ? "Failed to search jobs" : "Failed to load your matches");
+        if (!res.ok) {
+          throw new Error(await errorMessageFor(res, trimmed ? "Failed to search jobs" : "Failed to load your matches"));
+        }
 
         const data = await res.json();
         const raw: unknown[] = data.data || [];
-        setJobs(raw.map(normalizeRecommendedJob).slice(0, trimmed ? SEARCH_LIMIT : TOP_MATCHES_LIMIT));
+        const nextJobs = raw.map(normalizeRecommendedJob).slice(0, trimmed ? SEARCH_LIMIT : TOP_MATCHES_LIMIT);
+        const nextSourcing = Boolean(trimmed && raw.length === 0);
+
+        setJobs(nextJobs);
         setMode(nextMode);
         setActiveQuery(trimmed);
+        setSourcing(nextSourcing);
+
+        if (!nextSourcing) {
+          setCachedJobs(cacheKey, {
+            jobs: nextJobs,
+            mode: nextMode,
+            activeQuery: trimmed,
+            sourcing: nextSourcing,
+            createdAt: Date.now(),
+          });
+        }
 
         // An empty search means the backend has nothing stored for this role
         // yet. It kicks off ingestion for the term as a background task, so
         // say so rather than showing a bare "no results".
-        if (trimmed && raw.length === 0) setSourcing(true);
       } catch (err: unknown) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         setError(err instanceof Error ? err.message : "Something went wrong");
       } finally {
-        setLoading(false);
+        if (abortRef.current === controller) setLoading(false);
       }
     },
-    []
+    [cacheScope]
   );
 
   // Initial load + debounced re-load as the query changes. Clearing the box
