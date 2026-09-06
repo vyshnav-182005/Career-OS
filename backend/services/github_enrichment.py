@@ -1,6 +1,8 @@
 import asyncio
+import base64
 import hashlib
 import httpx
+import json
 import logging
 import re
 from datetime import datetime, timezone
@@ -13,10 +15,28 @@ from backend.db.supabase_client import (
     get_supabase_client,
 )
 from backend.services.workflow_orchestrator import trigger_profile_intelligence_workflow
-from backend.models.resume import Project
+from backend.models.resume import Project, normalize_bullets
 from backend.models.schemas import GithubSyncResult
 
 logger = logging.getLogger(__name__)
+
+# A repo's own one-line blurb is all the scan can write, which reads as filler
+# on a resume. These bound the pass that replaces it with README-grounded
+# bullets: enough README to describe the project, few enough repos that the
+# whole batch still fits one completion (the rest are picked up next sync).
+README_PROMPT_CHARS = 3000
+MAX_ENRICHMENT_REPOS = 8
+MAX_GENERATED_BULLETS = 3
+
+
+def _github_headers() -> dict:
+    headers = {
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "Career-OS-Agent",
+    }
+    if settings.github_token:
+        headers["Authorization"] = f"Bearer {settings.github_token}"
+    return headers
 
 async def _fetch_github_repos(github_url: str) -> list[dict] | None:
     """The account's public repos, or None if GitHub could not be asked.
@@ -34,13 +54,7 @@ async def _fetch_github_repos(github_url: str) -> list[dict] | None:
         logger.info("Invalid or generic GitHub username extracted: %s", username)
         return None
 
-    headers = {
-        "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "Career-OS-Agent",
-    }
-    
-    if settings.github_token:
-        headers["Authorization"] = f"Bearer {settings.github_token}"
+    headers = _github_headers()
 
     all_repos: list[dict] = []
     page = 1
@@ -89,6 +103,49 @@ async def _fetch_github_repos(github_url: str) -> list[dict] | None:
         logger.error("Failed to fetch GitHub repos: %s", e)
 
     return None
+
+async def _fetch_repo_readme(
+    client: httpx.AsyncClient, owner: str, repo: str
+) -> str | None:
+    """The repo's README as text, or None when it has none / could not be read.
+
+    None is the "nothing to ground bullets in" answer: a repo without a README
+    is skipped rather than described from its name alone.
+    """
+    try:
+        response = await client.get(f"https://api.github.com/repos/{owner}/{repo}/readme")
+        if response.status_code != 200:
+            # 404 is the common case (no README at all), and is not an error.
+            if response.status_code != 404:
+                logger.info(
+                    "README unavailable for %s/%s (%s)", owner, repo, response.status_code
+                )
+            return None
+
+        payload = response.json() or {}
+        content = payload.get("content")
+        if not content or payload.get("encoding") != "base64":
+            return None
+        return base64.b64decode(content).decode("utf-8", errors="replace")
+    except Exception as e:
+        logger.info("Failed to fetch README for %s/%s: %s", owner, repo, e)
+        return None
+
+
+async def _fetch_repo_languages(
+    client: httpx.AsyncClient, owner: str, repo: str
+) -> dict[str, int]:
+    """GitHub's {language: bytes} breakdown for the repo, empty if unavailable."""
+    try:
+        response = await client.get(f"https://api.github.com/repos/{owner}/{repo}/languages")
+        if response.status_code != 200:
+            return {}
+        languages = response.json()
+        return languages if isinstance(languages, dict) else {}
+    except Exception as e:
+        logger.info("Failed to fetch languages for %s/%s: %s", owner, repo, e)
+        return {}
+
 
 async def _generate_github_summary(repos: list[dict]) -> str:
     if not repos:
@@ -408,6 +465,272 @@ def _repos_signature(repos: list[dict]) -> str:
     return hashlib.sha256("\n".join(payload).encode("utf-8")).hexdigest()
 
 
+GITHUB_BULLET_PROMPT = """\
+You are a resume writing agent. Turn each GitHub repository below into resume \
+bullet points, using only what its README and language breakdown actually say.
+
+Return a JSON object mapping every repository name to its bullets (no markdown, \
+no extra text):
+{{
+  "repository-name": ["bullet 1", "bullet 2", "bullet 3"]
+}}
+
+Rules:
+1. Write 2-{max_bullets} bullets per repository. One sentence each, starting with a \
+past-tense verb ("Built", "Implemented", "Automated"), no trailing bullet glyphs.
+2. State ONLY what the README and languages support. Never invent metrics, user \
+counts, performance numbers, dates, team sizes, employers, or outcomes - if the \
+README does not state it, it does not go in a bullet.
+3. Name the concrete technologies the README and language breakdown show, and say \
+what the project does and how it is built.
+4. If a README is too thin to say anything specific, return fewer bullets for that \
+repository, or an empty list. Padding with generic filler is worse than saying less.
+5. Use each repository name EXACTLY as given below as its JSON key, and include no \
+repositories other than the ones listed.
+6. Return ONLY valid JSON.
+
+Repositories:
+{repos_text}
+"""
+
+
+def _language_breakdown(languages: dict[str, int]) -> str:
+    """Renders GitHub's per-language byte counts as "Python 72%, TypeScript 28%"."""
+    total = sum(v for v in languages.values() if isinstance(v, int) and v > 0)
+    if not total:
+        return "unknown"
+    ranked = sorted(languages.items(), key=lambda kv: kv[1], reverse=True)
+    return ", ".join(
+        f"{name} {round(byte_count / total * 100)}%" for name, byte_count in ranked[:6]
+    )
+
+
+def _readme_signature(readme: str, languages: dict[str, int]) -> str:
+    """Fingerprint of what a repo's bullets were written from.
+
+    Same idea as `_repos_signature`: the bullets cost an LLM call, so a repo
+    whose README and languages have not moved is not described a second time.
+    """
+    payload = json.dumps(
+        {"readme": readme, "languages": dict(sorted(languages.items()))}, sort_keys=True
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _enrichment_cache_key(repo: dict) -> str:
+    return _repo_key(repo.get("html_url")) or _normalize_name(repo.get("name"))
+
+
+def _has_only_scan_description(project: dict, repo: dict) -> bool:
+    """True when the description is still empty or the repo's own one-line blurb."""
+    description = [d for d in (project.get("description") or []) if str(d).strip()]
+    if not description:
+        return True
+    blurb = repo.get("description")
+    return bool(blurb) and description == [blurb]
+
+
+def _enrichment_candidates(
+    projects: list[dict], repos: list[dict]
+) -> list[tuple[dict, dict]]:
+    """The (project, repo) pairs worth spending a README read and an LLM call on.
+
+    Only entries the scan itself created, that the user has not written over,
+    and that still carry nothing but the repo blurb. Anything else already says
+    more than this pass could add, so it is left exactly as it is.
+    """
+    by_repo_id = {r["id"]: r for r in repos if r.get("id") is not None}
+    by_repo_key: dict[str, dict] = {}
+    for repo in repos:
+        key = _repo_key(repo.get("html_url"))
+        if key:
+            by_repo_key.setdefault(key, repo)
+
+    candidates: list[tuple[dict, dict]] = []
+    for project in projects:
+        if not isinstance(project, dict):
+            continue
+        if project.get("source") != "github":
+            continue
+        # Text the user wrote (or edited) is never overwritten by a generator.
+        if project.get("description_source") == "user":
+            continue
+
+        repo = by_repo_id.get(project.get("github_id"))
+        if repo is None:
+            key = _repo_key(project.get("url"))
+            repo = by_repo_key.get(key) if key else None
+        if repo is None:
+            continue
+
+        if _has_only_scan_description(project, repo):
+            candidates.append((project, repo))
+
+    return candidates
+
+
+async def _generate_project_bullets(
+    repos_context: list[tuple[str, str, dict[str, int]]]
+) -> dict[str, list[str]]:
+    """One completion for the whole batch, keyed by normalized repo name.
+
+    Batched deliberately: a call per repo would multiply latency and cost by
+    the number of repos, for output that is three lines each.
+    """
+    if not repos_context:
+        return {}
+
+    sections = []
+    for name, readme, languages in repos_context:
+        sections.append(
+            f"### {name}\n"
+            f"Languages: {_language_breakdown(languages)}\n"
+            f"README:\n{readme[:README_PROMPT_CHARS]}"
+        )
+
+    prompt = GITHUB_BULLET_PROMPT.format(
+        max_bullets=MAX_GENERATED_BULLETS,
+        repos_text="\n\n".join(sections),
+    )
+
+    client = build_async_client(timeout=120.0)
+    try:
+        completion = await client.chat.completions.create(
+            model=settings.model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a resume writing agent. Always respond with valid "
+                        "JSON only, no markdown."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.2,
+            max_tokens=400 * len(repos_context) + 200,
+            response_format={"type": "json_object"},
+            extra_body=NO_THINKING,
+        )
+        response_text = completion.choices[0].message.content or ""
+    except Exception as e:
+        logger.error("Failed to generate GitHub project bullets: %s", e)
+        return {}
+
+    try:
+        cleaned = response_text.strip()
+        cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\s*```$", "", cleaned)
+        parsed = json.loads(cleaned)
+    except Exception:
+        logger.error("Failed to parse GitHub project bullet response")
+        return {}
+
+    if not isinstance(parsed, dict):
+        return {}
+
+    bullets_by_repo: dict[str, list[str]] = {}
+    for name, bullets in parsed.items():
+        cleaned_bullets = normalize_bullets(bullets)[:MAX_GENERATED_BULLETS]
+        if cleaned_bullets:
+            bullets_by_repo[_normalize_name(name)] = cleaned_bullets
+    return bullets_by_repo
+
+
+async def enrich_project_descriptions(profile_data: dict, repos: list[dict]) -> dict:
+    """Replaces scan-written project blurbs with README-grounded bullets.
+
+    Mutates `profile_data` in place and reports back {"described", "changed"},
+    so the caller owns the save: "changed" says there is something to persist,
+    "described" says whether any project text actually moved. They differ when
+    the pass only recorded fingerprints, which must not bump profile_version
+    and throw away the job-match cache for text nobody rewrote.
+
+    Every repo it looks at is fingerprinted into `github_sync`, so an unchanged
+    README is never read or described twice -- including repos it could write no
+    bullets for, which would otherwise be re-fetched and re-generated on every
+    single sync.
+    """
+    projects = (profile_data.get("original_resume") or {}).get("projects") or []
+    candidates = _enrichment_candidates(projects, repos)
+    if not candidates:
+        return {"described": 0, "changed": False}
+
+    sync_state = dict(profile_data.get("github_sync") or {})
+    cache = dict(sync_state.get("readme_signatures") or {})
+
+    # Nothing pushed since we last read a repo means its README cannot have
+    # moved, so it is skipped before costing a request.
+    pending: list[tuple[dict, dict]] = []
+    for project, repo in candidates:
+        cached = cache.get(_enrichment_cache_key(repo)) or {}
+        if cached.get("pushed_at") and cached["pushed_at"] == repo.get("pushed_at"):
+            continue
+        pending.append((project, repo))
+
+    if not pending:
+        return {"described": 0, "changed": False}
+
+    pending = pending[:MAX_ENRICHMENT_REPOS]
+
+    async def _context(
+        client: httpx.AsyncClient, repo: dict
+    ) -> tuple[str | None, dict[str, int]]:
+        owner = (repo.get("owner") or {}).get("login") or _repo_owner(repo.get("html_url"))
+        name = repo.get("name")
+        if not owner or not name:
+            return None, {}
+        readme, languages = await asyncio.gather(
+            _fetch_repo_readme(client, owner, name),
+            _fetch_repo_languages(client, owner, name),
+        )
+        return readme, languages
+
+    async with httpx.AsyncClient(headers=_github_headers(), timeout=30.0) as client:
+        fetched = await asyncio.gather(*[_context(client, repo) for _, repo in pending])
+
+    to_generate: list[tuple[str, str, dict[str, int]]] = []
+    generation_targets: list[tuple[dict, dict]] = []
+
+    for (project, repo), (readme, languages) in zip(pending, fetched):
+        key = _enrichment_cache_key(repo)
+        pushed_at = repo.get("pushed_at")
+
+        if readme is None:
+            # Nothing to ground bullets in. Remember that we looked, so the
+            # next sync doesn't ask GitHub about this repo all over again.
+            cache[key] = {"signature": None, "pushed_at": pushed_at}
+            continue
+
+        signature = _readme_signature(readme, languages)
+        already_described = (cache.get(key) or {}).get("signature") == signature
+        cache[key] = {"signature": signature, "pushed_at": pushed_at}
+        if already_described:
+            continue
+
+        to_generate.append((repo.get("name") or "", readme, languages))
+        generation_targets.append((project, repo))
+
+    bullets_by_repo = await _generate_project_bullets(to_generate)
+
+    described = 0
+    for project, repo in generation_targets:
+        bullets = bullets_by_repo.get(_normalize_name(repo.get("name")))
+        if not bullets:
+            continue
+        project["description"] = bullets
+        project["description_source"] = "ai_generated"
+        described += 1
+
+    sync_state["readme_signatures"] = cache
+    profile_data["github_sync"] = sync_state
+
+    if described:
+        logger.info("Wrote README-grounded bullets for %d GitHub projects", described)
+
+    return {"described": described, "changed": True}
+
+
 def _identity_keys(project: dict) -> list[tuple]:
     """Handles a project may be recognised by, strongest first.
 
@@ -532,6 +855,44 @@ async def sync_github_projects(user_id: str, github_url: str | None = None) -> G
     )
 
 
+async def enrich_github_project_descriptions(
+    user_id: str, github_url: str | None = None
+) -> None:
+    """Background half of a sync: turns scan-written blurbs into real bullets.
+
+    Runs after the sync response has already been sent, so it re-reads the
+    profile rather than carrying the one the request built -- by the time it
+    runs, that copy may no longer be what is stored. The repo list is fetched
+    again for the same reason; it is one cheap call against a step that is
+    about to spend a completion anyway.
+    """
+    try:
+        profile_data = get_profile_data(user_id)
+        if not profile_data or "original_resume" not in profile_data:
+            return
+
+        resume = profile_data["original_resume"]
+        github_url = github_url or (resume.get("personal_info") or {}).get("github")
+        if not github_username(github_url):
+            return
+
+        repos = await _fetch_github_repos(github_url)
+        if not repos:
+            return
+
+        outcome = await enrich_project_descriptions(profile_data, repos)
+        if outcome["changed"]:
+            # Fingerprints alone are bookkeeping; only rewritten text is a
+            # changed profile, and only that should re-key the job-match cache.
+            _save_profile_data(
+                user_id, profile_data, bump_version=bool(outcome["described"])
+            )
+    except Exception:
+        # A background pass that fails must not take anything else with it; the
+        # sync it follows has already succeeded and been reported to the user.
+        logger.exception("GitHub description enrichment failed for user_id=%s", user_id)
+
+
 def _sync_message(counts: dict[str, int], repo_count: int) -> str:
     parts = [f"{value} {label}" for label, value in counts.items() if value]
     if not parts:
@@ -591,6 +952,11 @@ async def enrich_profile_with_github_projects(user_id: str, github_url: str):
             "repo_count": len(repos),
             "username": github_username(github_url),
         }
+
+        # This whole function already runs as a background task, so the README
+        # reads and the bullet call are paid for here rather than enqueued
+        # again. It writes its own cache into github_sync, set just above.
+        await enrich_project_descriptions(profile_data, repos)
 
     # The profile intelligence workflow runs straight after and recomputes the
     # version itself, so this write does not need to.
