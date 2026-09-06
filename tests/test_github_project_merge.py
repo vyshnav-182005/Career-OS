@@ -224,3 +224,97 @@ class TestMergeReposIntoProjects:
         ]
 
         assert merge_repos_into_projects(projects, []) == projects
+
+
+class TestUserWrittenDescriptions:
+    """`description_source == "user"` outranks the "whichever says more" rule."""
+
+    def test_a_longer_description_never_replaces_user_written_text(self):
+        url = "https://github.com/vyshnav-182005/Career-OS"
+        projects = [
+            {
+                "name": "Career-OS",
+                "description": ["My own one-liner."],
+                "description_source": "user",
+                "technologies": ["Python"],
+                "url": url,
+            },
+            {
+                "name": "Career-OS",
+                "description": ["Generated bullet one.", "Generated bullet two."],
+                "description_source": "ai_generated",
+                "technologies": ["FastAPI"],
+                "url": url + ".git",
+            },
+        ]
+
+        merged = merge_repos_into_projects(projects, [])
+
+        assert len(merged) == 1
+        assert merged[0]["description"] == ["My own one-liner."]
+        assert merged[0]["description_source"] == "user"
+        # Everything else still merges as before.
+        assert merged[0]["technologies"] == ["Python", "FastAPI"]
+
+    def test_the_scan_blurb_never_lands_on_user_written_text(self):
+        projects = [
+            {
+                "name": "Career-OS",
+                "description": [],
+                "description_source": "user",
+                "technologies": [],
+                "url": "https://github.com/vyshnav-182005/Career-OS",
+            }
+        ]
+
+        merged = merge_repos_into_projects(projects, [repo("Career-OS", description="A blurb.")])
+
+        assert merged[0]["description"] == []
+
+    def test_the_label_travels_with_the_text(self):
+        """Bullets must not end up marked as written by someone who didn't."""
+        url = "https://github.com/vyshnav-182005/Career-OS"
+        projects = [
+            {"name": "Career-OS", "description": [], "technologies": [], "url": url},
+            {
+                "name": "Career-OS",
+                "description": ["Generated bullet."],
+                "description_source": "ai_generated",
+                "technologies": [],
+                "url": url + ".git",
+            },
+        ]
+
+        merged = merge_repos_into_projects(projects, [])
+
+        assert merged[0]["description"] == ["Generated bullet."]
+        assert merged[0]["description_source"] == "ai_generated"
+
+    def test_unlabelled_resume_text_survives_whichever_copy_is_stored_first(self):
+        """Legacy entries carry no label, so the length rule is what guards them.
+
+        Blocking the overwrite on a missing description_source instead would
+        drop these bullets whenever the scan's copy happened to be stored first.
+        """
+        url = "https://github.com/vyshnav-182005/Sentinel-Turret-Rover"
+        scanned = {
+            "name": "Sentinel-Turret-Rover",
+            "description": ["A blurb."],
+            "technologies": ["Python"],
+            "url": url,
+        }
+        resume_written = {
+            "name": "Sentinel Turret Rover: Attention-Based Face Recognition",
+            "description": ["Tracked intruders in real time.", "Aimed a servo turret."],
+            "technologies": ["OpenCV"],
+            "url": url + ".git",
+        }
+
+        for projects in ([scanned, resume_written], [resume_written, scanned]):
+            merged = merge_repos_into_projects([dict(p) for p in projects], [])
+
+            assert len(merged) == 1
+            assert merged[0]["description"] == [
+                "Tracked intruders in real time.",
+                "Aimed a servo turret.",
+            ]

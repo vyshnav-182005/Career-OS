@@ -275,9 +275,28 @@ def _merge_project(target: dict, source: dict) -> None:
         target["url"] = source["url"]
 
     # Resume bullets are a list of sentences; a repo blurb is a single line.
-    # Whichever says more about the project wins.
-    if len(source.get("description") or []) > len(target.get("description") or []):
+    # Whichever says more about the project wins -- unless the user wrote what
+    # is already there, in which case nothing replaces it however much longer
+    # the other side is. A generator's output is not an improvement on text a
+    # person chose.
+    #
+    # A missing description_source is deliberately NOT read as "user" here.
+    # Pass 1 of merge_repos_into_projects collapses duplicate stored entries
+    # through this function, and entries written before the field existed carry
+    # none, so blocking on None would keep whichever duplicate happened to be
+    # indexed first -- dropping the user's own resume bullets for the scan's
+    # one-line blurb, which is the loss this check exists to prevent. What
+    # protects unlabelled text is the comparison itself: a longer description
+    # is never replaced by a shorter one, and the scan only ever offers one
+    # line. Positive identification for unlabelled text is done where it can
+    # actually be established, in _has_only_scan_description.
+    if target.get("description_source") != "user" and len(
+        source.get("description") or []
+    ) > len(target.get("description") or []):
         target["description"] = list(source["description"])
+        # The label travels with the text it describes; keeping the old one
+        # would leave bullets marked as written by someone who didn't write them.
+        target["description_source"] = source.get("description_source")
 
     technologies = list(target.get("technologies") or [])
     seen = {t.lower() for t in technologies if isinstance(t, str)}
@@ -522,7 +541,15 @@ def _enrichment_cache_key(repo: dict) -> str:
 
 
 def _has_only_scan_description(project: dict, repo: dict) -> bool:
-    """True when the description is still empty or the repo's own one-line blurb."""
+    """True when the description is still empty or the repo's own one-line blurb.
+
+    This is the positive identification that makes enrichment safe on entries
+    stored before `description_source` existed, which carry no label at all: an
+    empty description has nothing to lose, and one that is byte-identical to
+    the repo blurb is provably the scan's own text rather than the user's.
+    Anything else is treated as the user's and left alone, which is what
+    "missing means user" amounts to in practice.
+    """
     description = [d for d in (project.get("description") or []) if str(d).strip()]
     if not description:
         return True
@@ -553,6 +580,7 @@ def _enrichment_candidates(
         if project.get("source") != "github":
             continue
         # Text the user wrote (or edited) is never overwritten by a generator.
+        # Unlabelled text is held to the same rule via the shape check below.
         if project.get("description_source") == "user":
             continue
 

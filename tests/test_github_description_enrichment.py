@@ -127,6 +127,11 @@ class TestCandidateSelection:
         assert _enrichment_candidates(projects, repos) == []
 
     def test_a_description_saying_more_than_the_blurb_is_left_alone(self):
+        """An unlabelled entry that says more than the blurb reads as the user's.
+
+        Projects stored before description_source existed carry no label, so
+        "not positively the scan's own text" is what has to stand in for it.
+        """
         repos = [repo("Sem4_UMS", repo_id=11, description="A UMS")]
         projects = [
             scanned_project(
@@ -136,7 +141,16 @@ class TestCandidateSelection:
             )
         ]
 
+        assert "description_source" not in projects[0]
         assert _enrichment_candidates(projects, repos) == []
+
+    def test_an_unlabelled_blurb_is_still_enrichable(self):
+        """The one unlabelled case that can be identified: the scan's own line."""
+        repos = [repo("Sem4_UMS", repo_id=11, description="A UMS")]
+        projects = [scanned_project("Sem4_UMS", repo_id=11, description=["A UMS"])]
+
+        assert "description_source" not in projects[0]
+        assert len(_enrichment_candidates(projects, repos)) == 1
 
     def test_a_resume_written_project_is_never_a_candidate(self):
         repos = [repo("Sem4_UMS", repo_id=11)]
