@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
-from typing import Literal, Optional
+from pydantic import BaseModel, Field, field_validator
+from typing import Any, Literal, Optional
+
+from backend.models.resume import Certification, Publication, normalize_bullets
 
 class WorkflowResponse(BaseModel):
     success: bool
@@ -59,6 +61,53 @@ class JobFitAnalysis(BaseModel):
 
 class JobFeedbackRequest(BaseModel):
     vote: Literal["up", "down"]
+
+
+class ProjectDescriptionEdit(BaseModel):
+    """One project's bullets as the editor last showed them."""
+
+    name: str
+    url: Optional[str] = None
+    description: list[str]
+
+    @field_validator("description", mode="before")
+    @classmethod
+    def _clean(cls, value: Any) -> list[str]:
+        return normalize_bullets(value)
+
+    @field_validator("description")
+    @classmethod
+    def _reject_empty(cls, value: list[str]) -> list[str]:
+        # A project with no bullets cannot be used in a tailored resume, and
+        # saving one silently is how it stays that way unnoticed. The editor
+        # says so before this is ever reached; this is the same rule held at
+        # the boundary, so it does not depend on the UI enforcing it.
+        if not value:
+            raise ValueError(
+                "Add at least one line about this project so it can be used in "
+                "tailored resumes."
+            )
+        return value
+
+
+class ProfileEditRequest(BaseModel):
+    """A save from the profile editor. Absent sections are left untouched."""
+
+    user_id: str
+    certifications: Optional[list[Certification]] = None
+    publications: Optional[list[Publication]] = None
+    project_descriptions: Optional[list[ProjectDescriptionEdit]] = None
+
+
+class ProfileEditResult(BaseModel):
+    success: bool
+    message: str
+    certifications: int = 0
+    publications: int = 0
+    projects_updated: int = 0
+    # Named so the caller can say which edit did not land rather than
+    # reporting a save that quietly dropped one.
+    unmatched_projects: list[str] = Field(default_factory=list)
 
 
 class GithubSyncRequest(BaseModel):

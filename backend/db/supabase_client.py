@@ -10,6 +10,7 @@ from backend.config import settings
 from backend.models.resume import ParsedResume
 from backend.models.profile import ProfileIntelligence
 from backend.models.job import JobFilter
+from backend.services.profile_sections import merge_reparsed_sections
 
 logger = logging.getLogger(__name__)
 
@@ -60,11 +61,27 @@ def upsert_parsed_resume(
         raise e
 
     # 2. Upsert Initial Profile Data
+    #
+    # A re-parse replaces what the resume states, but not what the profile has
+    # that no resume ever will. Certifications and publications are editable in
+    # the profile editor, so replacing those arrays wholesale is what used to
+    # delete a hand-added certification the moment an older resume was
+    # uploaded. The GitHub state is carried over for the same reason: it
+    # describes the linked account, not this file, and rebuilding its README
+    # cache costs a fetch and a completion per repo.
+    existing = get_profile_data(user_id) or {}
+    existing_resume = existing.get("original_resume") or {}
+
     initial_profile_data = {
-        "original_resume": parsed_resume.model_dump(),
+        "original_resume": merge_reparsed_sections(existing_resume, parsed_resume.model_dump()),
+        # Both are re-derived by the profile intelligence workflow that runs
+        # straight after this, so they are deliberately not carried over.
         "preferred_job_roles": [],
         "strengths": []
     }
+    for carried in ("github_summary", "github_sync"):
+        if existing.get(carried) is not None:
+            initial_profile_data[carried] = existing[carried]
 
     row = {
         "user_id": user_id,
@@ -86,6 +103,26 @@ def upsert_parsed_resume(
     except Exception:
         logger.exception("Failed to upsert profile for user_id=%s", user_id)
         raise
+
+
+def save_profile_data(user_id: str, profile_data: dict, bump_version: bool = True) -> bool:
+    """Persists profile_data, re-keying the job-match cache when it changed.
+
+    job_matches is cached against profile_version, so a changed profile has to
+    drop stale LLM verdicts with it. Bookkeeping writes that changed no profile
+    text pass bump_version=False rather than throwing that cache away.
+    """
+    row: dict = {"profile_data": profile_data}
+    if bump_version:
+        row["profile_version"] = _compute_profile_version(profile_data)
+
+    client = get_supabase_client()
+    try:
+        client.table("profiles").update(row).eq("user_id", user_id).execute()
+        return True
+    except Exception:
+        logger.exception("Failed to save profile_data for user_id=%s", user_id)
+        return False
 
 
 def get_profile_data(user_id: str) -> Optional[dict]:

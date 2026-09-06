@@ -3,7 +3,12 @@
 import { useState } from "react";
 
 import type { ParsedResume, ProfileIntelligence } from "@/lib/types/resume";
+import CredentialsEditor from "./CredentialsEditor";
 import styles from "./ProfileView.module.css";
+
+/** Shown wherever a project has nothing a tailored resume could quote. */
+const EMPTY_PROJECT_PROMPT =
+  "Add at least one line about this project so it can be used in tailored resumes.";
 
 interface ProfileViewProps {
   resume: ParsedResume;
@@ -24,6 +29,12 @@ export default function ProfileView({ resume, filename, intelligence, onReset, o
   const [selectedProjectIndex, setSelectedProjectIndex] = useState<number | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
+  // One bullet per line while editing: a textarea is the shape people already
+  // expect for a short list, and it avoids a row-per-bullet widget for text
+  // that is usually two or three lines.
+  const [bulletDraft, setBulletDraft] = useState<string | null>(null);
+  const [isSavingBullets, setIsSavingBullets] = useState(false);
+  const [bulletError, setBulletError] = useState<string | null>(null);
 
   async function handleSyncGithub() {
     setIsSyncing(true);
@@ -44,6 +55,62 @@ export default function ProfileView({ resume, filename, intelligence, onReset, o
       setSyncResult({ success: false, message: "Could not reach the server. Please try again." });
     } finally {
       setIsSyncing(false);
+    }
+  }
+
+  const selectedProject =
+    selectedProjectIndex !== null ? resume.projects[selectedProjectIndex] : null;
+
+  /** Opening or closing a project drops any draft, so the next one starts clean. */
+  function showProject(index: number | null) {
+    setSelectedProjectIndex(index);
+    setBulletDraft(null);
+    setBulletError(null);
+  }
+
+  async function handleSaveBullets() {
+    if (!selectedProject || bulletDraft === null) return;
+
+    const bullets = bulletDraft
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    if (bullets.length === 0) {
+      setBulletError(EMPTY_PROJECT_PROMPT);
+      return;
+    }
+
+    setIsSavingBullets(true);
+    setBulletError(null);
+
+    try {
+      const res = await fetch("/api/profile/edit", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          project_descriptions: [
+            {
+              name: selectedProject.name,
+              url: selectedProject.url,
+              description: bullets,
+            },
+          ],
+        }),
+      });
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.success) {
+        setBulletError(data?.message ?? "Could not save your changes.");
+        return;
+      }
+
+      setBulletDraft(null);
+      await onSynced?.();
+    } catch {
+      setBulletError("Could not reach the server. Please try again.");
+    } finally {
+      setIsSavingBullets(false);
     }
   }
 
@@ -281,7 +348,7 @@ export default function ProfileView({ resume, filename, intelligence, onReset, o
             )}
             <div className={styles.projectsGrid}>
               {projects.map((proj, i) => (
-                <div key={i} className={styles.projectCard} onClick={() => setSelectedProjectIndex(i)} style={{ cursor: "pointer" }}>
+                <div key={i} className={styles.projectCard} onClick={() => showProject(i)} style={{ cursor: "pointer" }}>
                   <div className={styles.projectHeader}>
                     <p className={styles.projectName}>{proj.name}</p>
                     {proj.url && (
@@ -294,16 +361,18 @@ export default function ProfileView({ resume, filename, intelligence, onReset, o
                       </a>
                     )}
                   </div>
-                  {/* Preview text if we want, otherwise leave just title for cleaner look */}
+                  {proj.description.length === 0 && (
+                    <p className={styles.projectPrompt}>{EMPTY_PROJECT_PROMPT}</p>
+                  )}
                 </div>
               ))}
             </div>
             
             {/* Project Modal Overlay */}
             {selectedProjectIndex !== null && projects[selectedProjectIndex] && (
-              <div className={styles.modalOverlay} onClick={() => setSelectedProjectIndex(null)}>
+              <div className={styles.modalOverlay} onClick={() => showProject(null)}>
                 <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                  <button className={styles.closeButton} onClick={() => setSelectedProjectIndex(null)} aria-label="Close modal">
+                  <button className={styles.closeButton} onClick={() => showProject(null)} aria-label="Close modal">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="18" y1="6" x2="6" y2="18"></line>
                       <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -324,12 +393,69 @@ export default function ProfileView({ resume, filename, intelligence, onReset, o
                     )}
                   </div>
 
-                  {projects[selectedProjectIndex].description && projects[selectedProjectIndex].description.length > 0 && (
-                    <ul className={styles.bullets} style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
-                      {projects[selectedProjectIndex].description.map((desc, j) => (
-                        <li key={j} className={styles.projectDesc} style={{ fontSize: '0.9375rem' }}>{desc}</li>
-                      ))}
-                    </ul>
+                  {bulletDraft === null ? (
+                    <div>
+                      {projects[selectedProjectIndex].description.length > 0 ? (
+                        <ul className={styles.bullets} style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
+                          {projects[selectedProjectIndex].description.map((desc, j) => (
+                            <li key={j} className={styles.projectDesc} style={{ fontSize: '0.9375rem' }}>{desc}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className={styles.projectPrompt} role="status">{EMPTY_PROJECT_PROMPT}</p>
+                      )}
+                      <button
+                        type="button"
+                        className={styles.resetBtn}
+                        onClick={() =>
+                          setBulletDraft(projects[selectedProjectIndex].description.join("\n"))
+                        }
+                      >
+                        {projects[selectedProjectIndex].description.length > 0
+                          ? "Edit description"
+                          : "Add description"}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className={styles.bulletEditor}>
+                      <label className={styles.bulletLabel} htmlFor="project-bullets">
+                        One bullet per line
+                      </label>
+                      <textarea
+                        id="project-bullets"
+                        className={styles.bulletTextarea}
+                        rows={5}
+                        value={bulletDraft}
+                        onChange={(e) => setBulletDraft(e.target.value)}
+                        placeholder={EMPTY_PROJECT_PROMPT}
+                      />
+                      {bulletError && (
+                        <p className={styles.syncError} role="alert" style={{ margin: 0 }}>
+                          {bulletError}
+                        </p>
+                      )}
+                      <div className={styles.bulletActions}>
+                        <button
+                          type="button"
+                          className={styles.saveBtn}
+                          onClick={handleSaveBullets}
+                          disabled={isSavingBullets}
+                        >
+                          {isSavingBullets ? "Saving…" : "Save description"}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.resetBtn}
+                          onClick={() => {
+                            setBulletDraft(null);
+                            setBulletError(null);
+                          }}
+                          disabled={isSavingBullets}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
                   )}
                   
                   {projects[selectedProjectIndex].technologies && projects[selectedProjectIndex].technologies.length > 0 && (
@@ -348,71 +474,12 @@ export default function ProfileView({ resume, filename, intelligence, onReset, o
           </section>
         )}
 
-        {/* Certifications */}
-        {certifications.length > 0 && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Certifications</h2>
-            <div className={styles.entryList}>
-              {certifications.map((cert, i) => (
-                <div key={i} className={styles.entry}>
-                  {(() => {
-                    let displayName = cert.name;
-                    let displayIssuer = cert.issuer;
-                    
-                    if (displayIssuer) {
-                      if (displayName.endsWith(` - ${displayIssuer}`)) displayName = displayName.slice(0, -(` - ${displayIssuer}`.length));
-                      else if (displayName.endsWith(` – ${displayIssuer}`)) displayName = displayName.slice(0, -(` – ${displayIssuer}`.length));
-                      else if (displayName.endsWith(` — ${displayIssuer}`)) displayName = displayName.slice(0, -(` — ${displayIssuer}`.length));
-                    } else {
-                      // Fallback: Try to extract issuer from the title if missing
-                      const match = displayName.match(/^(.*?)\s+[-–—]\s+(.+)$/);
-                      if (match) {
-                        displayName = match[1];
-                        displayIssuer = match[2];
-                      }
-                    }
-
-                    return (
-                      <>
-                        <p className={styles.entryTitle}>{displayName}</p>
-                        <p className={styles.entryOrg}>
-                          {[displayIssuer, cert.date].filter(Boolean).join(" · ")}
-                          {cert.credential_id ? ` · ID: ${cert.credential_id}` : ""}
-                        </p>
-                      </>
-                    );
-                  })()}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Publications */}
-        {publications.length > 0 && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Publications</h2>
-            <div className={styles.entryList}>
-              {publications.map((pub, i) => (
-                <div key={i} className={styles.entry}>
-                  <div className={styles.entryHeader}>
-                    <div>
-                      <p className={styles.entryTitle}>{pub.title}</p>
-                      {pub.publisher && <p className={styles.entryOrg}>{pub.publisher}</p>}
-                    </div>
-                    {pub.date && <span className={styles.entryDate}>{pub.date}</span>}
-                  </div>
-                  {pub.url && (
-                    <a href={pub.url} target="_blank" rel="noopener noreferrer" className={styles.externalLink} style={{ marginTop: 4 }}>
-                      View Publication
-                    </a>
-                  )}
-                  {pub.description && <p className={styles.entryDesc}>{pub.description}</p>}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* Certifications & Publications — editable, and kept across re-parses */}
+        <CredentialsEditor
+          certifications={certifications}
+          publications={publications}
+          onSaved={onSynced}
+        />
 
         {/* Custom Sections */}
         {custom_sections.map((section, idx) => (

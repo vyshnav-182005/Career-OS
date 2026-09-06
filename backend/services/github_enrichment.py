@@ -10,9 +10,8 @@ from datetime import datetime, timezone
 from backend.config import settings
 from backend.services.llm_client import NO_THINKING, build_async_client
 from backend.db.supabase_client import (
-    _compute_profile_version,
     get_profile_data,
-    get_supabase_client,
+    save_profile_data,
 )
 from backend.services.workflow_orchestrator import trigger_profile_intelligence_workflow
 from backend.models.resume import Project, normalize_bullets
@@ -929,20 +928,8 @@ def _sync_message(counts: dict[str, int], repo_count: int) -> str:
 
 
 def _save_profile_data(user_id: str, profile_data: dict, bump_version: bool = True) -> bool:
-    """Persists profile_data, re-keying the job-match cache when it changed."""
-    row: dict = {"profile_data": profile_data}
-    if bump_version:
-        # job_matches is cached against this hash. A changed project list is a
-        # changed profile, so stale LLM verdicts have to fall out with it.
-        row["profile_version"] = _compute_profile_version(profile_data)
-
-    client = get_supabase_client()
-    try:
-        client.table("profiles").update(row).eq("user_id", user_id).execute()
-        return True
-    except Exception:
-        logger.exception("Failed to save profile_data for user_id=%s", user_id)
-        return False
+    """Persists profile_data. Kept as a seam the sync tests patch."""
+    return save_profile_data(user_id, profile_data, bump_version=bump_version)
 
 
 async def enrich_profile_with_github_projects(user_id: str, github_url: str):

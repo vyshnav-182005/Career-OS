@@ -538,3 +538,72 @@
 .syncError {
   color: var(--color-error);
 }
+
+/* A project with no bullets cannot be quoted in a tailored resume, so it says
+   so where it is seen rather than failing quietly at optimization time. */
+.projectPrompt {
+  font-size: 0.8125rem;
+  color: var(--color-text-tertiary);
+  line-height: 1.5;
+  margin: 0.5rem 0 0;
+}
+
+.bulletEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.bulletLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-tertiary);
+}
+
+.bulletTextarea {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  padding: 0.6rem 0.75rem;
+  resize: vertical;
+}
+
+.bulletTextarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.bulletActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.saveBtn {
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.saveBtn:disabled,
+.resetBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

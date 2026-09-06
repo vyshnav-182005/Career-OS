@@ -41,6 +41,12 @@ export interface Project {
   url: string | null;
   start_date: string | null;
   end_date: string | null;
+  /**
+   * Who wrote `description`: the user, or a generator (the GitHub README pass
+   * or the resume optimizer). Absent on projects stored before this existed,
+   * which is treated as the user's so nothing auto-overwrites it.
+   */
+  description_source?: "user" | "ai_generated" | null;
 }
 
 export interface Certification {
