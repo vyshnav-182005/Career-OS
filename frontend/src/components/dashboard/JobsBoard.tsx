@@ -17,6 +17,14 @@ const TOP_MATCHES_LIMIT = 10;
 const SEARCH_LIMIT = 20;
 /** Debounce before a keystroke becomes a request. */
 const SEARCH_DEBOUNCE_MS = 400;
+/**
+ * How long to wait before re-checking after the backend reports it is sourcing.
+ * Ingestion runs as a background task once the response has been sent, so the
+ * jobs a first-time user in a new field is waiting for land shortly after their
+ * empty page does. One automatic retry turns that into "the list fills itself
+ * in" instead of "reload and hope".
+ */
+const SOURCING_RETRY_MS = 12_000;
 
 type Mode = "recommended" | "search";
 
@@ -165,7 +173,13 @@ export default function JobsBoard({ hasProfile, cacheScope }: JobsBoardProps) {
         const data = await res.json();
         const raw: unknown[] = data.data || [];
         const nextJobs = raw.map(normalizeRecommendedJob).slice(0, trimmed ? SEARCH_LIMIT : TOP_MATCHES_LIMIT);
-        const nextSourcing = Boolean(trimmed && raw.length === 0);
+        // For a search, an empty result means nothing is stored for that term
+        // yet and the backend has queued a fetch for it. For the recommended
+        // list the backend says so itself via `sourcing`, since only it knows
+        // whether it just kicked ingestion off for this profile's roles.
+        const nextSourcing = trimmed
+          ? raw.length === 0
+          : Boolean(data.sourcing) && raw.length === 0;
 
         setJobs(nextJobs);
         setMode(nextMode);
@@ -202,6 +216,27 @@ export default function JobsBoard({ hasProfile, cacheScope }: JobsBoardProps) {
     const timer = setTimeout(() => load(query), query ? SEARCH_DEBOUNCE_MS : 0);
     return () => clearTimeout(timer);
   }, [query, hasProfile, load]);
+
+  // While the backend reports it is sourcing, check back once after the
+  // ingestion it queued has had time to land. Deliberately a single retry per
+  // sourcing result rather than a poll: `sourcing` only stays true if the
+  // retry also came back empty, and re-running this effect then would spin.
+  // `retried` guards against exactly that, so a field with genuinely no
+  // postings settles on the empty state instead of polling forever.
+  const retried = useRef(false);
+
+  // A new search term deserves its own retry budget. Declared before the
+  // effect that reads the ref so the reset is not dependent on effect order.
+  useEffect(() => {
+    retried.current = false;
+  }, [query]);
+
+  useEffect(() => {
+    if (!sourcing || loading || retried.current) return;
+    retried.current = true;
+    const timer = setTimeout(() => load(query), SOURCING_RETRY_MS);
+    return () => clearTimeout(timer);
+  }, [sourcing, loading, load, query]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -283,10 +318,18 @@ export default function JobsBoard({ hasProfile, cacheScope }: JobsBoardProps) {
       ) : jobs.length === 0 ? (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>🔎</div>
-          <h3>{sourcing ? "Sourcing that role now" : "Nothing here yet"}</h3>
+          <h3>
+            {sourcing
+              ? mode === "search"
+                ? "Sourcing that role now"
+                : "Sourcing roles for your field"
+              : "Nothing here yet"}
+          </h3>
           <p>
             {sourcing
-              ? `No stored postings for “${activeQuery}” yet — we've started pulling them from our sources. Try this search again in a moment.`
+              ? mode === "search"
+                ? `No stored postings for “${activeQuery}” yet — we've started pulling them from our sources. Try this search again in a moment.`
+                : "We're pulling in postings that match your background right now. This page will update on its own in a few seconds."
               : "We haven't found jobs in your target roles yet. We're actively pulling in new postings — check back soon."}
           </p>
         </div>

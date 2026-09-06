@@ -2,9 +2,8 @@ import asyncio
 import json
 import logging
 import re
-from openai import OpenAI
-
 from backend.config import settings
+from backend.services.llm_client import NO_THINKING, build_client
 from backend.db.supabase_client import get_profile_data, update_profile_intelligence
 from backend.models.profile import (
     ProfileIntelligence,
@@ -56,11 +55,14 @@ Rules:
    [FAMILY_LIST]
    Choose every family the résumé provides clear evidence for (usually 1-3).
 5. search_intent.excluded_families: Pick from the SAME fixed list. This is a deliberate NEGATIVE
-   signal — list every family the résumé shows NO evidence of, especially ones that could
-   otherwise look superficially plausible (e.g. a backend engineer with some AWS mentions but no
-   on-call/infra ownership should exclude "devops-sre"). This field is what later filtering relies
-   on to keep unrelated roles out, so do not leave it empty unless the résumé genuinely spans
-   almost every family.
+   signal for families that are a NEAR MISS — close enough to the candidate's background that
+   they would otherwise be recommended, but genuinely unsupported by the résumé (e.g. a backend
+   engineer with some AWS mentions but no on-call/infra ownership should exclude "devops-sre").
+   List AT MOST 3, and only near misses. Do NOT list families that are simply unrelated to the
+   candidate's field — an electronics engineer should not bother excluding "frontend", and a
+   security engineer should not exclude "civil-structural"; those are already filtered out by
+   role_families and listing them here only risks hiding good matches. Leave this empty when no
+   family is a genuine near miss.
 6. search_intent.seniority: Derive from total years of professional experience visible in the
    résumé's experience dates (not internships alone) — roughly 0 years = intern, <2 = junior,
    2-5 = mid, 5-8 = senior, 8+ = lead.
@@ -140,12 +142,7 @@ async def run_profile_intelligence(user_id: str):
     resume_json = json.dumps(resume_dict, indent=2)
 
     # Run LLM
-    client = OpenAI(
-        base_url="https://integrate.api.nvidia.com/v1",
-        api_key=settings.nvidia_api_key,
-        timeout=120.0,
-        max_retries=1,
-    )
+    client = build_client(timeout=120.0)
 
     prompt = PROFILE_INTELLIGENCE_PROMPT.replace(
         "{resume_json}", resume_json
@@ -166,6 +163,7 @@ async def run_profile_intelligence(user_id: str):
             temperature=0.2,
             max_tokens=4096,
             response_format={"type": "json_object"},
+            extra_body=NO_THINKING,
         )
         return completion.choices[0].message.content or ""
 

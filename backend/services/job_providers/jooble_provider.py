@@ -5,6 +5,7 @@ import logging
 
 from backend.services.job_providers.base import BaseJobProvider
 from backend.models.job import NormalizedJob
+from backend.services import taxonomy
 from backend.config import settings
 
 logger = logging.getLogger(__name__)
@@ -57,7 +58,13 @@ class JoobleProvider(BaseJobProvider):
                         company=job.get("company", "Unknown Company"),
                         location=job.get("location", "Remote"),
                         description=job.get("snippet", ""),
-                        skills=[],
+                        # Jooble returns no skills field of its own, and leaving
+                        # this empty zeroes the skill_overlap feature for every
+                        # job it supplies - which is most of the non-software
+                        # inventory. The ATS providers already mine their
+                        # description the same way; the snippet is shorter, so
+                        # this yields less, but not nothing.
+                        skills=taxonomy.extract_skills(job.get("snippet", "")),
                         employment_type="full_time", # Jooble doesn't typically provide this in simple search
                         salary=str(job.get("salary", "")),
                         posted_date=posted_date or datetime.now(timezone.utc),

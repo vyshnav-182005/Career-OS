@@ -1,0 +1,81 @@
+{
+  "personal_info": {
+    "name": "Rohan Mehta",
+    "email": "rohan.mehta.sec@example.com",
+    "phone": "+91-98450-55512",
+    "location": "Bengaluru, India",
+    "linkedin": "linkedin.com/in/rohanmehtasec",
+    "github": "github.com/rohanmehta-sec",
+    "website": null,
+    "summary": "Offensive security engineer focused on web and network penetration testing, red teaming, and vulnerability research. Comfortable across Burp Suite, Metasploit and custom tooling."
+  },
+  "education": [
+    {
+      "institution": "PES University",
+      "degree": "B.Tech",
+      "field_of_study": "Computer Science and Engineering (Cyber Security)",
+      "start_date": "2021-08",
+      "end_date": "2025-05",
+      "gpa": "8.6/10",
+      "description": null
+    }
+  ],
+  "experience": [
+    {
+      "company": "SafeHarbor Labs",
+      "title": "Security Research Intern",
+      "location": "Bengaluru, India",
+      "start_date": "2024-06",
+      "end_date": "2024-12",
+      "is_current": false,
+      "responsibilities": [
+        "Performed black-box penetration testing of client web applications using Burp Suite, reporting findings against the OWASP Top 10",
+        "Built proof-of-concept exploits for authentication bypass and IDOR issues in staging environments",
+        "Triaged SIEM alerts in Splunk and wrote detection rules mapped to MITRE ATT&CK techniques",
+        "Automated recurring vulnerability assessment scans with Nmap and Nessus, cutting manual triage time in half"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "CTF Exploit Toolkit",
+      "description": [
+        "Wrote a Python toolkit for binary exploitation challenges, automating ROP-chain construction",
+        "Reverse-engineered stripped binaries with Ghidra to recover control flow and identify overflow primitives"
+      ],
+      "technologies": ["Python", "Ghidra", "x86 Assembly", "Kali Linux"],
+      "url": "github.com/rohanmehta-sec/ctf-toolkit",
+      "start_date": "2023-06",
+      "end_date": "2024-02"
+    },
+    {
+      "name": "Home Lab Red Team Range",
+      "description": [
+        "Built an intentionally vulnerable Active Directory lab for red teaming practice",
+        "Documented lateral-movement and privilege-escalation paths end to end"
+      ],
+      "technologies": ["Metasploit", "Wireshark", "Bash", "Linux"],
+      "url": null,
+      "start_date": "2024-01",
+      "end_date": "2024-05"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "CompTIA Security+",
+      "issuer": "CompTIA",
+      "date": "2024-03",
+      "url": null
+    }
+  ],
+  "skills": [
+    {"category": "Offensive Security", "skills": ["Penetration Testing", "Red Teaming", "Vulnerability Assessment", "Reverse Engineering"]},
+    {"category": "Tooling", "skills": ["Burp Suite", "Metasploit", "Wireshark", "Nmap", "Ghidra", "Kali Linux"]},
+    {"category": "Detection", "skills": ["Splunk", "SIEM", "MITRE ATT&CK", "YARA"]},
+    {"category": "Languages", "skills": ["Python", "Bash", "C"]}
+  ],
+  "languages": ["English", "Hindi"],
+  "publications": [],
+  "custom_sections": [],
+  "raw_text": "Rohan Mehta - Offensive security engineer specializing in penetration testing, red teaming and vulnerability research."
+}

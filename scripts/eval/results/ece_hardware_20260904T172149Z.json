@@ -1,0 +1,306 @@
+{
+  "fixture": "ece_hardware",
+  "mode": "v2",
+  "jobs": [
+    {
+      "id": "6535150b-689b-403a-bc4a-de1d0ee45729",
+      "title": "Software Engineering Internship, Embedded Systems",
+      "company": "Apex Technology, Inc.",
+      "similarity": 0.656602742087352,
+      "role_family": "embedded",
+      "score": 0.5602094373063593,
+      "features": {
+        "semantic": 0.828301371043676,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9777777777777777
+      }
+    },
+    {
+      "id": "1ca74e1b-f9ff-4582-ac7d-d16629e72023",
+      "title": "RF Test Engineering Co-Op (January '27 - June '27)",
+      "company": "Skyworks",
+      "similarity": 0.630129299752159,
+      "role_family": "hardware-electronics",
+      "score": 0.5538036377282096,
+      "features": {
+        "semantic": 0.8150646498760795,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9555555555555556
+      }
+    },
+    {
+      "id": "17899373-05b4-416b-8463-145c738f8658",
+      "title": "RF Systems Engineer",
+      "company": "1 point system",
+      "similarity": 0.605530821947407,
+      "role_family": "hardware-electronics",
+      "score": 0.5488839421672592,
+      "features": {
+        "semantic": 0.8027654109737035,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9555555555555556
+      }
+    },
+    {
+      "id": "2907e47e-a5da-4eed-89d6-7b217bef2932",
+      "title": "Embedded Engineering Intern (Summer 2027)",
+      "company": "Zipline",
+      "similarity": 0.707884388692119,
+      "role_family": "embedded",
+      "score": 0.548799099960646,
+      "features": {
+        "semantic": 0.8539421943460594,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.8444444444444444
+      }
+    },
+    {
+      "id": "31731d78-3444-4d4b-a2da-b3472324f634",
+      "title": "Hardware Systems Engineering Co-Op (Winter/Spring 2027)",
+      "company": "Skyworks",
+      "similarity": 0.60469439001713,
+      "role_family": null,
+      "score": 0.5476055446700927,
+      "features": {
+        "semantic": 0.802347195008565,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9333333333333333
+      }
+    },
+    {
+      "id": "a3a76285-f5f7-4365-9143-730feb0b9a7e",
+      "title": "RF Validation Engineer Co-op (Summer/Fall 2027)",
+      "company": "Skyworks",
+      "similarity": 0.62029858706602,
+      "role_family": "hardware-electronics",
+      "score": 0.544059717413204,
+      "features": {
+        "semantic": 0.81014929353301,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8
+      }
+    },
+    {
+      "id": "c54d3aea-9e1d-4435-80f5-66af7907b5f2",
+      "title": "R&D Hardware Engineer Intern",
+      "company": "Boston Scientific",
+      "similarity": 0.633167743682866,
+      "role_family": "hardware-electronics",
+      "score": 0.539411326514351,
+      "features": {
+        "semantic": 0.816583871841433,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9555555555555556
+      }
+    },
+    {
+      "id": "287df738-fa4a-417d-bcef-02a06335cedf",
+      "title": "RF Engineer",
+      "company": "Acara Solutions",
+      "similarity": 0.550711566124968,
+      "role_family": "hardware-electronics",
+      "score": 0.5390312021138826,
+      "features": {
+        "semantic": 0.775355783062484,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9777777777777777
+      }
+    },
+    {
+      "id": "43a337d3-260d-4b53-b5b5-bf348829652d",
+      "title": "Machine Learning Engineer",
+      "company": "Keysight Technologies",
+      "similarity": 0.560439732048528,
+      "role_family": "ml-engineering",
+      "score": 0.5387546130763724,
+      "features": {
+        "semantic": 0.7802198660242641,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9333333333333333
+      }
+    },
+    {
+      "id": "7a6061fd-cdfc-4b76-a5d2-58457a78160e",
+      "title": "RF Test Engineering Co-Op (Winter/Spring 2027)",
+      "company": "Skyworks",
+      "similarity": 0.624191805816674,
+      "role_family": "hardware-electronics",
+      "score": 0.5381716944966681,
+      "features": {
+        "semantic": 0.812095902908337,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6666666666666667
+      }
+    },
+    {
+      "id": "847cfb7b-554b-45a8-bf49-fcd8ebe36b23",
+      "title": "RF Module Engineer - Winter/Spring Co-Op (Jan-June '27)",
+      "company": "Skyworks",
+      "similarity": 0.573287223177396,
+      "role_family": "hardware-electronics",
+      "score": 0.532435222413257,
+      "features": {
+        "semantic": 0.786643611588698,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7555555555555555
+      }
+    },
+    {
+      "id": "52b6b46d-2059-44f7-af16-17551fc7d8fd",
+      "title": "RF Electronics Technician",
+      "company": "Unknown Company",
+      "similarity": 0.600199329829296,
+      "role_family": "hardware-electronics",
+      "score": 0.5322620881880814,
+      "features": {
+        "semantic": 0.800099664914648,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6444444444444444
+      }
+    },
+    {
+      "id": "33a4c077-e09c-4094-8eac-fd629b1f298d",
+      "title": "Embedded Firmware Engineer, Battery Management System",
+      "company": "Tesla",
+      "similarity": 0.543361663818363,
+      "role_family": "embedded",
+      "score": 0.5308945549858949,
+      "features": {
+        "semantic": 0.7716808319091815,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8444444444444444
+      }
+    },
+    {
+      "id": "268337d4-55b0-4a92-bf00-1d89488b3f79",
+      "title": "Edison Engineering Development Program (EEDP) Engines - Electrical Engineering - US - 2027 Start",
+      "company": "GE Renewable Energy Power and Aviation",
+      "similarity": 0.532421334611736,
+      "role_family": "hardware-electronics",
+      "score": 0.5275953780334584,
+      "features": {
+        "semantic": 0.766210667305868,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8222222222222222
+      }
+    },
+    {
+      "id": "113affbd-20fc-4e29-8924-3ebe566d73a1",
+      "title": "Engineering Intern",
+      "company": "CardioQuip",
+      "similarity": 0.578876545563156,
+      "role_family": null,
+      "score": 0.527441975779298,
+      "features": {
+        "semantic": 0.7894382727815781,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9333333333333333
+      }
+    },
+    {
+      "id": "388b1c77-1b5e-4b20-bb29-be31dd91f611",
+      "title": "Senior Embedded Software Engineer (Systems & Architecture)",
+      "company": "Lincoln Electric",
+      "similarity": 0.561067037455197,
+      "role_family": "embedded",
+      "score": 0.5261022963799283,
+      "features": {
+        "semantic": 0.7805335187275986,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9777777777777777
+      }
+    },
+    {
+      "id": "b3301404-1b88-4c8d-b4fb-8677d9955c5f",
+      "title": "RF Test Development Engineer-Remote Aerospace & Defense",
+      "company": "Celestica International LP",
+      "similarity": 0.53048841564392,
+      "role_family": "hardware-electronics",
+      "score": 0.524986572017673,
+      "features": {
+        "semantic": 0.76524420782196,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7777777777777778
+      }
+    },
+    {
+      "id": "4c2575c0-2610-49af-9349-c8c23cb00557",
+      "title": "R&D Software Engineer Intern",
+      "company": "Boston Scientific",
+      "similarity": 0.54119834549418,
+      "role_family": "software-general",
+      "score": 0.522128557987725,
+      "features": {
+        "semantic": 0.77059917274709,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9777777777777777
+      }
+    },
+    {
+      "id": "79752512-dfa7-4b20-bb30-1265bc009234",
+      "title": "Group 06-66 | SRP Intern | Laser Communications | Summer 2027",
+      "company": "MIT Lincoln Laboratory",
+      "similarity": 0.549414655670884,
+      "role_family": null,
+      "score": 0.5215495978008435,
+      "features": {
+        "semantic": 0.7747073278354419,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9333333333333333
+      }
+    },
+    {
+      "id": "23e4efce-3615-4003-b5de-17c3aec63596",
+      "title": "Spring 2027 - IEF - Electronic Systems Engineering (Avionics) Collegiate Intern",
+      "company": "Gulfstream Aerospace Corporation",
+      "similarity": 0.53677930047451,
+      "role_family": "aerospace",
+      "score": 0.5190225267615687,
+      "features": {
+        "semantic": 0.7683896502372549,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9333333333333333
+      }
+    }
+  ]
+}

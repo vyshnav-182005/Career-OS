@@ -10,10 +10,42 @@ interface ProfileViewProps {
   filename: string;
   intelligence: ProfileIntelligence | null;
   onReset: () => void;
+  /** Re-reads the profile after a sync changed the stored projects. */
+  onSynced?: () => void | Promise<void>;
 }
 
-export default function ProfileView({ resume, filename, intelligence, onReset }: ProfileViewProps) {
+interface SyncResult {
+  success: boolean;
+  message: string;
+  changed?: boolean;
+}
+
+export default function ProfileView({ resume, filename, intelligence, onReset, onSynced }: ProfileViewProps) {
   const [selectedProjectIndex, setSelectedProjectIndex] = useState<number | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
+
+  async function handleSyncGithub() {
+    setIsSyncing(true);
+    setSyncResult(null);
+
+    try {
+      const res = await fetch("/api/profile/github-sync", { method: "POST" });
+      const data = (await res.json().catch(() => null)) as SyncResult | null;
+
+      setSyncResult(
+        data ?? { success: false, message: "Sync failed. Please try again." },
+      );
+
+      // Only re-read when the stored projects actually moved; an up-to-date
+      // sync would otherwise flash the whole profile for no reason.
+      if (data?.success && data.changed) await onSynced?.();
+    } catch {
+      setSyncResult({ success: false, message: "Could not reach the server. Please try again." });
+    } finally {
+      setIsSyncing(false);
+    }
+  }
 
   const {
     personal_info,
@@ -224,9 +256,29 @@ export default function ProfileView({ resume, filename, intelligence, onReset }:
         )}
 
         {/* Projects */}
-        {projects.length > 0 && (
+        {(projects.length > 0 || personal_info?.github) && (
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Projects</h2>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>Projects</h2>
+              {personal_info?.github && (
+                <button
+                  type="button"
+                  className={styles.resetBtn}
+                  onClick={handleSyncGithub}
+                  disabled={isSyncing}
+                >
+                  {isSyncing ? "Syncing…" : "Sync with GitHub"}
+                </button>
+              )}
+            </div>
+            {syncResult && (
+              <p
+                className={syncResult.success ? styles.syncNote : styles.syncError}
+                role="status"
+              >
+                {syncResult.message}
+              </p>
+            )}
             <div className={styles.projectsGrid}>
               {projects.map((proj, i) => (
                 <div key={i} className={styles.projectCard} onClick={() => setSelectedProjectIndex(i)} style={{ cursor: "pointer" }}>

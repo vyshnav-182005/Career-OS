@@ -59,3 +59,24 @@ class JobFitAnalysis(BaseModel):
 
 class JobFeedbackRequest(BaseModel):
     vote: Literal["up", "down"]
+
+
+class GithubSyncRequest(BaseModel):
+    user_id: str
+
+
+class GithubSyncResult(BaseModel):
+    """What one manual "Sync now" run changed, for the button to report back."""
+
+    success: bool
+    message: str
+    # None when the sync could not run at all (no linked account, GitHub
+    # unreachable), which the UI must not present as "0 repos found".
+    repo_count: Optional[int] = None
+    added: int = 0
+    removed: int = 0
+    unlinked: int = 0
+    renamed: int = 0
+    total_projects: int = 0
+    changed: bool = False
+    synced_at: Optional[str] = None

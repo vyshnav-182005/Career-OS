@@ -1,9 +1,16 @@
 # Job-matching evaluation harness
 
-Offline, deterministic scoring of the job recommendation retrieval path against 6
+Offline, deterministic scoring of the job recommendation retrieval path against 9
 synthetic fixture résumés spanning distinct role families (`fixtures/*.json`, expected
 families in `fixtures/expected.json`). Read-only against Supabase; no LLM calls in
 scoring.
+
+Three of the fixtures — `cybersecurity_offensive`, `ece_hardware` and
+`mechanical_design` — are non-software on purpose. The taxonomy was originally
+software-only, so résumés from those branches of engineering classified as nothing,
+were dropped by the `role_family` gate, and returned almost no matches. Keep a
+fixture per engineering branch here so that regression is caught by `empty_rate`
+rather than by a user with an empty Jobs page.
 
 ## Running
 

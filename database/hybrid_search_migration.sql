@@ -98,7 +98,16 @@ BEGIN
     1 - (j.embedding <=> query_embedding) AS similarity
   FROM jobs j
   WHERE j.status = 'ACTIVE'
-    AND (cardinality(target_families) = 0 OR j.role_family = ANY(target_families))
+    -- role_family IS NULL must pass this gate. In SQL, NULL = ANY(...) is NULL
+    -- rather than false, so without the explicit test every job we could not
+    -- classify is silently invisible to any candidate with a search intent -
+    -- which was 69% of the table, including most security and hardware roles.
+    -- Unclassified jobs are NOT waved through unscored: _family_fit() in
+    -- services/job_matching.py gives them 0.4 (against 1.0 for an exact family
+    -- match), so they rank below classified work and still face MIN_SCORE and
+    -- the LLM verdict. Note the excluded_families line below already spelled
+    -- this out; this is the same rule applied to the positive gate.
+    AND (cardinality(target_families) = 0 OR j.role_family IS NULL OR j.role_family = ANY(target_families))
     AND (cardinality(excluded_families) = 0 OR j.role_family IS NULL OR j.role_family <> ALL(excluded_families))
     AND (min_posted_date IS NULL OR j.posted_date >= min_posted_date)
     AND (
@@ -168,7 +177,15 @@ BEGIN
   FROM jobs j
   WHERE j.status = 'ACTIVE'
     AND j.search_vector @@ websearch_to_tsquery('english', search_query)
-    AND (cardinality(target_families) = 0 OR j.role_family = ANY(target_families))
+    -- role_family IS NULL must pass this gate. In SQL, NULL = ANY(...) is NULL
+    -- rather than false, so without the explicit test every job we could not
+    -- classify is silently invisible to any candidate with a search intent -
+    -- which was 69% of the table, including most security and hardware roles.
+    -- Unclassified jobs are NOT waved through unscored: _family_fit() in
+    -- services/job_matching.py gives them 0.4 (against 1.0 for an exact family
+    -- match), so they rank below classified work and still face MIN_SCORE and
+    -- the LLM verdict. match_jobs_v2 gates the same way.
+    AND (cardinality(target_families) = 0 OR j.role_family IS NULL OR j.role_family = ANY(target_families))
   ORDER BY rank DESC
   LIMIT match_count;
 END;

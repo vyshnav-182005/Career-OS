@@ -1,0 +1,306 @@
+{
+  "fixture": "java_backend",
+  "mode": "v2",
+  "jobs": [
+    {
+      "id": "858be027-1e85-4e93-b6d6-cc9b4e47a8b7",
+      "title": "App Dev - Java",
+      "company": "Ampcus",
+      "similarity": 0.66599349176845,
+      "role_family": null,
+      "score": 0.5620875872425789,
+      "features": {
+        "semantic": 0.832996745884225,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9777777777777777
+      }
+    },
+    {
+      "id": "9854317d-d546-4f61-a31e-b11ec4f432aa",
+      "title": "Senior Fullstack Software Engineer (Backend-focused)",
+      "company": "FusionHit",
+      "similarity": 0.731373987536848,
+      "role_family": "backend",
+      "score": 0.5534970197295919,
+      "features": {
+        "semantic": 0.865686993768424,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.8444444444444444
+      }
+    },
+    {
+      "id": "666afde0-742a-4c64-8c5f-82520036574c",
+      "title": "Senior Fullstack Software Engineer (Backend-focused)",
+      "company": "FusionHit",
+      "similarity": 0.731373987536848,
+      "role_family": "backend",
+      "score": 0.5534970197295919,
+      "features": {
+        "semantic": 0.865686993768424,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.8444444444444444
+      }
+    },
+    {
+      "id": "71724de8-0a5d-44f2-9a21-fcce768a65dc",
+      "title": "Java Developer II - AutoOps Services - Platform Applications",
+      "company": "Elastic",
+      "similarity": 0.64435076713562,
+      "role_family": "backend",
+      "score": 0.5322034867604574,
+      "features": {
+        "semantic": 0.8221753835678101,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.4666666666666667
+      }
+    },
+    {
+      "id": "18d5716b-4a7b-42ba-b8db-4c4d95aa2905",
+      "title": "Senior Software Engineer, Backend",
+      "company": "Archer",
+      "similarity": 0.607677817344666,
+      "role_family": "backend",
+      "score": 0.5320911190244888,
+      "features": {
+        "semantic": 0.803838908672333,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9111111111111111
+      }
+    },
+    {
+      "id": "4dc6aa64-27c6-49e8-aa29-17f99367a6ee",
+      "title": "Software Engineer, Backend (Product)",
+      "company": "Clay Labs",
+      "similarity": 0.582320094108582,
+      "role_family": "backend",
+      "score": 0.5264640188217165,
+      "features": {
+        "semantic": 0.791160047054291,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6
+      }
+    },
+    {
+      "id": "019d2d91-67bf-4ed0-93d8-fb2c998346ad",
+      "title": "Software Engineer, Backend (Product)",
+      "company": "Clay Labs",
+      "similarity": 0.582320094108582,
+      "role_family": "backend",
+      "score": 0.5264640188217165,
+      "features": {
+        "semantic": 0.791160047054291,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6
+      }
+    },
+    {
+      "id": "81b54bce-1013-44d4-90a8-870a08d8ecd6",
+      "title": "Software Engineer, Backend",
+      "company": "Strike",
+      "similarity": 0.59865303631583,
+      "role_family": "backend",
+      "score": 0.5208417183742772,
+      "features": {
+        "semantic": 0.799326518157915,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.4222222222222223
+      }
+    },
+    {
+      "id": "b4d73214-c992-4581-9bb8-4baa43c20dd3",
+      "title": "Senior Software Engineer, Backend (Lake Analytics Platform)",
+      "company": "Affirm",
+      "similarity": 0.613283478421959,
+      "role_family": "backend",
+      "score": 0.5176566956843918,
+      "features": {
+        "semantic": 0.8066417392109795,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.6
+      }
+    },
+    {
+      "id": "8aafb611-c853-4c1f-88fd-00417db6ddad",
+      "title": "Infrastructure Software Engineer, Metadata Core",
+      "company": "Dropbox",
+      "similarity": 0.599609136581421,
+      "role_family": "software-general",
+      "score": 0.5165884939829509,
+      "features": {
+        "semantic": 0.7998045682907104,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.33333333333333337
+      }
+    },
+    {
+      "id": "f53a076f-6391-4b9d-8216-15677e3d4872",
+      "title": "App Dev - Java - Lead",
+      "company": "Ampcus",
+      "similarity": 0.585601831340682,
+      "role_family": null,
+      "score": 0.5154536996014698,
+      "features": {
+        "semantic": 0.792800915670341,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.6666666666666667
+      }
+    },
+    {
+      "id": "01e37c33-6327-4c0c-b101-f8d8248f1111",
+      "title": "Senior Software Engineer (Backend)",
+      "company": "Aditude",
+      "similarity": 0.612853132912331,
+      "role_family": "backend",
+      "score": 0.5097928488046884,
+      "features": {
+        "semantic": 0.8064265664561655,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.4444444444444444
+      }
+    },
+    {
+      "id": "d285122d-92cd-488d-8422-a387d9ea9140",
+      "title": "Senior Software Engineer, Backend",
+      "company": "Mozilla",
+      "similarity": 0.635143280029297,
+      "role_family": "backend",
+      "score": 0.508695322672526,
+      "features": {
+        "semantic": 0.8175716400146484,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.33333333333333337
+      }
+    },
+    {
+      "id": "d75edaf8-a24d-413b-9f7f-e53d8a9fc43a",
+      "title": "Software Engineer 3",
+      "company": "MongoDB",
+      "similarity": 0.622201502323151,
+      "role_family": "software-general",
+      "score": 0.5044403004646303,
+      "features": {
+        "semantic": 0.8111007511615755,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "fa9942e8-05b0-42d3-bae1-a16f47552296",
+      "title": "Senior Software Engineer, Application Migration",
+      "company": "MongoDB",
+      "similarity": 0.691100737187289,
+      "role_family": "software-general",
+      "score": 0.5032201474374578,
+      "features": {
+        "semantic": 0.8455503685936445,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "383d881c-f0f0-4a82-b0bc-7732390da96c",
+      "title": "Software Engineer - Backend",
+      "company": "Databricks",
+      "similarity": 0.614422715569897,
+      "role_family": "backend",
+      "score": 0.5028845431139795,
+      "features": {
+        "semantic": 0.8072113577849485,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "22092e93-cfe5-41dc-a7c9-3b93d793e3f4",
+      "title": "Senior Software Engineer",
+      "company": "Datadog",
+      "similarity": 0.688824018502951,
+      "role_family": "software-general",
+      "score": 0.5027648037005903,
+      "features": {
+        "semantic": 0.8444120092514755,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "b35406bb-5a0f-4484-83a2-c3b47afbdd91",
+      "title": "Senior Infrastructure Engineer (Software-Focused)",
+      "company": "Asana",
+      "similarity": 0.676134507425697,
+      "role_family": "devops-sre",
+      "score": 0.5002269014851395,
+      "features": {
+        "semantic": 0.8380672537128485,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "62b55547-5126-4a40-ac83-0f5934b63f10",
+      "title": "Software Engineer, Backend (All Teams)",
+      "company": "DoorDash",
+      "similarity": 0.599887925383089,
+      "role_family": "backend",
+      "score": 0.4999775850766178,
+      "features": {
+        "semantic": 0.7999439626915446,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "f7091018-3f35-42ee-b2c4-f14f5b9dbcae",
+      "title": "Software Development Engineer III -Backend",
+      "company": "Meesho",
+      "similarity": 0.598624348640442,
+      "role_family": "backend",
+      "score": 0.4997248697280884,
+      "features": {
+        "semantic": 0.799312174320221,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    }
+  ]
+}

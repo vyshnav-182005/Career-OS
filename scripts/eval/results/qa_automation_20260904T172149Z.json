@@ -1,0 +1,306 @@
+{
+  "fixture": "qa_automation",
+  "mode": "v2",
+  "jobs": [
+    {
+      "id": "2101a74e-c4eb-4e36-af73-44ef88e8f7e4",
+      "title": "QA/DevOps Engineer",
+      "company": "Discord",
+      "similarity": 0.636632396472301,
+      "role_family": "devops-sre",
+      "score": 0.5339931459611269,
+      "features": {
+        "semantic": 0.8183161982361504,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.5333333333333333
+      }
+    },
+    {
+      "id": "779b6454-1b12-4e4e-b896-fc75e70363cd",
+      "title": "DevOps Engineer (USA)",
+      "company": "Trexquant Investment",
+      "similarity": 0.555958509445194,
+      "role_family": "devops-sre",
+      "score": 0.5289694796668166,
+      "features": {
+        "semantic": 0.777979254722597,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7555555555555555
+      }
+    },
+    {
+      "id": "dcb1ca2e-efcd-42f5-b037-724f1c1c17b6",
+      "title": "Senior Operations Specialist, Engineering Testing",
+      "company": "DoorDash",
+      "similarity": 0.564369440078739,
+      "role_family": null,
+      "score": 0.5256516657935255,
+      "features": {
+        "semantic": 0.7821847200393695,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9555555555555556
+      }
+    },
+    {
+      "id": "2ccd4b09-0694-459c-b59d-9489695ca94d",
+      "title": "DevOps Engineer",
+      "company": "Virtusa",
+      "similarity": 0.545643811898686,
+      "role_family": "devops-sre",
+      "score": 0.5235732068241817,
+      "features": {
+        "semantic": 0.7728219059493431,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6888888888888889
+      }
+    },
+    {
+      "id": "dd3b23f4-50d3-4711-9e90-db3a7df99e92",
+      "title": "DevOps Engineer- TS/SCI Clearance",
+      "company": "V2X",
+      "similarity": 0.535590378308878,
+      "role_family": "devops-sre",
+      "score": 0.5226736312173312,
+      "features": {
+        "semantic": 0.767795189154439,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "3867986c-3f20-434b-af7d-c6f073c7f320",
+      "title": "DevOps Engineer",
+      "company": "SRI Tech",
+      "similarity": 0.518653542915199,
+      "role_family": "devops-sre",
+      "score": 0.5215084863608177,
+      "features": {
+        "semantic": 0.7593267714575995,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7555555555555555
+      }
+    },
+    {
+      "id": "bae5ba91-86ef-43e3-9797-90f5e72d6e1c",
+      "title": "DevOps Engineer",
+      "company": "Robert Half",
+      "similarity": 0.521418571472172,
+      "role_family": "devops-sre",
+      "score": 0.5209503809611011,
+      "features": {
+        "semantic": 0.760709285736086,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7333333333333334
+      }
+    },
+    {
+      "id": "5e7fe718-1eee-4b04-814c-13a11d985276",
+      "title": "DevOps Engineer With Kubernetes Experience is Must",
+      "company": "Sonsoft",
+      "similarity": 0.515378863536053,
+      "role_family": "devops-sre",
+      "score": 0.5208535504849885,
+      "features": {
+        "semantic": 0.7576894317680265,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7555555555555555
+      }
+    },
+    {
+      "id": "b2c2011b-2dd2-42e5-b71c-48aca4ff1bf1",
+      "title": "DevOps Engineer",
+      "company": "Artech",
+      "similarity": 0.523758191430299,
+      "role_family": "devops-sre",
+      "score": 0.5203071938416154,
+      "features": {
+        "semantic": 0.7618790957151496,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "b98cb5b8-d868-4c72-a980-d9d97f13a1bc",
+      "title": "DevOps Engineer",
+      "company": "Robert Half",
+      "similarity": 0.529628546811853,
+      "role_family": "devops-sre",
+      "score": 0.519259042695704,
+      "features": {
+        "semantic": 0.7648142734059264,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6666666666666667
+      }
+    },
+    {
+      "id": "71e0e216-257b-472d-97ac-2ff61b42a0c1",
+      "title": "Staff Software Engineer (Continuous Integration)",
+      "company": "Affirm",
+      "similarity": 0.525560350749514,
+      "role_family": "software-general",
+      "score": 0.5190009590387917,
+      "features": {
+        "semantic": 0.762780175374757,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9777777777777777
+      }
+    },
+    {
+      "id": "d76e0760-8319-4043-9fc9-6ea96c29f94d",
+      "title": "Azure DevOps (Infra As Code) Engineer",
+      "company": "HAN Staffing",
+      "similarity": 0.510533959301351,
+      "role_family": "devops-sre",
+      "score": 0.5187734585269369,
+      "features": {
+        "semantic": 0.7552669796506755,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7333333333333334
+      }
+    },
+    {
+      "id": "df097044-effc-476d-9e4d-33e255e031c0",
+      "title": "DevOps Engineer",
+      "company": "KForce",
+      "similarity": 0.506317108493032,
+      "role_family": "devops-sre",
+      "score": 0.516818977254162,
+      "features": {
+        "semantic": 0.753158554246516,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "ba9f26c1-ea64-4b4e-b70e-ade949f227c4",
+      "title": "DevOps Engineer",
+      "company": "MoTek Technologies",
+      "similarity": 0.516784789178942,
+      "role_family": "devops-sre",
+      "score": 0.5166902911691218,
+      "features": {
+        "semantic": 0.758392394589471,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6666666666666667
+      }
+    },
+    {
+      "id": "33cee267-c621-4817-8fca-d48b8ad7c068",
+      "title": "Manual QA Engineer",
+      "company": "Xebia",
+      "similarity": 0.587853526345107,
+      "role_family": "qa-testing",
+      "score": 0.5142373719356881,
+      "features": {
+        "semantic": 0.7939267631725535,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.33333333333333337
+      }
+    },
+    {
+      "id": "f1a09088-5b65-4a15-b50b-4337aad32918",
+      "title": "Senior Software Engineer, Platform",
+      "company": "Super.com",
+      "similarity": 0.554784264875405,
+      "role_family": "software-general",
+      "score": 0.5081790751973032,
+      "features": {
+        "semantic": 0.7773921324377024,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.6444444444444444
+      }
+    },
+    {
+      "id": "798d1a4b-a2d3-4da1-9a28-4752204fa912",
+      "title": "Senior/Staff QA Engineer - Agentic AI Platform",
+      "company": "Ontrac Solutions",
+      "similarity": 0.659619947694554,
+      "role_family": "qa-testing",
+      "score": 0.5047017673166886,
+      "features": {
+        "semantic": 0.8298099738472771,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.15555555555555556
+      }
+    },
+    {
+      "id": "2fca69f6-9edb-4576-89c6-19f78bef8da7",
+      "title": "Full Stack Developer with Test Automation experience",
+      "company": "Qualysoft",
+      "similarity": 0.586646030741457,
+      "role_family": "fullstack",
+      "score": 0.5039958728149581,
+      "features": {
+        "semantic": 0.7933230153707285,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.1333333333333333
+      }
+    },
+    {
+      "id": "2009e43b-1683-4049-a2f2-5d13779e3ab2",
+      "title": "Lead Software/ DevOps Engineer",
+      "company": "UnitedHealth Group",
+      "similarity": 0.529892746197313,
+      "role_family": "devops-sre",
+      "score": 0.5009785492394627,
+      "features": {
+        "semantic": 0.7649463730986565,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.6
+      }
+    },
+    {
+      "id": "16a6cca5-30f3-448f-b415-e4f0889969eb",
+      "title": "Sr. Site Reliability Engineer",
+      "company": "Donnelley Financial Solutions",
+      "similarity": 0.586161971092228,
+      "role_family": "devops-sre",
+      "score": 0.49834350532955674,
+      "features": {
+        "semantic": 0.7930809855461141,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.022222222222222254
+      }
+    }
+  ]
+}

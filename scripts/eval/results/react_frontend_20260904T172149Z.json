@@ -1,0 +1,306 @@
+{
+  "fixture": "react_frontend",
+  "mode": "v2",
+  "jobs": [
+    {
+      "id": "1a660a18-77ee-4c93-8150-493ad91fbafd",
+      "title": "Fullstack Engineer",
+      "company": "Oneleet",
+      "similarity": 0.742109409288974,
+      "role_family": "fullstack",
+      "score": 0.5450885485244615,
+      "features": {
+        "semantic": 0.871054704644487,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.33333333333333337
+      }
+    },
+    {
+      "id": "4c90c70b-c68f-4b2e-acd5-f6b34506fbdc",
+      "title": "Fullstack Software Engineer",
+      "company": "Pragmatike",
+      "similarity": 0.639636495091707,
+      "role_family": "fullstack",
+      "score": 0.543482854573897,
+      "features": {
+        "semantic": 0.8198182475458535,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "a214322e-2b10-45f0-ba05-30357d10725b",
+      "title": "Angular Dev",
+      "company": "HAN Staffing",
+      "similarity": 0.548686060231094,
+      "role_family": null,
+      "score": 0.5375149898239966,
+      "features": {
+        "semantic": 0.774343030115547,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9555555555555556
+      }
+    },
+    {
+      "id": "0c17e8d7-d621-4103-a19d-a2a6a72f6173",
+      "title": "Senior Full-Stack Software Engineer (Backend)",
+      "company": "SolutionIT",
+      "similarity": 0.570595060026352,
+      "role_family": "backend",
+      "score": 0.5268967897830481,
+      "features": {
+        "semantic": 0.7852975300131759,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9555555555555556
+      }
+    },
+    {
+      "id": "fb03ab5e-0139-488c-911a-6bf116086e9a",
+      "title": "Software Engineer II, Fullstack (App Experience)",
+      "company": "Affirm",
+      "similarity": 0.549474391309882,
+      "role_family": "fullstack",
+      "score": 0.525450433817532,
+      "features": {
+        "semantic": 0.7747371956549409,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "676e0575-a408-4873-9f0d-a345c310f0a9",
+      "title": "Software Engineer II, Fullstack (App Experience)",
+      "company": "Affirm",
+      "similarity": 0.549474391309882,
+      "role_family": "fullstack",
+      "score": 0.525450433817532,
+      "features": {
+        "semantic": 0.7747371956549409,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "dd5df3a7-cb33-43d5-8fd7-154aed52d276",
+      "title": "Senior Software Engineer, Build Loop",
+      "company": "Webflow",
+      "similarity": 0.552059716231789,
+      "role_family": "software-general",
+      "score": 0.5254119432463578,
+      "features": {
+        "semantic": 0.7760298581158944,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 1.0
+      }
+    },
+    {
+      "id": "dcaeb905-985f-43af-a026-aacac76b95d3",
+      "title": "Platform/API Engineer",
+      "company": "Databento",
+      "similarity": 0.719879338719728,
+      "role_family": "backend",
+      "score": 0.5250869788550567,
+      "features": {
+        "semantic": 0.859939669359864,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.022222222222222254
+      }
+    },
+    {
+      "id": "fa0fb980-5ab0-445d-81ae-f2b75492b0e6",
+      "title": "Senior Software Engineer, Frontend (App Experience)",
+      "company": "Affirm",
+      "similarity": 0.620742436117748,
+      "role_family": "frontend",
+      "score": 0.5247040427791052,
+      "features": {
+        "semantic": 0.810371218058874,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "e0c24069-a107-4f33-861c-5a9dbca6ccc1",
+      "title": "Software Engineer, Backend",
+      "company": "Vercel",
+      "similarity": 0.672217647565464,
+      "role_family": "backend",
+      "score": 0.5244435295130928,
+      "features": {
+        "semantic": 0.836108823782732,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.19999999999999996
+      }
+    },
+    {
+      "id": "18d5716b-4a7b-42ba-b8db-4c4d95aa2905",
+      "title": "Senior Software Engineer, Backend",
+      "company": "Archer",
+      "similarity": 0.566977355896078,
+      "role_family": "backend",
+      "score": 0.5239510267347712,
+      "features": {
+        "semantic": 0.783488677948039,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9111111111111111
+      }
+    },
+    {
+      "id": "cbdfe22e-1d03-45bf-88ba-609d644ecb86",
+      "title": "Sr. Angular Dev/Lead",
+      "company": "Spectraforce Technologies",
+      "similarity": 0.546473313552736,
+      "role_family": null,
+      "score": 0.5231835515994361,
+      "features": {
+        "semantic": 0.773236656776368,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9777777777777777
+      }
+    },
+    {
+      "id": "d2f0dffe-c230-4d32-a7b1-5a912c64b443",
+      "title": "Frontend Software Engineer",
+      "company": "Weekday AI",
+      "similarity": 0.708689212799077,
+      "role_family": "frontend",
+      "score": 0.5217378425598155,
+      "features": {
+        "semantic": 0.8543446063995386,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "01f0ea0d-2ce3-4b4c-8cb8-7f1da0fed655",
+      "title": "Software Engineer, Data Experience",
+      "company": "Silver",
+      "similarity": 0.609447075062642,
+      "role_family": "software-general",
+      "score": 0.5185560816791951,
+      "features": {
+        "semantic": 0.804723537531321,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.33333333333333337
+      }
+    },
+    {
+      "id": "0084f709-dae7-43e1-b0e3-50ef78c6a751",
+      "title": "Senior Frontend Engineer",
+      "company": "Gong",
+      "similarity": 0.678282778160739,
+      "role_family": "frontend",
+      "score": 0.5173232222988144,
+      "features": {
+        "semantic": 0.8391413890803695,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.33333333333333337
+      }
+    },
+    {
+      "id": "97aede8b-f34a-4f6a-ad4b-34751ec89d0a",
+      "title": "Senior Software Engineer - Frontend",
+      "company": "Datadog",
+      "similarity": 0.746341109275823,
+      "role_family": "frontend",
+      "score": 0.5142682218551646,
+      "features": {
+        "semantic": 0.8731705546379115,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "80ddd8ab-72b4-44ab-8a45-fdef1a48c339",
+      "title": "Senior Fullstack Engineer - Marketing",
+      "company": "Hevo Data",
+      "similarity": 0.575981412886466,
+      "role_family": "fullstack",
+      "score": 0.5124185047995155,
+      "features": {
+        "semantic": 0.787990706443233,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.6444444444444444
+      }
+    },
+    {
+      "id": "3e1558fe-d605-483b-8331-104d44c503ff",
+      "title": "Software Engineer",
+      "company": "Asana",
+      "similarity": 0.54333526412669,
+      "role_family": "software-general",
+      "score": 0.5120003861586714,
+      "features": {
+        "semantic": 0.771667632063345,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.4666666666666667
+      }
+    },
+    {
+      "id": "81b54bce-1013-44d4-90a8-870a08d8ecd6",
+      "title": "Software Engineer, Backend",
+      "company": "Strike",
+      "similarity": 0.544221628685739,
+      "role_family": "backend",
+      "score": 0.509955436848259,
+      "features": {
+        "semantic": 0.7721108143428694,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.4222222222222223
+      }
+    },
+    {
+      "id": "fdcd816d-84c9-4d84-81fb-7dfaed697928",
+      "title": "Software Engineer - C++",
+      "company": "Figma",
+      "similarity": 0.648528395461595,
+      "role_family": "software-general",
+      "score": 0.509705679092319,
+      "features": {
+        "semantic": 0.8242641977307975,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,306 @@
+{
+  "fixture": "devops_control",
+  "mode": "v2",
+  "jobs": [
+    {
+      "id": "5e7fe718-1eee-4b04-814c-13a11d985276",
+      "title": "DevOps Engineer With Kubernetes Experience is Must",
+      "company": "Sonsoft",
+      "similarity": 0.742270573512947,
+      "role_family": "devops-sre",
+      "score": 0.5662318924803672,
+      "features": {
+        "semantic": 0.8711352867564734,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7555555555555555
+      }
+    },
+    {
+      "id": "df097044-effc-476d-9e4d-33e255e031c0",
+      "title": "DevOps Engineer",
+      "company": "KForce",
+      "similarity": 0.743918374543299,
+      "role_family": "devops-sre",
+      "score": 0.5643392304642154,
+      "features": {
+        "semantic": 0.8719591872716494,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "d85ff5c8-c8f3-4b22-b8cd-0a9708dd0b89",
+      "title": "Azure Devops engineer",
+      "company": "HAN Staffing",
+      "similarity": 0.736018478870397,
+      "role_family": "devops-sre",
+      "score": 0.5638703624407461,
+      "features": {
+        "semantic": 0.8680092394351985,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7333333333333334
+      }
+    },
+    {
+      "id": "2ccd4b09-0694-459c-b59d-9489695ca94d",
+      "title": "DevOps Engineer",
+      "company": "Virtusa",
+      "similarity": 0.721540358250184,
+      "role_family": "devops-sre",
+      "score": 0.5587525160944813,
+      "features": {
+        "semantic": 0.860770179125092,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6888888888888889
+      }
+    },
+    {
+      "id": "6994ca45-01c9-46ab-914a-6cf90a7e917d",
+      "title": "Azure DevOps Engineer",
+      "company": "Infosys Technologies",
+      "similarity": 0.702347040176397,
+      "role_family": "devops-sre",
+      "score": 0.5549138524797239,
+      "features": {
+        "semantic": 0.8511735200881985,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6888888888888889
+      }
+    },
+    {
+      "id": "779b6454-1b12-4e4e-b896-fc75e70363cd",
+      "title": "DevOps Engineer (USA)",
+      "company": "Trexquant Investment",
+      "similarity": 0.676001727581029,
+      "role_family": "devops-sre",
+      "score": 0.5529781232939837,
+      "features": {
+        "semantic": 0.8380008637905145,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7555555555555555
+      }
+    },
+    {
+      "id": "ba9f26c1-ea64-4b4e-b70e-ade949f227c4",
+      "title": "DevOps Engineer",
+      "company": "MoTek Technologies",
+      "similarity": 0.694956325883427,
+      "role_family": "devops-sre",
+      "score": 0.5523245985100188,
+      "features": {
+        "semantic": 0.8474781629417135,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6666666666666667
+      }
+    },
+    {
+      "id": "9b6c3fab-5a05-4a5b-91b7-7cf1d836e4c2",
+      "title": "DevOps Engineer",
+      "company": "HonorVet Technologies",
+      "similarity": 0.688069701194768,
+      "role_family": "devops-sre",
+      "score": 0.5520583846833981,
+      "features": {
+        "semantic": 0.844034850597384,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6888888888888889
+      }
+    },
+    {
+      "id": "b98cb5b8-d868-4c72-a980-d9d97f13a1bc",
+      "title": "DevOps Engineer",
+      "company": "Robert Half",
+      "similarity": 0.692852657607357,
+      "role_family": "devops-sre",
+      "score": 0.5519038648548048,
+      "features": {
+        "semantic": 0.8464263288036785,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6666666666666667
+      }
+    },
+    {
+      "id": "8e8c48fc-43f3-46cf-8202-5a55453290aa",
+      "title": "Azure Devops Engineer",
+      "company": "SRI Tech",
+      "similarity": 0.661362170224579,
+      "role_family": "devops-sre",
+      "score": 0.5500502118226936,
+      "features": {
+        "semantic": 0.8306810851122894,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7555555555555555
+      }
+    },
+    {
+      "id": "b2c2011b-2dd2-42e5-b71c-48aca4ff1bf1",
+      "title": "DevOps Engineer",
+      "company": "Artech",
+      "similarity": 0.67075131397714,
+      "role_family": "devops-sre",
+      "score": 0.5497058183509836,
+      "features": {
+        "semantic": 0.83537565698857,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "d76e0760-8319-4043-9fc9-6ea96c29f94d",
+      "title": "Azure DevOps (Infra As Code) Engineer",
+      "company": "HAN Staffing",
+      "similarity": 0.659638682582301,
+      "role_family": "devops-sre",
+      "score": 0.5485944031831269,
+      "features": {
+        "semantic": 0.8298193412911505,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7333333333333334
+      }
+    },
+    {
+      "id": "71e0e216-257b-472d-97ac-2ff61b42a0c1",
+      "title": "Staff Software Engineer (Continuous Integration)",
+      "company": "Affirm",
+      "similarity": 0.671414534533891,
+      "role_family": "software-general",
+      "score": 0.5481717957956671,
+      "features": {
+        "semantic": 0.8357072672669454,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9777777777777777
+      }
+    },
+    {
+      "id": "ed43cb3f-9475-4acb-81a3-35470dc62491",
+      "title": "Devops Engineer",
+      "company": "HAN Staffing",
+      "similarity": 0.657345930179712,
+      "role_family": "devops-sre",
+      "score": 0.5481358527026091,
+      "features": {
+        "semantic": 0.828672965089856,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7333333333333334
+      }
+    },
+    {
+      "id": "d08e8d32-393a-4cb2-8a90-5b4770a9f0a5",
+      "title": "Sr. IT Site Reliability Software Engineer",
+      "company": "Databricks",
+      "similarity": 0.802357614391687,
+      "role_family": "devops-sre",
+      "score": 0.5404715228783374,
+      "features": {
+        "semantic": 0.9011788071958435,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "16a6cca5-30f3-448f-b415-e4f0889969eb",
+      "title": "Sr. Site Reliability Engineer",
+      "company": "Donnelley Financial Solutions",
+      "similarity": 0.790101826190954,
+      "role_family": "devops-sre",
+      "score": 0.5391314763493019,
+      "features": {
+        "semantic": 0.895050913095477,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.022222222222222254
+      }
+    },
+    {
+      "id": "dee329ac-b1f8-44c7-bdb2-2b0a8f1bda33",
+      "title": "Software Engineer- Site Reliability Engineering (SRE)",
+      "company": "Noctua Technology",
+      "similarity": 0.777095079422003,
+      "role_family": "devops-sre",
+      "score": 0.5354190158844007,
+      "features": {
+        "semantic": 0.8885475397110014,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "2009e43b-1683-4049-a2f2-5d13779e3ab2",
+      "title": "Lead Software/ DevOps Engineer",
+      "company": "UnitedHealth Group",
+      "similarity": 0.687487147746938,
+      "role_family": "devops-sre",
+      "score": 0.5324974295493876,
+      "features": {
+        "semantic": 0.843743573873469,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.6
+      }
+    },
+    {
+      "id": "5cde6913-92ea-4367-912c-d97f55f7b830",
+      "title": "Sr. Platform Engineering",
+      "company": "Archer",
+      "similarity": 0.70727398482251,
+      "role_family": "devops-sre",
+      "score": 0.5258992414089465,
+      "features": {
+        "semantic": 0.853636992411255,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0888888888888889
+      }
+    },
+    {
+      "id": "8c52f201-6228-4b73-9583-e1ab39d45b7b",
+      "title": "Site Reliability Engineer (Senior or Staff), Deployments",
+      "company": "MongoDB",
+      "similarity": 0.801437306489785,
+      "role_family": "devops-sre",
+      "score": 0.525287461297957,
+      "features": {
+        "semantic": 0.9007186532448925,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.0
+      }
+    }
+  ]
+}

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
+import { BACKEND_UNREACHABLE, backendFetch, internalHeaders } from "@/lib/backendFetch";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
@@ -34,16 +33,14 @@ export async function GET(request: NextRequest) {
       limit: String(limit),
     });
 
-    const backendResponse = await fetch(`${BACKEND_URL}/jobs/search?${params.toString()}`, {
-      headers: {
-        "X-Internal-Secret": process.env.INTERNAL_API_SECRET || "",
-      },
+    const backendResponse = await backendFetch(`/jobs/search?${params.toString()}`, {
+      headers: internalHeaders(),
     });
 
     const data = await backendResponse.json();
     return NextResponse.json(data, { status: backendResponse.status });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to search jobs.";
-    return NextResponse.json({ error: message }, { status: 502 });
+    console.error("GET /api/jobs/search - backend unreachable:", err);
+    return NextResponse.json({ error: BACKEND_UNREACHABLE }, { status: 503 });
   }
 }

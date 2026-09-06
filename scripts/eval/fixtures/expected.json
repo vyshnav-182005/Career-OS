@@ -4,5 +4,8 @@
   "data_analyst": ["data-science"],
   "ml_engineer": ["ml-engineering"],
   "qa_automation": ["qa-testing"],
-  "devops_control": ["devops-sre"]
+  "devops_control": ["devops-sre"],
+  "cybersecurity_offensive": ["security"],
+  "ece_hardware": ["hardware-electronics", "embedded"],
+  "mechanical_design": ["mechanical"]
 }

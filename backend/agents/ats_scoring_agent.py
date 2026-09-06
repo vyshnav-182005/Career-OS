@@ -4,9 +4,10 @@ import logging
 import re
 from typing import Any, Dict, Optional
 
-from openai import APITimeoutError, OpenAI
+from openai import APITimeoutError
 
 from backend.config import settings
+from backend.services.llm_client import NO_THINKING, build_client
 
 logger = logging.getLogger(__name__)
 
@@ -111,12 +112,7 @@ async def run_ats_scoring(
 
     profile_summary = _build_profile_summary(profile_data)
 
-    client = OpenAI(
-        base_url="https://integrate.api.nvidia.com/v1",
-        api_key=settings.nvidia_api_key,
-        timeout=90.0,
-        max_retries=1,
-    )
+    client = build_client(timeout=90.0)
 
     prompt = ATS_SCORING_PROMPT.format(
         profile_summary=profile_summary,
@@ -137,6 +133,7 @@ async def run_ats_scoring(
             temperature=0.1,
             max_tokens=2048,
             response_format={"type": "json_object"},
+            extra_body=NO_THINKING,
         )
         return completion.choices[0].message.content or ""
 

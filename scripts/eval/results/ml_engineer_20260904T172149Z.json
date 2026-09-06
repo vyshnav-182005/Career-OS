@@ -1,0 +1,306 @@
+{
+  "fixture": "ml_engineer",
+  "mode": "v2",
+  "jobs": [
+    {
+      "id": "f1d8329b-3651-4886-a70a-55ce9cf9cc7b",
+      "title": "Machine Learning Engineer",
+      "company": "innovitusa",
+      "similarity": 0.766527460010498,
+      "role_family": "ml-engineering",
+      "score": 0.5721943808909886,
+      "features": {
+        "semantic": 0.883263730005249,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7777777777777778
+      }
+    },
+    {
+      "id": "9a46716a-bc48-41a5-8131-2e8e31cce2a1",
+      "title": "Machine Learning Engineer",
+      "company": "Givzey",
+      "similarity": 0.665121813707254,
+      "role_family": "ml-engineering",
+      "score": 0.5596910294081175,
+      "features": {
+        "semantic": 0.832560906853627,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9333333333333333
+      }
+    },
+    {
+      "id": "b1b47d58-41aa-4478-bbea-65adb6cb9a9f",
+      "title": "Machine Learning Engineer",
+      "company": "Confie",
+      "similarity": 0.684824030686858,
+      "role_family": "ml-engineering",
+      "score": 0.5525203616929272,
+      "features": {
+        "semantic": 0.842412015343429,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "495f5a9d-43c9-41cc-86e5-ce89d6830cb1",
+      "title": "Machine Learning Engineer",
+      "company": "DEKA Research & Development",
+      "similarity": 0.639270522550973,
+      "role_family": "ml-engineering",
+      "score": 0.5489652156213057,
+      "features": {
+        "semantic": 0.8196352612754865,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8222222222222222
+      }
+    },
+    {
+      "id": "a09c243f-1795-4f25-8213-1563f85b1dc1",
+      "title": "Machine Learning Engineer",
+      "company": "Gotion Inc.",
+      "similarity": 0.66227382421494,
+      "role_family": "ml-engineering",
+      "score": 0.5480103203985436,
+      "features": {
+        "semantic": 0.83113691210747,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "64722366-47ab-46a4-92b0-f0d7069ede5f",
+      "title": "Machine Learning Engineer",
+      "company": "Velo3d",
+      "similarity": 0.657320061762338,
+      "role_family": "ml-engineering",
+      "score": 0.5470195679080232,
+      "features": {
+        "semantic": 0.828660030881169,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "cb2ddcb4-ebf0-47fe-af9a-3e6a98007c4d",
+      "title": "Machine Learning Engineer Technical Fellow",
+      "company": "Indeed",
+      "similarity": 0.653743902071948,
+      "role_family": "ml-engineering",
+      "score": 0.5463043359699452,
+      "features": {
+        "semantic": 0.826871951035974,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "207935f2-d4d3-4b44-a052-8d530b895dc7",
+      "title": "Artificial Intelligence / Machine Learning Engineer",
+      "company": "Engenious",
+      "similarity": 0.677640120842465,
+      "role_family": "ml-engineering",
+      "score": 0.545528024168493,
+      "features": {
+        "semantic": 0.8388200604212326,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6
+      }
+    },
+    {
+      "id": "d5e93e72-0b47-4a7f-a4cb-d52078ef3181",
+      "title": "Machine Learning Engineer",
+      "company": "Netflix",
+      "similarity": 0.643563406892229,
+      "role_family": "ml-engineering",
+      "score": 0.5442682369340014,
+      "features": {
+        "semantic": 0.8217817034461146,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "c11c252a-2057-42ff-b23b-5b3487738a19",
+      "title": "Machine Learning Engineer",
+      "company": "Micron Technology",
+      "similarity": 0.639569439862338,
+      "role_family": "ml-engineering",
+      "score": 0.5434694435280232,
+      "features": {
+        "semantic": 0.819784719931169,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "ae2605ab-1c6f-49ff-9940-f74f9cfc56a6",
+      "title": "Machine Learning Engineer",
+      "company": "OpenAI",
+      "similarity": 0.638212420833852,
+      "role_family": "ml-engineering",
+      "score": 0.543198039722326,
+      "features": {
+        "semantic": 0.819106210416926,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "24cb2543-e184-46f4-869d-063e55316409",
+      "title": "Machine Learning Engineer",
+      "company": "OpenAI",
+      "similarity": 0.638212420833852,
+      "role_family": "ml-engineering",
+      "score": 0.543198039722326,
+      "features": {
+        "semantic": 0.819106210416926,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "8ecf4745-4eef-4d50-873e-757d455c575b",
+      "title": "Machine Learning Engineer",
+      "company": "Federato",
+      "similarity": 0.651221430592883,
+      "role_family": "ml-engineering",
+      "score": 0.5424665083407988,
+      "features": {
+        "semantic": 0.8256107152964415,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6444444444444444
+      }
+    },
+    {
+      "id": "ebcd7c58-6f6f-4b21-8068-455135d4d445",
+      "title": "Machine Learning Engineer",
+      "company": "Reducto",
+      "similarity": 0.619354046544675,
+      "role_family": "ml-engineering",
+      "score": 0.5394263648644906,
+      "features": {
+        "semantic": 0.8096770232723375,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "9daad6a2-1684-4367-85a9-9a0b2e62e008",
+      "title": "Machine Learning Engineer",
+      "company": "Helsing",
+      "similarity": 0.633890327861041,
+      "role_family": "ml-engineering",
+      "score": 0.5390002877944304,
+      "features": {
+        "semantic": 0.8169451639305205,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6444444444444444
+      }
+    },
+    {
+      "id": "1007dfc4-17e7-4e04-bad7-bac4d48bc410",
+      "title": "Machine Learning/Deep Learning Engineer",
+      "company": "SGS Consulting",
+      "similarity": 0.770638034977797,
+      "role_family": "ml-engineering",
+      "score": 0.5341276069955595,
+      "features": {
+        "semantic": 0.8853190174888985,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "9ec09312-4d84-4602-b894-135f67b89589",
+      "title": "Remote Machine Learning Engineer",
+      "company": "Skylum",
+      "similarity": 0.643817284334737,
+      "role_family": "ml-engineering",
+      "score": 0.5298745679780585,
+      "features": {
+        "semantic": 0.8219086421673685,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.4222222222222223
+      }
+    },
+    {
+      "id": "5808471b-ae8c-454c-96ba-42ff3c6e0f0a",
+      "title": "Machine Learning Engineer II (Underwriting ML)",
+      "company": "Affirm",
+      "similarity": 0.630573272705083,
+      "role_family": "ml-engineering",
+      "score": 0.5238924323187945,
+      "features": {
+        "semantic": 0.8152866363525415,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.3555555555555555
+      }
+    },
+    {
+      "id": "34c51160-ce45-4a90-832e-cb9608b22a4f",
+      "title": "Staff Machine Learning Engineer",
+      "company": "Ginas Tech Jobs",
+      "similarity": 0.619195736598716,
+      "role_family": "ml-engineering",
+      "score": 0.5188391473197432,
+      "features": {
+        "semantic": 0.809597868299358,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.6
+      }
+    },
+    {
+      "id": "ca925fb9-6616-4855-b44a-709158ea9b05",
+      "title": "Senior Machine Learning Infrastructure Engineer, Embedding Platform",
+      "company": "Reddit",
+      "similarity": 0.634340976825502,
+      "role_family": "devops-sre",
+      "score": 0.517423750920656,
+      "features": {
+        "semantic": 0.817170488412751,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.5111111111111111
+      }
+    }
+  ]
+}

@@ -509,3 +509,32 @@
   background: var(--color-surface-hover);
   color: var(--color-text-primary);
 }
+
+/* Projects section header — title beside its sync action */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* The title carries the section's bottom margin on its own; inside the header
+   row the flex gap handles spacing instead. */
+.sectionHeader .sectionTitle {
+  margin-bottom: 0;
+}
+
+.syncNote,
+.syncError {
+  font-size: 0.8125rem;
+  margin: -0.5rem 0 1rem;
+}
+
+.syncNote {
+  color: var(--color-text-secondary);
+}
+
+.syncError {
+  color: var(--color-error);
+}

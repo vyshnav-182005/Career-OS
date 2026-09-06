@@ -171,6 +171,15 @@ class Project(BaseModel):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
 
+    # Provenance, set by the GitHub scan rather than by resume parsing. A sync
+    # may delete a project it created itself when the repo is gone, but must
+    # never delete one the user wrote in their resume, so the two have to be
+    # told apart. Absent on anything stored before syncing existed, which is
+    # treated as "not ours" and therefore never auto-deleted.
+    source: Optional[str] = None
+    # GitHub's numeric repo id. Stable across renames, where the URL is not.
+    github_id: Optional[int] = None
+
     # Structured raw material for per-JD tailoring, kept separate from
     # `description` (which stays the "as last phrased" bullet list actually
     # rendered on the resume). These hold the underlying facts once, so a

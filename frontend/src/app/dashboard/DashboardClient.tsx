@@ -65,6 +65,25 @@ export default function DashboardClient({
     return () => clearInterval(interval);
   }, [isPolling]);
 
+  /**
+   * Re-reads the stored profile. The GitHub sync writes straight to the
+   * database, so the projects on screen are stale until we pull them back.
+   */
+  async function refreshProfile() {
+    try {
+      const res = await fetch('/api/profile');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.profile_data) return;
+
+      const pd = data.profile_data as ProfileIntelligence;
+      setProfileIntelligence(pd);
+      if (pd.original_resume) setParsedResume(pd.original_resume);
+    } catch {
+      // Leave the current view in place; the sync message already reported.
+    }
+  }
+
   function handleParsed(resume: ParsedResume, filename: string, intelligence: ProfileIntelligence | null) {
     setParsedResume(resume);
     setParsedFilename(filename);
@@ -163,6 +182,7 @@ export default function DashboardClient({
                   filename={parsedFilename}
                   intelligence={profileIntelligence}
                   onReset={handleReset}
+                  onSynced={refreshProfile}
                 />
               </>
             )}

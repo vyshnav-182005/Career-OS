@@ -1,0 +1,306 @@
+{
+  "fixture": "cybersecurity_offensive",
+  "mode": "v2",
+  "jobs": [
+    {
+      "id": "f976c241-b4ac-4a48-b1ac-51fb34497596",
+      "title": "Vulnerability Analyst",
+      "company": "Delan Associates, Inc",
+      "similarity": 0.669025063514709,
+      "role_family": "security",
+      "score": 0.5604716793696085,
+      "features": {
+        "semantic": 0.8345125317573545,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9333333333333333
+      }
+    },
+    {
+      "id": "38ff36c8-583c-4ead-b143-c4aba919c043",
+      "title": "Vulnerability Assessment Analyst and Penetration Tester",
+      "company": " Elite Technical ",
+      "similarity": 0.613267348615252,
+      "role_family": "security",
+      "score": 0.5526534697230504,
+      "features": {
+        "semantic": 0.806633674307626,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 1.0
+      }
+    },
+    {
+      "id": "d78622db-4682-41a3-89a4-c87ab4545dc2",
+      "title": "Software Security Researcher",
+      "company": "SecSrvr",
+      "similarity": 0.610180056701903,
+      "role_family": "security",
+      "score": 0.5487026780070473,
+      "features": {
+        "semantic": 0.8050900283509514,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9333333333333333
+      }
+    },
+    {
+      "id": "3184ca55-42ed-4953-a2a6-c675107abd9e",
+      "title": "Security Researcher",
+      "company": "Clarity Innovations",
+      "similarity": 0.642427363540374,
+      "role_family": "security",
+      "score": 0.5473743615969637,
+      "features": {
+        "semantic": 0.8212136817701869,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7777777777777778
+      }
+    },
+    {
+      "id": "59e5af7c-f1ed-411f-8c21-553239e088fb",
+      "title": "Vulnerability Assessment Analyst, Mid-Level",
+      "company": "Independent Software",
+      "similarity": 0.581948041915894,
+      "role_family": "security",
+      "score": 0.5397229417165121,
+      "features": {
+        "semantic": 0.790974020957947,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8666666666666667
+      }
+    },
+    {
+      "id": "76a5fb5d-8042-4e8f-8d5b-905d0c9eeb7f",
+      "title": "Research Scientist - System Security Researcher",
+      "company": "MIT Lincoln Laboratory",
+      "similarity": 0.547431707382202,
+      "role_family": "security",
+      "score": 0.5383752303653293,
+      "features": {
+        "semantic": 0.7737158536911011,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9777777777777777
+      }
+    },
+    {
+      "id": "9b8c4122-70d5-4b20-918b-bf41c8b4fa66",
+      "title": "Software Engineer",
+      "company": "Lyft",
+      "similarity": 0.549063758524173,
+      "role_family": "software-general",
+      "score": 0.5375905294826124,
+      "features": {
+        "semantic": 0.7745318792620866,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9555555555555556
+      }
+    },
+    {
+      "id": "dab29391-ec15-4003-9ba5-e0cbed310a8f",
+      "title": "Penetration Tester - TS/SCI with Polygraph",
+      "company": "General Dynamics Information Technology",
+      "similarity": 0.542592644691467,
+      "role_family": "security",
+      "score": 0.5362963067160712,
+      "features": {
+        "semantic": 0.7712963223457334,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9555555555555556
+      }
+    },
+    {
+      "id": "cf768871-911b-450a-ac50-0b9c80f83cb9",
+      "title": "Full Stack Dev./ Software Developer / Software Engineer/ Application Developer",
+      "company": "Techop Solutions International, Inc.",
+      "similarity": 0.537600127601617,
+      "role_family": "fullstack",
+      "score": 0.5352978032981013,
+      "features": {
+        "semantic": 0.7688000638008086,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9555555555555556
+      }
+    },
+    {
+      "id": "334404f0-3a54-4ebd-a32d-a6a056030bbb",
+      "title": "System Vulnerability Analyst",
+      "company": "Themis Insight",
+      "similarity": 0.542219519615173,
+      "role_family": "security",
+      "score": 0.5351105705897014,
+      "features": {
+        "semantic": 0.7711097598075864,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9333333333333333
+      }
+    },
+    {
+      "id": "bcb7fd99-b1cd-4915-af12-022fa2897806",
+      "title": "Security Analysis Specialist Advisor",
+      "company": "NTT DATA, Inc.",
+      "similarity": 0.569205692637478,
+      "role_family": null,
+      "score": 0.5327300274163845,
+      "features": {
+        "semantic": 0.784602846318739,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7777777777777778
+      }
+    },
+    {
+      "id": "c21105d0-66d8-4530-aa3d-02cd008e09f1",
+      "title": "Security Engineer II - Vulnerability Management",
+      "company": "Samsara",
+      "similarity": 0.561708178418388,
+      "role_family": "security",
+      "score": 0.5312305245725666,
+      "features": {
+        "semantic": 0.780854089209194,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7777777777777778
+      }
+    },
+    {
+      "id": "e9522812-4ea7-4a51-909e-a7232d42b545",
+      "title": "System Vulnerability Analyst, Level 3",
+      "company": "Independent Software",
+      "similarity": 0.596776247024536,
+      "role_family": "security",
+      "score": 0.5293552494049072,
+      "features": {
+        "semantic": 0.7983881235122681,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6
+      }
+    },
+    {
+      "id": "a708b8ef-c868-4aba-b8f4-504ee65d54d9",
+      "title": "Senior Security Engineer, Vulnerability Management",
+      "company": "Datadog",
+      "similarity": 0.571556951310817,
+      "role_family": "security",
+      "score": 0.5282002791510523,
+      "features": {
+        "semantic": 0.7857784756554085,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9777777777777777
+      }
+    },
+    {
+      "id": "749f4d96-cf69-4d14-a102-e9bce6f35855",
+      "title": "Red Team Penetration Tester",
+      "company": " Elite Technical ",
+      "similarity": 0.618096768856049,
+      "role_family": "security",
+      "score": 0.5280637982156543,
+      "features": {
+        "semantic": 0.8090483844280245,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.48888888888888893
+      }
+    },
+    {
+      "id": "bc0beaa1-c607-4d14-86e5-c0f576b346df",
+      "title": "Cybersecurity Analyst- Department of Education",
+      "company": "Fedsync",
+      "similarity": 0.553457054701869,
+      "role_family": "security",
+      "score": 0.5273580776070406,
+      "features": {
+        "semantic": 0.7767285273509346,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7333333333333334
+      }
+    },
+    {
+      "id": "ff251226-90b7-4f31-a511-15f3fd141097",
+      "title": "Penetration Tester",
+      "company": "Coalfire",
+      "similarity": 0.5755854845047,
+      "role_family": "security",
+      "score": 0.5273393191231622,
+      "features": {
+        "semantic": 0.7877927422523501,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6444444444444444
+      }
+    },
+    {
+      "id": "260f9d23-885e-4d95-b93c-c2c4991387c7",
+      "title": "Penetration Tester",
+      "company": "Bishop Fox",
+      "similarity": 0.619073923147376,
+      "role_family": "security",
+      "score": 0.5260370068516974,
+      "features": {
+        "semantic": 0.809536961573688,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.4444444444444444
+      }
+    },
+    {
+      "id": "7b6b0e1c-4134-46c8-8cd9-5cc684829462",
+      "title": "Manual Ethical Hacker",
+      "company": "Bank of America Corporation",
+      "similarity": 0.557359235208012,
+      "role_family": null,
+      "score": 0.5236940692638247,
+      "features": {
+        "semantic": 0.7786796176040061,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6444444444444444
+      }
+    },
+    {
+      "id": "eff36bc2-ae43-4a8f-923e-65feb53b5fcf",
+      "title": "Senior Penetration Tester",
+      "company": "Govcio LLC",
+      "similarity": 0.550072854765998,
+      "role_family": "security",
+      "score": 0.5227923487309774,
+      "features": {
+        "semantic": 0.775036427382999,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.9555555555555556
+      }
+    }
+  ]
+}

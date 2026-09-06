@@ -1,0 +1,306 @@
+{
+  "fixture": "mechanical_design",
+  "mode": "v2",
+  "jobs": [
+    {
+      "id": "01890065-c8a7-4e17-972c-9e9cadbf3229",
+      "title": "Software Engineer, Backend Engineer- Credit Coverage",
+      "company": "Stripe",
+      "similarity": 0.575949788093567,
+      "role_family": "backend",
+      "score": 0.5418566242853801,
+      "features": {
+        "semantic": 0.7879748940467834,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9333333333333333
+      }
+    },
+    {
+      "id": "37ff7c1d-f089-4f87-9ac4-e0a2325fc3d1",
+      "title": "Machine Learning Engineer",
+      "company": "aqua IT",
+      "similarity": 0.53215999997139,
+      "role_family": "ml-engineering",
+      "score": 0.536431999994278,
+      "features": {
+        "semantic": 0.766079999985695,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 1.0
+      }
+    },
+    {
+      "id": "d9e970e7-64b2-4089-8339-3b680b2e297e",
+      "title": "Machine Learning Engineer",
+      "company": "Stripe",
+      "similarity": 0.537857234477997,
+      "role_family": "ml-engineering",
+      "score": 0.5342381135622661,
+      "features": {
+        "semantic": 0.7689286172389985,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9333333333333333
+      }
+    },
+    {
+      "id": "9a46716a-bc48-41a5-8131-2e8e31cce2a1",
+      "title": "Machine Learning Engineer",
+      "company": "Givzey",
+      "similarity": 0.535622175261719,
+      "role_family": "ml-engineering",
+      "score": 0.5337911017190106,
+      "features": {
+        "semantic": 0.7678110876308595,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9333333333333333
+      }
+    },
+    {
+      "id": "43a337d3-260d-4b53-b5b5-bf348829652d",
+      "title": "Machine Learning Engineer",
+      "company": "Keysight Technologies",
+      "similarity": 0.534025251865387,
+      "role_family": "ml-engineering",
+      "score": 0.5334717170397442,
+      "features": {
+        "semantic": 0.7670126259326935,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9333333333333333
+      }
+    },
+    {
+      "id": "018bda6f-12ad-46ae-afb7-94b91d92e622",
+      "title": "Mechanical Engineer I",
+      "company": "IT Landes",
+      "similarity": 0.542498247101851,
+      "role_family": "mechanical",
+      "score": 0.5329440938648147,
+      "features": {
+        "semantic": 0.7712491235509256,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8888888888888888
+      }
+    },
+    {
+      "id": "b550739c-3222-424b-ba92-249641bd5aa9",
+      "title": "Research Software Engineer I",
+      "company": "University of Florida",
+      "similarity": 0.532097089180092,
+      "role_family": "software-general",
+      "score": 0.5319749733915741,
+      "features": {
+        "semantic": 0.766048544590046,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9111111111111111
+      }
+    },
+    {
+      "id": "61f0d99e-9917-40f9-8abb-a8457dccac14",
+      "title": "Machine Learning Engineer - Hybrid",
+      "company": "XPO",
+      "similarity": 0.534872905459193,
+      "role_family": "ml-engineering",
+      "score": 0.5314190255362831,
+      "features": {
+        "semantic": 0.7674364527295965,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8888888888888888
+      }
+    },
+    {
+      "id": "0127e115-4a2b-4bc7-b7c9-428b51c27f5d",
+      "title": "Machine Learning Engineer - Hybrid",
+      "company": "XPO",
+      "similarity": 0.534872905459193,
+      "role_family": "ml-engineering",
+      "score": 0.530307914425172,
+      "features": {
+        "semantic": 0.7674364527295965,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8666666666666667
+      }
+    },
+    {
+      "id": "779b6454-1b12-4e4e-b896-fc75e70363cd",
+      "title": "DevOps Engineer (USA)",
+      "company": "Trexquant Investment",
+      "similarity": 0.554169621815109,
+      "role_family": "devops-sre",
+      "score": 0.5286117021407997,
+      "features": {
+        "semantic": 0.7770848109075545,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7555555555555555
+      }
+    },
+    {
+      "id": "f52b275d-c512-4f41-a462-7fb830ed2fb5",
+      "title": "Machine Learning Engineer",
+      "company": "Us Physicsx",
+      "similarity": 0.564328279237255,
+      "role_family": "ml-engineering",
+      "score": 0.5284212114030066,
+      "features": {
+        "semantic": 0.7821641396186275,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "ae2605ab-1c6f-49ff-9940-f74f9cfc56a6",
+      "title": "Machine Learning Engineer",
+      "company": "OpenAI",
+      "similarity": 0.563762009143829,
+      "role_family": "ml-engineering",
+      "score": 0.5283079573843213,
+      "features": {
+        "semantic": 0.7818810045719145,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "24cb2543-e184-46f4-869d-063e55316409",
+      "title": "Machine Learning Engineer",
+      "company": "OpenAI",
+      "similarity": 0.563762009143829,
+      "role_family": "ml-engineering",
+      "score": 0.5283079573843213,
+      "features": {
+        "semantic": 0.7818810045719145,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "e712f922-e403-4cc1-b802-96da5ca73dc3",
+      "title": "Sr. DevOps Engineer",
+      "company": "HAN Staffing",
+      "similarity": 0.558133065700531,
+      "role_family": "devops-sre",
+      "score": 0.5282932798067729,
+      "features": {
+        "semantic": 0.7790665328502655,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7333333333333334
+      }
+    },
+    {
+      "id": "64722366-47ab-46a4-92b0-f0d7069ede5f",
+      "title": "Machine Learning Engineer",
+      "company": "Velo3d",
+      "similarity": 0.558196425437927,
+      "role_family": "ml-engineering",
+      "score": 0.527194840643141,
+      "features": {
+        "semantic": 0.7790982127189635,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    },
+    {
+      "id": "c5c80e15-b979-4a5b-8b51-9124be8aa30c",
+      "title": "AI Innovation Engineer",
+      "company": "Bright Vision Technologies",
+      "similarity": 0.514813215423419,
+      "role_family": null,
+      "score": 0.525184865306906,
+      "features": {
+        "semantic": 0.7574066077117094,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8444444444444444
+      }
+    },
+    {
+      "id": "bde81a2d-f256-4b4b-bb68-ba46d2505846",
+      "title": "Machine Learning Engineer - RL",
+      "company": "Bright Vision Technologies",
+      "similarity": 0.511316359043121,
+      "role_family": "ml-engineering",
+      "score": 0.5244854940308464,
+      "features": {
+        "semantic": 0.7556581795215604,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8444444444444444
+      }
+    },
+    {
+      "id": "495f5a9d-43c9-41cc-86e5-ce89d6830cb1",
+      "title": "Machine Learning Engineer",
+      "company": "DEKA Research & Development",
+      "similarity": 0.51656299829483,
+      "role_family": "ml-engineering",
+      "score": 0.5244237107700771,
+      "features": {
+        "semantic": 0.7582814991474149,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8222222222222222
+      }
+    },
+    {
+      "id": "4f97f002-a176-4c99-9c24-30c17fa92a1b",
+      "title": "Software Engineer, Dev Tools",
+      "company": "Polymarket",
+      "similarity": 0.53372958503542,
+      "role_family": "software-general",
+      "score": 0.5234125836737508,
+      "features": {
+        "semantic": 0.76686479251771,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7333333333333334
+      }
+    },
+    {
+      "id": "76ee8b81-a77d-4a34-890c-b5c38e7943ee",
+      "title": "Machine Learning Engineer - Hybrid",
+      "company": "XPO Logistics",
+      "similarity": 0.534872905459193,
+      "role_family": "ml-engineering",
+      "score": 0.5225301366473942,
+      "features": {
+        "semantic": 0.7674364527295965,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.7111111111111111
+      }
+    }
+  ]
+}

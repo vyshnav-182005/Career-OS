@@ -19,7 +19,10 @@ class Settings(BaseSettings):
     internal_api_secret: str = Field(default="", alias="INTERNAL_API_SECRET")
     allowed_origins: str = "http://localhost:3000"
     max_file_size_mb: int = 10
-    model: str = Field(default="meta/llama-3.1-8b-instruct", alias="MODEL")
+    # NVIDIA retired the llama-3.1 family (410 Gone, 2026-08-26). This is the
+    # general-purpose model for every agent; see services/llm_client.py for why
+    # each call site must pass NO_THINKING with it.
+    model: str = Field(default="nvidia/nemotron-3-super-120b-a12b", alias="MODEL")
 
     model_config = SettingsConfigDict(
         # backend/.env takes priority; frontend/.env is fallback

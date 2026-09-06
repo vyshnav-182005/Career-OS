@@ -14,70 +14,280 @@
     "to check every token against the live API and drop the dead ones.",
     "Add your own targets freely; the providers pick up file changes on reload."
   ],
-
   "greenhouse": [
-    { "token": "stripe",      "name": "Stripe" },
-    { "token": "databricks",  "name": "Databricks" },
-    { "token": "figma",       "name": "Figma" },
-    { "token": "discord",     "name": "Discord" },
-    { "token": "reddit",      "name": "Reddit" },
-    { "token": "coinbase",    "name": "Coinbase" },
-    { "token": "dropbox",     "name": "Dropbox" },
-    { "token": "doordash",    "name": "DoorDash" },
-    { "token": "gitlab",      "name": "GitLab" },
-    { "token": "robinhood",   "name": "Robinhood" },
-    { "token": "brex",        "name": "Brex" },
-    { "token": "plaid",       "name": "Plaid" },
-    { "token": "twilio",      "name": "Twilio" },
-    { "token": "cloudflare",  "name": "Cloudflare" },
-    { "token": "hashicorp",   "name": "HashiCorp" },
-    { "token": "elastic",     "name": "Elastic" },
-    { "token": "mongodb",     "name": "MongoDB" },
-    { "token": "datadog",     "name": "Datadog" },
-    { "token": "asana",       "name": "Asana" },
-    { "token": "samsara",     "name": "Samsara" },
-    { "token": "affirm",      "name": "Affirm" },
-    { "token": "instacart",   "name": "Instacart" },
-    { "token": "lyft",        "name": "Lyft" },
-    { "token": "pinterest",   "name": "Pinterest" },
-    { "token": "airtable",    "name": "Airtable" },
-    { "token": "amplitude",   "name": "Amplitude" },
-    { "token": "retool",      "name": "Retool" },
-    { "token": "gusto",       "name": "Gusto" },
-    { "token": "flexport",    "name": "Flexport" },
-    { "token": "faire",       "name": "Faire" },
-    { "token": "rippling",    "name": "Rippling" },
-    { "token": "webflow",     "name": "Webflow" },
-    { "token": "postman",     "name": "Postman" },
-    { "token": "freshworks",  "name": "Freshworks" },
-    { "token": "browserstack","name": "BrowserStack" },
-    { "token": "hasura",      "name": "Hasura" },
-    { "token": "zeta",        "name": "Zeta" },
-    { "token": "chargebee",   "name": "Chargebee" },
-    { "token": "innovaccer",  "name": "Innovaccer" },
-    { "token": "sprinklr",    "name": "Sprinklr" }
+    {
+      "token": "stripe",
+      "name": "Stripe"
+    },
+    {
+      "token": "databricks",
+      "name": "Databricks"
+    },
+    {
+      "token": "figma",
+      "name": "Figma"
+    },
+    {
+      "token": "discord",
+      "name": "Discord"
+    },
+    {
+      "token": "reddit",
+      "name": "Reddit"
+    },
+    {
+      "token": "coinbase",
+      "name": "Coinbase"
+    },
+    {
+      "token": "dropbox",
+      "name": "Dropbox"
+    },
+    {
+      "token": "doordashusa",
+      "name": "DoorDash"
+    },
+    {
+      "token": "gitlab",
+      "name": "GitLab"
+    },
+    {
+      "token": "robinhood",
+      "name": "Robinhood"
+    },
+    {
+      "token": "brex",
+      "name": "Brex"
+    },
+    {
+      "token": "twilio",
+      "name": "Twilio"
+    },
+    {
+      "token": "cloudflare",
+      "name": "Cloudflare"
+    },
+    {
+      "token": "elastic",
+      "name": "Elastic"
+    },
+    {
+      "token": "mongodb",
+      "name": "MongoDB"
+    },
+    {
+      "token": "datadog",
+      "name": "Datadog"
+    },
+    {
+      "token": "asana",
+      "name": "Asana"
+    },
+    {
+      "token": "samsara",
+      "name": "Samsara"
+    },
+    {
+      "token": "affirm",
+      "name": "Affirm"
+    },
+    {
+      "token": "instacart",
+      "name": "Instacart"
+    },
+    {
+      "token": "lyft",
+      "name": "Lyft"
+    },
+    {
+      "token": "pinterest",
+      "name": "Pinterest"
+    },
+    {
+      "token": "airtable",
+      "name": "Airtable"
+    },
+    {
+      "token": "amplitude",
+      "name": "Amplitude"
+    },
+    {
+      "token": "gusto",
+      "name": "Gusto"
+    },
+    {
+      "token": "flexport",
+      "name": "Flexport"
+    },
+    {
+      "token": "faire",
+      "name": "Faire"
+    },
+    {
+      "token": "webflow",
+      "name": "Webflow"
+    },
+    {
+      "token": "postman",
+      "name": "Postman"
+    },
+    {
+      "token": "mixpanel",
+      "name": "Mixpanel"
+    },
+    {
+      "token": "kickstarter",
+      "name": "Kickstarter"
+    },
+    {
+      "token": "groww",
+      "name": "Groww"
+    },
+    {
+      "token": "slice",
+      "name": "Slice"
+    },
+    {
+      "token": "zetaglobal",
+      "name": "Zeta Global"
+    },
+    {
+      "token": "flyzipline",
+      "name": "Zipline"
+    },
+    {
+      "token": "relativity",
+      "name": "Relativity Space"
+    },
+    {
+      "token": "astranis",
+      "name": "Astranis"
+    },
+    {
+      "token": "rocketlab",
+      "name": "Rocket Lab"
+    },
+    {
+      "token": "planetlabs",
+      "name": "Planet Labs"
+    },
+    {
+      "token": "vardaspace",
+      "name": "Varda Space"
+    },
+    {
+      "token": "slingshotaerospace",
+      "name": "Slingshot Aerospace"
+    },
+    {
+      "token": "nuro",
+      "name": "Nuro"
+    },
+    {
+      "token": "lucidmotors",
+      "name": "Lucid Motors"
+    },
+    {
+      "token": "wayve",
+      "name": "Wayve"
+    },
+    {
+      "token": "agilityrobotics",
+      "name": "Agility Robotics"
+    },
+    {
+      "token": "pathrobotics",
+      "name": "Path Robotics"
+    },
+    {
+      "token": "formic",
+      "name": "Formic"
+    },
+    {
+      "token": "sambanovasystems",
+      "name": "SambaNova Systems"
+    },
+    {
+      "token": "lightmatter",
+      "name": "Lightmatter"
+    },
+    {
+      "token": "asteralabs",
+      "name": "Astera Labs"
+    },
+    {
+      "token": "tenstorrent",
+      "name": "Tenstorrent"
+    },
+    {
+      "token": "redwoodmaterials",
+      "name": "Redwood Materials"
+    },
+    {
+      "token": "silananotechnologies",
+      "name": "Sila Nanotechnologies"
+    },
+    {
+      "token": "verkada",
+      "name": "Verkada"
+    },
+    {
+      "token": "peloton",
+      "name": "Peloton"
+    },
+    {
+      "token": "oura",
+      "name": "Oura"
+    },
+    {
+      "token": "butterflynetwork",
+      "name": "Butterfly Network"
+    },
+    {
+      "token": "ginkgobioworks",
+      "name": "Ginkgo Bioworks"
+    }
   ],
-
   "lever": [
-    { "token": "netflix",     "name": "Netflix" },
-    { "token": "lever",       "name": "Lever" },
-    { "token": "sentry",      "name": "Sentry" },
-    { "token": "nerdwallet",  "name": "NerdWallet" },
-    { "token": "quora",       "name": "Quora" },
-    { "token": "mixpanel",    "name": "Mixpanel" },
-    { "token": "kickstarter", "name": "Kickstarter" },
-    { "token": "razorpay",    "name": "Razorpay" },
-    { "token": "swiggy",      "name": "Swiggy" },
-    { "token": "meesho",      "name": "Meesho" },
-    { "token": "cred",        "name": "CRED" },
-    { "token": "groww",       "name": "Groww" },
-    { "token": "upgrad",      "name": "upGrad" },
-    { "token": "dream11",     "name": "Dream11" },
-    { "token": "unacademy",   "name": "Unacademy" },
-    { "token": "khatabook",   "name": "Khatabook" },
-    { "token": "jupiter",     "name": "Jupiter" },
-    { "token": "slice",       "name": "Slice" },
-    { "token": "zepto",       "name": "Zepto" },
-    { "token": "hevodata",    "name": "Hevo Data" }
+    {
+      "token": "lever",
+      "name": "Lever"
+    },
+    {
+      "token": "meesho",
+      "name": "Meesho"
+    },
+    {
+      "token": "cred",
+      "name": "CRED"
+    },
+    {
+      "token": "hevodata",
+      "name": "Hevo Data"
+    },
+    {
+      "token": "freshworks",
+      "name": "Freshworks"
+    },
+    {
+      "token": "shieldai",
+      "name": "Shield AI"
+    },
+    {
+      "token": "hermeus",
+      "name": "Hermeus"
+    },
+    {
+      "token": "zoox",
+      "name": "Zoox"
+    },
+    {
+      "token": "waabi",
+      "name": "Waabi"
+    },
+    {
+      "token": "brightmachines",
+      "name": "Bright Machines"
+    }
   ]
 }

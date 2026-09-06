@@ -14,9 +14,8 @@ import re
 from typing import Tuple, Any, Dict
 from fastapi import UploadFile, BackgroundTasks
 
-from openai import OpenAI
-
 from backend.config import settings
+from backend.services.llm_client import NO_THINKING, build_client
 from backend.models.resume import ParsedResume
 from backend.db.supabase_client import upsert_parsed_resume
 from backend.services.workflow_orchestrator import trigger_profile_intelligence_workflow
@@ -158,12 +157,7 @@ def parse_resume(file_bytes: bytes, content_type: str) -> ParsedResume:
     logger.info("Extracted %d characters from resume (Segmented)", len(raw_text))
 
     # 2. Single LLM Extraction with explicit XML bounds
-    client = OpenAI(
-        base_url="https://integrate.api.nvidia.com/v1",
-        api_key=settings.nvidia_api_key,
-        timeout=120.0,
-        max_retries=1,
-    )
+    client = build_client(timeout=120.0)
     
     prompt = PARSE_RESUME_PROMPT.replace("{personal}", sections.get("personal", ""))
     prompt = prompt.replace("{education}", sections.get("education", ""))
@@ -184,6 +178,7 @@ def parse_resume(file_bytes: bytes, content_type: str) -> ParsedResume:
         temperature=0.1,
         max_tokens=4096,
         response_format={"type": "json_object"},
+        extra_body=NO_THINKING,
     )
     
     response_text = completion.choices[0].message.content or ""

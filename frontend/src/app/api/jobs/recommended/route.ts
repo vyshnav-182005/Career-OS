@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { BACKEND_UNREACHABLE, backendFetch, internalHeaders } from "@/lib/backendFetch";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
+// The backend re-ranks the shortlist with an LLM, which is bounded at 30s on
+// its side (LLM_TIMEOUT_SECONDS) before it falls back to feature ranking.
+// Without this, a deployment platform's default function limit could cut the
+// proxy off first and turn a slow-but-succeeding request into an error.
+export const maxDuration = 60;
 
 const DEFAULT_LIMIT = 30;
 const MAX_LIMIT = 50;
@@ -32,16 +37,17 @@ export async function GET(request: NextRequest) {
       limit: String(limit),
     });
 
-    const backendResponse = await fetch(`${BACKEND_URL}/jobs/recommended?${params.toString()}`, {
-      headers: {
-        "X-Internal-Secret": process.env.INTERNAL_API_SECRET || "",
-      },
+    const backendResponse = await backendFetch(`/jobs/recommended?${params.toString()}`, {
+      headers: internalHeaders(),
     });
 
     const data = await backendResponse.json();
     return NextResponse.json(data, { status: backendResponse.status });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch recommended jobs.";
-    return NextResponse.json({ error: message }, { status: 502 });
+    // backendFetch only throws once every connection attempt failed, so this
+    // is "backend not reachable", not "backend disagreed" - say that rather
+    // than surfacing a raw fetch error like "ECONNREFUSED" to the user.
+    console.error("GET /api/jobs/recommended - backend unreachable:", err);
+    return NextResponse.json({ error: BACKEND_UNREACHABLE }, { status: 503 });
   }
 }

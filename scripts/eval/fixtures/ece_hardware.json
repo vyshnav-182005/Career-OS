@@ -1,0 +1,74 @@
+{
+  "personal_info": {
+    "name": "Akshay Ramesh",
+    "email": "akshay.ramesh.ece@example.com",
+    "phone": "+91-99400-33218",
+    "location": "Chennai, India",
+    "linkedin": "linkedin.com/in/akshayramesh-ece",
+    "github": "github.com/akshayramesh",
+    "website": null,
+    "summary": "Electronics and Communication Engineering student focused on RF and embedded hardware. Hands-on with antenna simulation, board bring-up and microcontroller firmware."
+  },
+  "education": [
+    {
+      "institution": "Anna University",
+      "degree": "B.Tech",
+      "field_of_study": "Electronics and Communication Engineering",
+      "start_date": "2022-08",
+      "end_date": "2026-05",
+      "gpa": "8.9/10",
+      "description": null
+    }
+  ],
+  "experience": [
+    {
+      "company": "Nexwave Systems",
+      "title": "Hardware Development Intern",
+      "location": "Chennai, India",
+      "start_date": "2025-05",
+      "end_date": "2025-07",
+      "is_current": false,
+      "responsibilities": [
+        "Simulated patch antenna designs in ANSYS HFSS and correlated results against anechoic-chamber measurements",
+        "Assisted board bring-up for an STM32-based sensor node, debugging I2C and UART links with an oscilloscope",
+        "Wrote Embedded C drivers in Keil uVision for onboard temperature and IMU sensors",
+        "Characterized power-supply ripple in LTspice before committing the PCB layout"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "2.4 GHz Wireless Telemetry Link",
+      "description": [
+        "Designed a four-layer PCB in Altium for a low-power 2.4 GHz telemetry transmitter",
+        "Validated RF front-end return loss and matched the antenna feed network"
+      ],
+      "technologies": ["Altium Designer", "ANSYS HFSS", "LTspice", "Embedded C"],
+      "url": null,
+      "start_date": "2024-08",
+      "end_date": "2025-02"
+    },
+    {
+      "name": "FPGA Digital Filter",
+      "description": [
+        "Implemented a FIR filter in Verilog and verified it against a MATLAB reference model",
+        "Synthesized to a Xilinx FPGA and measured timing closure"
+      ],
+      "technologies": ["Verilog", "MATLAB", "FPGA"],
+      "url": "github.com/akshayramesh/fpga-fir",
+      "start_date": "2024-01",
+      "end_date": "2024-05"
+    }
+  ],
+  "certifications": [],
+  "skills": [
+    {"category": "RF and Analog", "skills": ["ANSYS HFSS", "LTspice", "PCB Design", "Signal Processing"]},
+    {"category": "Embedded", "skills": ["Embedded C", "Keil uVision", "STM32", "I2C", "UART", "Oscilloscope"]},
+    {"category": "Digital Design", "skills": ["Verilog", "FPGA"]},
+    {"category": "Tools", "skills": ["Altium Designer", "MATLAB", "Python"]}
+  ],
+  "languages": ["English", "Tamil"],
+  "publications": [],
+  "custom_sections": [],
+  "raw_text": "Akshay Ramesh - ECE student specializing in RF design, PCB layout and embedded firmware."
+}

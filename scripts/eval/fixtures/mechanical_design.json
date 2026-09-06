@@ -1,0 +1,63 @@
+{
+  "personal_info": {
+    "name": "Priya Nair",
+    "email": "priya.nair.mech@example.com",
+    "phone": "+91-98200-77431",
+    "location": "Pune, India",
+    "linkedin": "linkedin.com/in/priyanair-mech",
+    "github": null,
+    "website": null,
+    "summary": "Mechanical design engineer with two years in product development for industrial equipment. Works across CAD modelling, FEA and design for manufacturability."
+  },
+  "education": [
+    {
+      "institution": "College of Engineering Pune",
+      "degree": "B.Tech",
+      "field_of_study": "Mechanical Engineering",
+      "start_date": "2019-08",
+      "end_date": "2023-05",
+      "gpa": "8.4/10",
+      "description": null
+    }
+  ],
+  "experience": [
+    {
+      "company": "Thermodyne Industries",
+      "title": "Mechanical Design Engineer",
+      "location": "Pune, India",
+      "start_date": "2023-07",
+      "end_date": null,
+      "is_current": true,
+      "responsibilities": [
+        "Modelled sheet-metal and machined assemblies in SolidWorks for industrial heat-exchanger units",
+        "Ran structural and thermal FEA in ANSYS to size brackets, cutting material use 12% without losing safety margin",
+        "Applied GD&T to production drawings and led tolerance-stack reviews with the manufacturing team",
+        "Coordinated with vendors on CNC machining and sheet-metal fabrication to resolve DFM issues before release"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Compact Heat Exchanger Redesign",
+      "description": [
+        "Redesigned a plate-fin heat exchanger for a 20% smaller footprint at equal thermal duty",
+        "Validated the design with CFD, then confirmed against a physical prototype"
+      ],
+      "technologies": ["SolidWorks", "ANSYS", "CFD", "Thermodynamics"],
+      "url": null,
+      "start_date": "2024-02",
+      "end_date": "2024-09"
+    }
+  ],
+  "certifications": [],
+  "skills": [
+    {"category": "CAD", "skills": ["SolidWorks", "AutoCAD", "CATIA"]},
+    {"category": "Analysis", "skills": ["ANSYS", "Finite Element Analysis", "CFD", "Thermodynamics"]},
+    {"category": "Manufacturing", "skills": ["GD&T", "CNC Machining"]},
+    {"category": "Other", "skills": ["MATLAB", "Python"]}
+  ],
+  "languages": ["English", "Marathi", "Hindi"],
+  "publications": [],
+  "custom_sections": [],
+  "raw_text": "Priya Nair - Mechanical design engineer working in CAD, FEA and design for manufacturability."
+}

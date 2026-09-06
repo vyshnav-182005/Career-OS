@@ -123,8 +123,31 @@ class RankJobsMalformedResponseTests(unittest.IsolatedAsyncioTestCase):
         # Fallback never rejects a job retrieval already deemed a real candidate.
         self.assertIn(result[0].verdict, {"strong", "possible"})
         self.assertIn("AI reviewer was unavailable", result[0].reason)
-        # Fallback result is still persisted so it can be inspected/replaced later.
+        # A fallback must NOT be cached. The cache is keyed on profile_version and
+        # is consulted before the LLM, so a persisted fallback is served back on
+        # every later request and blocks the retry that would replace it - which
+        # is how a transient provider outage turned into permanently degraded
+        # results. Leaving the miss uncached lets the next request heal it.
+        upsert_mock.assert_not_called()
+
+    async def test_real_llm_verdict_is_persisted(self):
+        """The flip side of the test above: a genuine verdict is still cached,
+        so the LLM is not re-run for the same job on the next request."""
+        llm_mock = AsyncMock(return_value=(
+            '{"results": [{"index": 0, "verdict": "strong", "score": 91, '
+            '"reason": "Strong backend overlap.", "matched_skills": ["Python"], '
+            '"missing_skills": []}]}'
+        ))
+        with patch.object(job_matching_agent, "get_profile_version", return_value="v1"),              patch.object(job_matching_agent, "get_cached_job_matches", return_value={}),              patch.object(job_matching_agent, "_call_llm", llm_mock),              patch.object(job_matching_agent, "upsert_job_matches") as upsert_mock:
+            result = await rank_jobs("user-1", [_scored_job("job-1")], profile_data={})
+
+        self.assertEqual(result[0].verdict, "strong")
+        self.assertEqual(result[0].score, 91)
         upsert_mock.assert_called_once()
+        persisted = upsert_mock.call_args[0][0]
+        self.assertEqual(len(persisted), 1)
+        self.assertEqual(persisted[0]["job_id"], "job-1")
+        self.assertEqual(persisted[0]["verdict"], "strong")
 
     async def test_result_count_mismatch_is_treated_as_malformed(self):
         llm_mock = AsyncMock(return_value='{"results": []}')

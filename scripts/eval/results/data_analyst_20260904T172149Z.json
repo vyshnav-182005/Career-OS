@@ -1,0 +1,306 @@
+{
+  "fixture": "data_analyst",
+  "mode": "v2",
+  "jobs": [
+    {
+      "id": "9391d9ed-899c-4629-91f6-b89781faef80",
+      "title": "Specialist Solutions Architect - Data Engineering & Warehousing (Digital Native Business)",
+      "company": "Databricks",
+      "similarity": 0.55510444446465,
+      "role_family": "data-engineering",
+      "score": 0.5387986666707079,
+      "features": {
+        "semantic": 0.777552222232325,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.9555555555555556
+      }
+    },
+    {
+      "id": "7b282c73-af03-4ff6-8a57-0d963de27cef",
+      "title": "Specialist Solutions Architect - Data Warehousing (Healthcare & Life Sciences)",
+      "company": "Databricks",
+      "similarity": 0.557128482207245,
+      "role_family": null,
+      "score": 0.5225368075525602,
+      "features": {
+        "semantic": 0.7785642411036224,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.6222222222222222
+      }
+    },
+    {
+      "id": "bf2b29aa-bc65-4b8e-a56e-f3935de23aba",
+      "title": "Product Specialist - Gen AI  (Sr. Specialist Solutions Architect)",
+      "company": "Databricks",
+      "similarity": 0.512605008457897,
+      "role_family": null,
+      "score": 0.5225210016915794,
+      "features": {
+        "semantic": 0.7563025042289485,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8
+      }
+    },
+    {
+      "id": "2f4b3ef3-471b-4a35-872f-e1134c3e5f50",
+      "title": "Product Specialist - Gen AI  (Sr. Specialist Solutions Architect)",
+      "company": "Databricks",
+      "similarity": 0.512605008457897,
+      "role_family": null,
+      "score": 0.5225210016915794,
+      "features": {
+        "semantic": 0.7563025042289485,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.8
+      }
+    },
+    {
+      "id": "e65d9bf3-004f-4400-bc98-c7f1b46074e2",
+      "title": "Specialist Solutions Architect - Data Engineering & Warehousing (Financial Services)",
+      "company": "Databricks",
+      "similarity": 0.559453029730375,
+      "role_family": "data-engineering",
+      "score": 0.5152239392794083,
+      "features": {
+        "semantic": 0.7797265148651875,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.4666666666666667
+      }
+    },
+    {
+      "id": "07b1d64f-8a6a-4e32-9552-32708e3b2305",
+      "title": "Specialist Solutions Architect - AI/ML",
+      "company": "Databricks",
+      "similarity": 0.506539344787612,
+      "role_family": null,
+      "score": 0.5090856467353002,
+      "features": {
+        "semantic": 0.7532696723938059,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.5555555555555556
+      }
+    },
+    {
+      "id": "487238c2-7259-45ca-8a30-3da9801b6911",
+      "title": "Data Scientist III",
+      "company": "Meesho",
+      "similarity": 0.605186390258508,
+      "role_family": "data-science",
+      "score": 0.5010372780517016,
+      "features": {
+        "semantic": 0.802593195129254,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "fd85d94a-0988-47b9-9ae5-8158534d732e",
+      "title": "Software Engineering Intern (2027 Start) - Winter",
+      "company": "Databricks",
+      "similarity": 0.498816668987288,
+      "role_family": "software-general",
+      "score": 0.4992077782419021,
+      "features": {
+        "semantic": 0.749408334493644,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.6888888888888889
+      }
+    },
+    {
+      "id": "b4d73214-c992-4581-9bb8-4baa43c20dd3",
+      "title": "Senior Software Engineer, Backend (Lake Analytics Platform)",
+      "company": "Affirm",
+      "similarity": 0.514999774396461,
+      "role_family": "backend",
+      "score": 0.4979999548792923,
+      "features": {
+        "semantic": 0.7574998871982306,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.6
+      }
+    },
+    {
+      "id": "d1e50fc4-82bc-4a7a-a801-f1d1e43df9a6",
+      "title": "Sr. Learning Platform Specialist",
+      "company": "Databricks",
+      "similarity": 0.589771010930297,
+      "role_family": null,
+      "score": 0.49795420218605946,
+      "features": {
+        "semantic": 0.7948855054651485,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "6bc06ea6-0610-4096-b24e-2387af71fdcb",
+      "title": "Product Management Intern",
+      "company": "Datadog",
+      "similarity": 0.49807077669254,
+      "role_family": null,
+      "score": 0.49461415533850805,
+      "features": {
+        "semantic": 0.74903538834627,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.6
+      }
+    },
+    {
+      "id": "485a43a6-a489-4658-8d63-0ab64963502c",
+      "title": "Senior Financial Systems Analyst",
+      "company": "Datadog",
+      "similarity": 0.627151451876683,
+      "role_family": null,
+      "score": 0.4904302903753366,
+      "features": {
+        "semantic": 0.8135757259383415,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "c170e8dd-2a03-4e9c-bfe0-0e26df3873c7",
+      "title": "Software Engineer, Data",
+      "company": "Airtable",
+      "similarity": 0.549536639507221,
+      "role_family": "software-general",
+      "score": 0.4899073279014442,
+      "features": {
+        "semantic": 0.7747683197536105,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "67a98ee1-1145-4082-9aec-c163c369b59a",
+      "title": "Specialist Solutions Architect (Security)",
+      "company": "Databricks",
+      "similarity": 0.548357421355559,
+      "role_family": null,
+      "score": 0.48967148427111185,
+      "features": {
+        "semantic": 0.7741787106777795,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "9815ebc6-1631-40a8-8d6a-bd4abf088bc9",
+      "title": "Business Development Representative",
+      "company": "Databricks",
+      "similarity": 0.538649673622889,
+      "role_family": null,
+      "score": 0.4877299347245778,
+      "features": {
+        "semantic": 0.7693248368114445,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "a2d9e342-aa6f-4a48-b432-45d54b9d0cd2",
+      "title": "Business Development Representative",
+      "company": "Databricks",
+      "similarity": 0.534498659700244,
+      "role_family": null,
+      "score": 0.4868997319400489,
+      "features": {
+        "semantic": 0.767249329850122,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "b864d154-b166-4961-bbed-92bf7f569a94",
+      "title": "Senior Finance Specialist (Data & AI)",
+      "company": "Databricks",
+      "similarity": 0.60573505094826,
+      "role_family": null,
+      "score": 0.486147010189652,
+      "features": {
+        "semantic": 0.80286752547413,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.65,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "d3c4351a-77c6-49db-bddd-5c54445d7cfe",
+      "title": "Software Engineer - Data Infrastructure",
+      "company": "Figma",
+      "similarity": 0.52186462152812,
+      "role_family": "software-general",
+      "score": 0.48437292430562406,
+      "features": {
+        "semantic": 0.76093231076406,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "e6c93931-4fac-455b-8959-a2bfd8943800",
+      "title": "Business Development Representative",
+      "company": "Databricks",
+      "similarity": 0.513255950628292,
+      "role_family": null,
+      "score": 0.4826511901256585,
+      "features": {
+        "semantic": 0.756627975314146,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    },
+    {
+      "id": "c8b03298-5e87-49ce-9c65-3f9651cc9533",
+      "title": "Technical Product Marketing",
+      "company": "Hevo Data",
+      "similarity": 0.50339007337212,
+      "role_family": null,
+      "score": 0.48067801467442406,
+      "features": {
+        "semantic": 0.75169503668606,
+        "skill_overlap": 0.0,
+        "family_fit": 0.5,
+        "seniority_fit": 0.8,
+        "recency": 0.0
+      }
+    }
+  ]
+}

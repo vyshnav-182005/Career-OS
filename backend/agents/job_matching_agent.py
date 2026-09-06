@@ -16,10 +16,10 @@ import logging
 import re
 from typing import Any, Optional
 
-from openai import OpenAI
 from pydantic import BaseModel
 
 from backend.config import settings
+from backend.services.llm_client import NO_THINKING, build_client
 from backend.db.supabase_client import (
     get_cached_job_matches,
     get_profile_data,
@@ -34,17 +34,28 @@ logger = logging.getLogger(__name__)
 
 # Top-N candidates from Phase 2 that get sent for verification per request.
 TOP_CANDIDATES = 25
-# Candidates per LLM call. Smaller than TOP_CANDIDATES on purpose: an 8B model
-# batching all 25 in one call was observed cross-attributing skills between
-# jobs (rejecting a job for lacking a skill the candidate's own profile
-# listed as a must-have). Chunks run concurrently, so a smaller BATCH_SIZE
-# costs little in wall-clock time - measured live, batch=8 cut the error rate
-# from ~14/25 to ~1/25; batch=4 is a further step in the same direction.
+# Candidates per LLM call. Smaller than TOP_CANDIDATES on purpose: batching all
+# 25 into one call was observed cross-attributing skills between jobs
+# (rejecting a job for lacking a skill the candidate's own profile listed as a
+# must-have). Chunks run concurrently, so a smaller BATCH_SIZE costs little in
+# wall-clock time - measured live on the 8B model, batch=8 cut the error rate
+# from ~14/25 to ~1/25 and batch=4 was a further step in the same direction.
+# Re-measured on the current model after the 8B retirement: batch=4 holds at
+# 0-1 verdict errors per 25 while batch=13 regressed to 2, so the small batch
+# is still doing work and stays.
 BATCH_SIZE = 4
 # Bounds each chunk's blocking LLM call in the request path; a slower
 # response falls back to feature ranking for that chunk immediately and
-# retries in the background instead.
-LLM_TIMEOUT_SECONDS = 20.0
+# retries in the background instead. Chunks run concurrently, so this is
+# roughly the ceiling on the whole endpoint, not a per-chunk cost.
+#
+# Raised from 20s when the 8B model was retired: the replacement runs the same
+# 25-job fan-out in ~13s median but ~19s at the top of its range, which sat
+# right on the old limit and tripped the fallback on chunks that were about to
+# succeed. A timeout here is not free - it throws away the completed LLM work
+# and puts "the AI reviewer was unavailable" on those cards - so the limit is
+# set above the observed spread rather than at the median.
+LLM_TIMEOUT_SECONDS = 30.0
 DESCRIPTION_TRUNCATE = 600
 
 _VALID_VERDICTS = {"strong", "possible", "reject"}
@@ -104,6 +115,9 @@ class RankedJob(BaseModel):
     matched_skills: list[str]
     missing_skills: list[str]
     retrieval_sources: list[str]
+    # False when this result is the feature-ranking fallback rather than a real
+    # LLM verdict. Only used to decide what may enter the cache - see rank_jobs.
+    from_llm: bool = True
 
 
 def _build_profile_summary(profile_data: Optional[dict]) -> str:
@@ -132,22 +146,26 @@ def _build_jobs_block(candidates: list[ScoredJob]) -> str:
     return "\n\n".join(lines)
 
 
-# Deliberately settings.model (the 8B default), not the 70B model used for
-# resume optimization: measured live, meta/llama-3.1-70b-instruct's latency
-# for this workload ranged ~6s-60s+/timeout for the same batch size - too
-# inconsistent to block a user-facing request on. 8B is reliably fast
-# (~6-10s for a 25-job request); BATCH_SIZE below is tuned small instead to
-# control the cross-job skill-attribution errors 8B is prone to.
+# The previous default here (meta/llama-3.1-8b-instruct) was retired by NVIDIA
+# on 2026-08-26 and now answers 410 Gone, which sent every request down the
+# feature-ranking fallback path. settings.model is the replacement.
+#
+# It must be called with NO_THINKING (see services/llm_client.py): with its
+# reasoning trace left on, a 25-job request measured ~18-34s per batch and
+# blew the timeout below; with it off the same request lands in ~5-11s, in
+# line with what the retired 8B model used to do.
 JOB_MATCHING_MODEL = settings.model
+
+# 5xx/429 from this endpoint are transient and concentrated in exactly the
+# burst this agent creates - TOP_CANDIDATES/BATCH_SIZE calls fired at once.
+# Measured over the full 25-job fan-out, one retry left ~1 call in 7 failing
+# while two retries drove it to zero without moving the wall clock, since the
+# retried call overlaps the slower ones still in flight.
+LLM_MAX_RETRIES = 2
 
 
 async def _call_llm(prompt: str) -> str:
-    client = OpenAI(
-        base_url="https://integrate.api.nvidia.com/v1",
-        api_key=settings.nvidia_api_key,
-        timeout=60.0,
-        max_retries=1,
-    )
+    client = build_client(timeout=60.0, max_retries=LLM_MAX_RETRIES)
 
     def _sync():
         completion = client.chat.completions.create(
@@ -162,6 +180,7 @@ async def _call_llm(prompt: str) -> str:
             temperature=0.2,
             max_tokens=4096,
             response_format={"type": "json_object"},
+            extra_body=NO_THINKING,
         )
         return completion.choices[0].message.content or ""
 
@@ -264,6 +283,7 @@ def _fallback_ranked_job(scored: ScoredJob, resume_skills: set[str]) -> RankedJo
     missing = sorted(job_skills - resume_skills)
     verdict = "strong" if scored.score >= 0.6 else "possible"
     return RankedJob(
+        from_llm=False,
         job=scored.job,
         features=scored.features,
         verdict=verdict,
@@ -356,7 +376,7 @@ async def _rank_candidates(
     """
     Splits `candidates` into BATCH_SIZE-sized chunks and ranks each with its
     own concurrent LLM call - smaller than one call for the whole shortlist
-    so an 8B model has less to cross-attribute skills between within a call.
+    so the model has less to cross-attribute skills between within a call.
     Always returns one RankedJob per candidate, in order, plus the subset
     that fell back (for the caller to optionally retry in the background).
     """
@@ -386,9 +406,10 @@ async def _background_refresh_matches(
         rows = [
             _to_row(user_id, c.job.id, rj, profile_version)
             for c, rj in zip(candidates, ranked)
-            if c.job.id
+            if c.job.id and rj.from_llm
         ]
-        upsert_job_matches(rows)
+        if rows:
+            upsert_job_matches(rows)
     except Exception:
         logger.exception("Background job-match refresh failed for user_id=%s", user_id)
 
@@ -438,10 +459,18 @@ async def rank_jobs(
             )
 
         if profile_version:
+            # Only real LLM verdicts may enter the cache. A fallback row is the
+            # record of work that did not happen, and the cache is keyed on
+            # profile_version - so persisting one pins "the AI reviewer was
+            # unavailable" to that job until the user's profile changes, long
+            # after the outage that caused it. That is exactly what happened
+            # when the previous model was retired and every call returned 410.
+            # Leaving the miss uncached costs one retry on the next request and
+            # lets the results heal on their own.
             to_persist = [
                 _to_row(user_id, candidates[i].job.id, ranked[i], profile_version)
                 for i in miss_indices
-                if candidates[i].job.id and ranked[i] is not None
+                if candidates[i].job.id and ranked[i] is not None and ranked[i].from_llm
             ]
             if to_persist:
                 upsert_job_matches(to_persist)

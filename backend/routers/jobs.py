@@ -188,7 +188,19 @@ async def get_recommended_jobs(
     entries = build_job_ats_summaries(
         profile_data, entries, cached_scores=get_ats_scores_for_jobs(user_id, job_ids)
     )
-    return {"success": True, "data": entries, "total": len(entries)}
+    # An empty result here is almost always cold start rather than "no work
+    # exists for you": ingestion for this user's roles was queued above as a
+    # background task, so it runs *after* this response is sent. The first
+    # candidate from a field nobody has signed up for yet therefore sees an
+    # empty page even though their jobs are being fetched right then. Telling
+    # the client that lets it say so and come back for the results, instead of
+    # rendering a dead end the user has to reload out of.
+    return {
+        "success": True,
+        "data": entries,
+        "total": len(entries),
+        "sourcing": not entries,
+    }
 
 
 @router.get(
