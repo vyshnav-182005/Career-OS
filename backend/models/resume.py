@@ -2,7 +2,7 @@ import ast
 import json
 import re
 from pydantic import BaseModel, Field, field_validator
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 
 # Leading bullet glyphs / list markers on a line that is already going to be
@@ -171,6 +171,25 @@ class Project(BaseModel):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
 
+    # Structured raw material for per-JD tailoring, kept separate from
+    # `description` (which stays the "as last phrased" bullet list actually
+    # rendered on the resume). These hold the underlying facts once, so a
+    # tailoring pass can re-phrase them for a given JD without having to
+    # reverse-engineer them back out of prose. All optional, so projects
+    # stored before these existed validate unchanged.
+    role: Optional[str] = None
+    approach: Optional[str] = None
+    impact: Optional[str] = None
+    scale: Optional[str] = None
+
+    # Who wrote the current `description`: the user by hand, or a generator
+    # (the resume-optimization agent, or the GitHub-scan enrichment). None
+    # means the project predates this field; treat it as "user" so we never
+    # auto-overwrite text whose origin we don't actually know.
+    description_source: Optional[Literal["user", "ai_generated"]] = None
+
+    # Only `description` is bullet-normalized. role/approach/impact/scale are
+    # free-form single strings, deliberately left untouched by this validator.
     @field_validator("description", mode="before")
     @classmethod
     def _normalize_description(cls, value: Any) -> list[str]:
