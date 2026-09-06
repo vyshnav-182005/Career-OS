@@ -26,6 +26,23 @@ const SEARCH_DEBOUNCE_MS = 400;
  */
 const SOURCING_RETRY_MS = 12_000;
 
+/**
+ * The proxy answers 503 only when it could not reach the backend at all (see
+ * lib/backendFetch.ts) - never for a backend that answered with an error. In
+ * development both processes start from one command and the backend needs
+ * ~10s of imports before it binds its port, so a 503 on the first load is
+ * overwhelmingly "not up yet" rather than "broken".
+ *
+ * Retrying here rather than making the proxy sit on a long connect loop is
+ * what keeps the page quick: the request returns immediately, the user gets a
+ * "starting up" message instead of a frozen spinner or an error they have to
+ * reload out of, and the cards appear the moment the backend answers. The
+ * delays ramp so a backend that really is down settles down rather than being
+ * hammered, and stop after ~25s, at which point it is reported as an error.
+ */
+const BACKEND_UNREACHABLE_STATUS = 503;
+const STARTUP_RETRY_DELAYS_MS = [400, 800, 1500, 2500, 4000, 5000, 5000, 5000];
+
 type Mode = "recommended" | "search";
 
 interface JobCacheEntry {
@@ -131,8 +148,16 @@ export default function JobsBoard({ hasProfile, cacheScope }: JobsBoardProps) {
   // name it without flickering to the in-flight term mid-request.
   const [activeQuery, setActiveQuery] = useState("");
   const [sourcing, setSourcing] = useState(false);
+  // True while we are waiting out a backend that hasn't finished starting.
+  const [starting, setStarting] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
+  // How many startup retries this attempt has already spent, and the pending
+  // timer, so a new query or an unmount cancels it.
+  const startupAttemptRef = useRef(0);
+  const startupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Lets `load` reschedule itself without being its own dependency.
+  const loadRef = useRef<(searchTerm: string) => void>(() => {});
 
   const load = useCallback(
     async (searchTerm: string) => {
@@ -148,6 +173,8 @@ export default function JobsBoard({ hasProfile, cacheScope }: JobsBoardProps) {
         setActiveQuery(cached.activeQuery);
         setSourcing(cached.sourcing);
         setError(null);
+        // Cards are on screen, so whatever the backend was doing is moot.
+        setStarting(false);
         setLoading(false);
         return;
       }
@@ -166,9 +193,26 @@ export default function JobsBoard({ hasProfile, cacheScope }: JobsBoardProps) {
           : `/api/jobs/recommended?limit=${TOP_MATCHES_LIMIT}`;
 
         const res = await fetch(url, { signal: controller.signal });
+
+        if (res.status === BACKEND_UNREACHABLE_STATUS) {
+          const delay = STARTUP_RETRY_DELAYS_MS[startupAttemptRef.current];
+          if (delay !== undefined) {
+            startupAttemptRef.current += 1;
+            setStarting(true);
+            setError(null);
+            startupTimerRef.current = setTimeout(() => loadRef.current(searchTerm), delay);
+            return;
+          }
+          // Budget spent - it isn't starting, it's down. Fall through and
+          // report it like any other failure.
+        }
+
         if (!res.ok) {
           throw new Error(await errorMessageFor(res, trimmed ? "Failed to search jobs" : "Failed to load your matches"));
         }
+
+        startupAttemptRef.current = 0;
+        setStarting(false);
 
         const data = await res.json();
         const raw: unknown[] = data.data || [];
@@ -201,6 +245,7 @@ export default function JobsBoard({ hasProfile, cacheScope }: JobsBoardProps) {
         // say so rather than showing a bare "no results".
       } catch (err: unknown) {
         if (err instanceof DOMException && err.name === "AbortError") return;
+        setStarting(false);
         setError(err instanceof Error ? err.message : "Something went wrong");
       } finally {
         if (abortRef.current === controller) setLoading(false);
@@ -209,13 +254,32 @@ export default function JobsBoard({ hasProfile, cacheScope }: JobsBoardProps) {
     [cacheScope]
   );
 
+  // Keeps the retry timer pointed at the current closure rather than one
+  // captured from a stale cacheScope. Declared before the effect that triggers
+  // the first load, so it is always assigned by the time anything can fire.
+  useEffect(() => {
+    loadRef.current = load;
+  }, [load]);
+
   // Initial load + debounced re-load as the query changes. Clearing the box
-  // falls straight back to the recommendations.
+  // falls straight back to the recommendations. A pending startup retry is
+  // dropped here: it belongs to the term the user has just moved off, and the
+  // load this schedules will re-establish one if the backend is still down.
   useEffect(() => {
     if (!hasProfile) return;
+    if (startupTimerRef.current) clearTimeout(startupTimerRef.current);
+    startupAttemptRef.current = 0;
     const timer = setTimeout(() => load(query), query ? SEARCH_DEBOUNCE_MS : 0);
     return () => clearTimeout(timer);
   }, [query, hasProfile, load]);
+
+  // Stop a scheduled startup retry from firing after the board is gone.
+  useEffect(
+    () => () => {
+      if (startupTimerRef.current) clearTimeout(startupTimerRef.current);
+    },
+    []
+  );
 
   // While the backend reports it is sourcing, check back once after the
   // ingestion it queued has had time to land. Deliberately a single retry per
@@ -308,7 +372,12 @@ export default function JobsBoard({ hasProfile, cacheScope }: JobsBoardProps) {
         </form>
       </div>
 
-      {loading ? (
+      {starting ? (
+        <div className={styles.loadingState}>
+          <div className={styles.spinner} />
+          <p>Starting the jobs service — your matches will appear here in a moment.</p>
+        </div>
+      ) : loading ? (
         <div className={styles.loadingState}>
           <div className={styles.spinner} />
           <p>{mode === "search" ? "Searching..." : "Analyzing profile and sourcing roles..."}</p>

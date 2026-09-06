@@ -11,7 +11,8 @@ from backend.config import settings
 from backend.services.llm_client import NO_THINKING, build_client
 from backend.agents.ats_scoring_agent import run_ats_scoring
 from backend.db.supabase_client import get_job_fit_analysis, get_profile_data
-from backend.models.resume import ParsedResume
+from backend.models.resume import ParsedResume, Project
+from backend.services.ats_scoring import _significant_words
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ Constraints:
 2. TAILORING: Rephrase existing bullet points and summaries to highlight experiences, skills, and projects most relevant to the JD keywords.
 3. KEYWORDS: The "Required keywords" and "Preferred keywords" lines below are an authoritative classification of this JD - treat them as the keyword list and do NOT re-derive keywords from the JD prose. Naturally integrate the required keywords the candidate genuinely has into the resume content first, then the preferred ones. Never assert a keyword the Base Resume does not support.
 4. SELECTION: Select and prioritize the most relevant sentences, skills, and projects based on the user's stored data.
-5. PROJECTS: For each project, keep only the 2-4 bullet points most relevant to the JD, reordered so the most relevant comes first. Drop projects that are clearly irrelevant to this JD rather than forcing a connection.
+5. PROJECT COUNT & CONTENT: Select AT MOST {max_projects} projects total - the ones most relevant to this JD's required and preferred keywords - and omit every other project entirely, even if it is a solid project in general; a focused, targeted resume beats a complete one. For each kept project, keep only the 2-4 bullet points most relevant to the JD, reordered so the most relevant comes first.
 6. BULLET FORMAT: `projects[].description` and `experience[].responsibilities` MUST be JSON arrays of separate strings - one complete, self-contained sentence per element. Never return a single string containing list syntax, brackets, newlines, or leading "-"/"*"/"bullet" markers. Correct: ["Built X, cutting latency 40%.", "Led Y."]  Wrong: "['Built X', 'Led Y']".
 7. COVERAGE: Carry through every section the base resume provides - education, skills, certifications, languages, publications and custom sections. Dropping a section only shortens the page; drop individual items only when they are genuinely irrelevant to this JD.
 8. SUBSTANCE: Aim for roughly one full page of content: keep 3-4 bullets for each retained role and project, each a specific, quantified sentence drawn from the source material. Never pad with filler or generic claims the base resume does not support.
@@ -59,6 +60,54 @@ SCHEMA_RETRY_TEMPLATE = (
 )
 
 NO_KEYWORDS_PLACEHOLDER = "(classification unavailable - infer from the Job Description below)"
+
+# Rule 5 asks the model to keep at most this many projects, but a count
+# instruction is not guaranteed to be followed - this is the deterministic
+# backstop that enforces it regardless of what the model actually returned.
+MAX_RESUME_PROJECTS = 4
+
+
+def _project_relevance_score(project: Project, jd_words: set) -> int:
+    """Word-overlap between a project's own content and the JD, for ranking."""
+    words: set = set()
+    for bullet in project.description or []:
+        words |= _significant_words(bullet)
+    for tech in project.technologies or []:
+        words |= _significant_words(tech)
+    if project.name:
+        words |= _significant_words(project.name)
+    return len(words & jd_words)
+
+
+def _enforce_project_cap(
+    resume: ParsedResume,
+    job_title: str,
+    job_description: str,
+    required: List[str],
+    preferred: List[str],
+) -> ParsedResume:
+    """
+    Keeps at most MAX_RESUME_PROJECTS projects, ranked by keyword overlap with
+    the JD. A stable sort means projects the model scored equally keep the
+    order it already prioritized them in (rule 5 asks for most-relevant-first),
+    so this only reaches for its own ranking to break ties or when the model
+    didn't trim the list at all.
+    """
+    if len(resume.projects) <= MAX_RESUME_PROJECTS:
+        return resume
+
+    jd_text = " ".join(
+        [job_title or "", job_description or "", " ".join(required), " ".join(preferred)]
+    )
+    jd_words = _significant_words(jd_text)
+
+    ranked = sorted(
+        resume.projects,
+        key=lambda p: _project_relevance_score(p, jd_words),
+        reverse=True,
+    )
+    resume.projects = ranked[:MAX_RESUME_PROJECTS]
+    return resume
 
 
 def _dedupe(values: Any) -> List[str]:
@@ -180,7 +229,8 @@ async def run_resume_optimization(
         job_title=job_title,
         required_keywords=", ".join(required) if required else NO_KEYWORDS_PLACEHOLDER,
         preferred_keywords=", ".join(preferred) if preferred else NO_KEYWORDS_PLACEHOLDER,
-        job_description=job_description
+        job_description=job_description,
+        max_projects=MAX_RESUME_PROJECTS,
     )
 
     def _call_llm(user_prompt: str):
@@ -216,7 +266,7 @@ async def run_resume_optimization(
         return None
 
     try:
-        return ParsedResume(**optimized_data)
+        optimized_resume = ParsedResume(**optimized_data)
     except ValidationError as validation_error:
         # One retry: the model usually fixes a schema slip once it's shown the
         # exact pydantic error, which is far cheaper than discarding the run.
@@ -229,6 +279,8 @@ async def run_resume_optimization(
     except Exception as e:
         logger.error("Verification Engine Failed (Schema mismatch): %s", e)
         return None
+    else:
+        return _enforce_project_cap(optimized_resume, job_title, job_description, required, preferred)
 
     retry_prompt = prompt + SCHEMA_RETRY_TEMPLATE.format(error=validation_error_text)
 
@@ -245,7 +297,9 @@ async def run_resume_optimization(
         return None
 
     try:
-        return ParsedResume(**retry_data)
+        retry_resume = ParsedResume(**retry_data)
     except Exception as e:
         logger.error("Verification Engine Failed after retry (Schema mismatch): %s", e)
         return None
+    else:
+        return _enforce_project_cap(retry_resume, job_title, job_description, required, preferred)

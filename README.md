@@ -107,7 +107,7 @@ MODEL=meta/llama-3.1-8b-instruct
 # Job API
 ADZUNA_APP_ID=<your-adzuna-id>
 ADZUNA_APP_KEY=<your-adzuna-key>
-JOB_API_KEY_2=<your-job-api-key>
+JOOBLE_API_KEY=<your-jooble-api-key>
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
@@ -127,7 +127,7 @@ NVIDIA_API_KEY=<your-nvidia-nim-key>
 MODEL=meta/llama-3.1-8b-instruct
 ADZUNA_APP_ID=<your-adzuna-id>
 ADZUNA_APP_KEY=<your-adzuna-key>
-JOB_API_KEY_2=<your-job-api-key>
+JOOBLE_API_KEY=<your-jooble-api-key>
 ```
 
 ### 3. Database Migration

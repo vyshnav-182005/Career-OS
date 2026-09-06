@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { BACKEND_UNREACHABLE, backendFetch, internalHeaders } from "@/lib/backendFetch";
 
+// Room for the save plus backendFetch's connect budget, so a platform default
+// can't drop the user's edit mid-flight. See lib/backendFetch.ts.
+export const maxDuration = 30;
+
 /**
  * PUT /api/profile/edit — saves hand-edited profile sections (certifications,
  * publications, project bullets), deriving the user id from the verified

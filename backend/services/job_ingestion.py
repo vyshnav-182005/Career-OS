@@ -5,7 +5,7 @@ from typing import List
 
 from backend.models.job import NormalizedJob, IngestionStatistics, JobStatus
 from backend.services.job_providers.base import BaseJobProvider
-from backend.services.embeddings import generate_job_embedding
+from backend.services.embeddings import generate_job_embeddings
 from backend.services import taxonomy
 from backend.db.supabase_client import (
     upsert_jobs,
@@ -57,6 +57,16 @@ class JobIngestionWorkflow:
                 current_fetch_ids = set()
 
                 # 2. Normalize and Prepare
+                #
+                # Two passes rather than one: the first decides which jobs need
+                # a (re)embed, then they are encoded in one batched call, and
+                # the second builds the payloads. The transformer is far faster
+                # over a list than over the same texts one at a time, and this
+                # runs as a background task while the user's next search is
+                # competing for the same cores.
+                unchanged_ids: set[str] = set()
+                needs_embedding: list[NormalizedJob] = []
+
                 for job in jobs:
                     # In a real app we might do more rigorous validation here
                     # Pydantic has already validated the NormalizedJob object
@@ -74,31 +84,44 @@ class JobIngestionWorkflow:
                     job.last_seen_at = datetime.now(timezone.utc)
                     job.content_hash = compute_content_hash(job.title, job.company, job.description, job.skills)
 
-                    content_unchanged = (
+                    if (
                         job.provider_job_id in existing_hashes
                         and existing_hashes[job.provider_job_id] == job.content_hash
-                    )
-
-                    if content_unchanged:
+                    ):
                         # Nothing about the job changed since it was last embedded —
                         # skip the (expensive) re-embed and leave the stored vector
                         # untouched by omitting it from the upsert payload below.
                         job.embedding = None
+                        unchanged_ids.add(job.provider_job_id)
                     else:
                         # (Re)generate the embedding for new or changed jobs, so a job
                         # that was ingested before embeddings existed (or with a stale
                         # one) doesn't keep a missing/outdated vector forever.
-                        try:
-                            job.embedding = generate_job_embedding(job.title, job.description, job.skills)
-                        except Exception as e:
-                            logger.error("Failed to generate embedding for job %s: %s", job.provider_job_id, e)
-                            job.embedding = None
+                        needs_embedding.append(job)
 
-                        if not job.embedding:
-                            # An unembedded job is invisible to vector matching forever,
-                            # so skip persisting it rather than storing it unranked.
-                            stats.skipped += 1
-                            continue
+                if needs_embedding:
+                    try:
+                        embeddings = generate_job_embeddings(
+                            [(job.title, job.description, job.skills) for job in needs_embedding]
+                        )
+                    except Exception as e:
+                        # generate_job_embeddings contains its own failures and
+                        # returns None entries, so this is belt-and-braces: a
+                        # surprise here must cost this provider's embeddings,
+                        # not abort the whole run before the upsert.
+                        logger.error("Failed to generate embeddings for %d jobs: %s", len(needs_embedding), e)
+                        embeddings = [None] * len(needs_embedding)
+                    for job, embedding in zip(needs_embedding, embeddings):
+                        job.embedding = embedding
+
+                for job in jobs:
+                    content_unchanged = job.provider_job_id in unchanged_ids
+
+                    if not content_unchanged and not job.embedding:
+                        # An unembedded job is invisible to vector matching forever,
+                        # so skip persisting it rather than storing it unranked.
+                        stats.skipped += 1
+                        continue
 
                     job_dict = job.model_dump()
                     job_dict["status"] = JobStatus.ACTIVE.value

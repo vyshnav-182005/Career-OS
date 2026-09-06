@@ -12,7 +12,7 @@ from backend.services.ats_scoring import extract_optimized_projects, verify_expe
 from backend.db.supabase_client import (
     get_job_by_id,
     get_job_fit_analysis,
-    get_profile_updated_at,
+    get_profile_version,
     get_profile_data,
     upsert_optimized_resume_snapshot,
 )
@@ -44,14 +44,20 @@ async def compile_html_to_pdf_base64(html_content: str) -> str | None:
 def _get_fresh_cached_resume(user_id: str, job_id: str) -> ParsedResume | None:
     """
     Returns the tailored resume cached by a prior "Analyze fit" call for this
-    (user, job) pair, unless the profile has since changed (re-uploaded resume).
+    (user, job) pair, unless the profile's content has actually changed since.
+
+    Compared by profile_version (exact match) rather than a timestamp: the
+    profiles.updated_at column is bumped by any write at all, including
+    bookkeeping-only ones (a GitHub sync that described no new projects), which
+    would otherwise invalidate this cache on every sync regardless of whether
+    anything relevant to the resume changed.
     """
     cached = get_job_fit_analysis(user_id, job_id)
     if not cached or not cached.get("optimized_resume_json"):
         return None
 
-    profile_updated_at = get_profile_updated_at(user_id)
-    if profile_updated_at and profile_updated_at > cached.get("updated_at", ""):
+    profile_version = get_profile_version(user_id)
+    if profile_version and cached.get("profile_version") != profile_version:
         return None
 
     try:
@@ -87,6 +93,7 @@ def _persist_optimized_resume(
             job_id,
             optimized_resume.model_dump(),
             [p.model_dump() for p in optimized_projects],
+            get_profile_version(user_id),
         )
     except Exception:
         # Caching is a best-effort optimization; don't fail the PDF flow over it.

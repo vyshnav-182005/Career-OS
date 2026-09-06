@@ -2,6 +2,7 @@ import hashlib
 import json
 import logging
 import uuid
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Dict, Any
 
 from supabase import create_client
@@ -225,22 +226,45 @@ def get_active_provider_job_hashes(provider: str) -> Dict[str, str]:
         logger.exception("Failed to fetch active provider job hashes for %s", provider)
         return {}
 
+# A provider's fetch can run to several hundred rows once fanned out across
+# every seeded ATS company (a big employer alone can have 100+ open roles),
+# each carrying a full description plus an embedding vector. Sending all of
+# it as one upsert risks Postgres's statement_timeout on a large enough run -
+# this is what was canceling ingestion outright. Chunking costs nothing when
+# a provider's batch is already small, and means one oversized run degrades
+# to "slower, in pieces" instead of failing completely.
+JOBS_UPSERT_BATCH_SIZE = 200
+
+
 def upsert_jobs(jobs_data: List[Dict[str, Any]]) -> None:
     """
-    Upserts a batch of jobs into the jobs table.
+    Upserts jobs into the jobs table in chunks of JOBS_UPSERT_BATCH_SIZE, so a
+    provider's full fetch never lands in one statement large enough to hit
+    Postgres's statement timeout. Each chunk is its own request; a batch that
+    fails still raises (matching the previous single-call behavior for
+    callers), but whatever batches already committed stay committed rather
+    than the whole run being lost to one oversized statement.
     """
     if not jobs_data:
         return
     client = get_supabase_client()
-    try:
-        client.table("jobs").upsert(
-            jobs_data, 
-            on_conflict="provider,provider_job_id"
-        ).execute()
-        logger.info("Successfully upserted %d jobs.", len(jobs_data))
-    except Exception:
-        logger.exception("Failed to upsert jobs.")
-        raise
+    total = len(jobs_data)
+    for start in range(0, total, JOBS_UPSERT_BATCH_SIZE):
+        chunk = jobs_data[start:start + JOBS_UPSERT_BATCH_SIZE]
+        try:
+            client.table("jobs").upsert(
+                chunk,
+                on_conflict="provider,provider_job_id"
+            ).execute()
+            logger.info(
+                "Successfully upserted %d jobs (batch %d-%d of %d).",
+                len(chunk), start + 1, start + len(chunk), total,
+            )
+        except Exception:
+            logger.exception(
+                "Failed to upsert jobs batch %d-%d of %d.", start + 1, start + len(chunk), total
+            )
+            raise
 
 def delete_expired_jobs(provider: str, provider_job_ids: List[str]) -> None:
     """
@@ -427,26 +451,13 @@ def get_jobs_by_role_family(role_families: List[str], match_count: int = 60) -> 
 
 # --- Job Fit Analysis (project bullets + ATS score) DB Operations ---
 
-def get_profile_updated_at(user_id: str) -> Optional[str]:
-    """Returns the profile's updated_at timestamp, used to detect a stale job-fit cache."""
-    client = get_supabase_client()
-    try:
-        result = client.table("profiles").select("updated_at").eq("user_id", user_id).execute()
-        if result.data:
-            return result.data[0].get("updated_at")
-        return None
-    except Exception:
-        logger.exception("Failed to get profile updated_at for user_id=%s", user_id)
-        return None
-
-
 def get_job_fit_analysis(user_id: str, job_id: str) -> Optional[Dict[str, Any]]:
     """Returns the cached job-fit row (optimized resume snapshot / projects / ATS score) for a (user, job) pair, if any."""
     client = get_supabase_client()
     try:
         result = (
             client.table("job_resume_optimizations")
-            .select("optimized_resume_json, optimized_projects, ats_score, updated_at")
+            .select("optimized_resume_json, optimized_projects, ats_score, profile_version, updated_at")
             .eq("user_id", user_id)
             .eq("job_id", job_id)
             .execute()
@@ -495,11 +506,14 @@ def upsert_optimized_resume_snapshot(
     job_id: str,
     optimized_resume_json: Dict[str, Any],
     optimized_projects: List[Dict[str, Any]],
+    profile_version: Optional[str] = None,
 ) -> None:
     """
-    Persists the tailored resume + derived project bullets for a (user, job) pair.
-    Only touches these two columns — PostgREST's upsert leaves ats_score untouched
-    on conflict since it isn't part of this payload.
+    Persists the tailored resume + derived project bullets for a (user, job) pair,
+    tagged with the profile_version it was generated from so a later call can
+    tell whether the profile's content has actually changed since (see
+    get_profile_version) rather than relying on the row's updated_at timestamp,
+    which is bumped by any write at all.
     """
     client = get_supabase_client()
     try:
@@ -508,6 +522,7 @@ def upsert_optimized_resume_snapshot(
             "job_id": job_id,
             "optimized_resume_json": optimized_resume_json,
             "optimized_projects": optimized_projects,
+            "profile_version": profile_version,
         }
         client.table("job_resume_optimizations").upsert(row, on_conflict="user_id,job_id").execute()
     except Exception:
@@ -545,6 +560,15 @@ def get_profile_version(user_id: str) -> Optional[str]:
         return None
 
 
+# How long a feature-ranking fallback row stays servable. Real LLM verdicts are
+# cached until the profile changes; a fallback is the record of work that did
+# not happen, so it gets a short life instead - long enough that paging around
+# the Jobs page doesn't re-fire the whole LLM fan-out over a provider's bad
+# minute, short enough that the results heal on their own without waiting for
+# the user to edit their profile. See database/job_matches_from_llm_migration.sql.
+FALLBACK_CACHE_TTL_SECONDS = 600
+
+
 def get_cached_job_matches(
     user_id: str, job_ids: List[str], profile_version: Optional[str]
 ) -> Dict[str, Dict[str, Any]]:
@@ -552,23 +576,69 @@ def get_cached_job_matches(
     Returns cached job_matches rows keyed by job_id, scoped to the current
     profile_version - a stale-version row (profile changed since) is never
     returned, forcing a fresh LLM call instead of serving an outdated verdict.
+
+    Fallback rows (from_llm = false) additionally expire after
+    FALLBACK_CACHE_TTL_SECONDS, so a transient LLM outage is absorbed for a few
+    minutes rather than either re-fired on every single request or pinned to
+    the job until the profile changes.
     """
     if not job_ids or not profile_version:
         return {}
     client = get_supabase_client()
-    try:
-        result = (
+
+    def _select(columns: str):
+        return (
             client.table("job_matches")
-            .select("job_id, verdict, score, reason, matched_skills, missing_skills")
+            .select(columns)
             .eq("user_id", user_id)
             .eq("profile_version", profile_version)
             .in_("job_id", job_ids)
             .execute()
         )
-        return {row["job_id"]: row for row in result.data}
+
+    base_columns = "job_id, verdict, score, reason, matched_skills, missing_skills"
+    try:
+        result = _select(f"{base_columns}, from_llm, updated_at")
     except Exception:
-        logger.exception("Failed to get cached job matches for user_id=%s", user_id)
-        return {}
+        # Most likely the from_llm migration has not been applied here. Falling
+        # back to the columns that certainly exist keeps the cache working
+        # (every stored row then reads as a real verdict, which is what they all
+        # were before the column existed). Returning {} instead would silently
+        # disable the cache and put the full LLM fan-out back on every request -
+        # a large, hard-to-attribute slowdown from a missing migration.
+        logger.warning(
+            "job_matches select with from_llm failed for user_id=%s; retrying without it. "
+            "Apply database/job_matches_from_llm_migration.sql.",
+            user_id,
+            exc_info=True,
+        )
+        try:
+            result = _select(base_columns)
+        except Exception:
+            logger.exception("Failed to get cached job matches for user_id=%s", user_id)
+            return {}
+
+    cutoff = datetime.now(timezone.utc) - timedelta(seconds=FALLBACK_CACHE_TTL_SECONDS)
+    fresh: Dict[str, Dict[str, Any]] = {}
+    for row in result.data:
+        # Absent column (migration not yet applied) reads as a real verdict,
+        # which is what every row written before from_llm existed actually was.
+        if row.get("from_llm", True) or _parsed_timestamp(row.get("updated_at")) > cutoff:
+            fresh[row["job_id"]] = row
+    return fresh
+
+
+def _parsed_timestamp(value: Any) -> datetime:
+    """
+    Parses a PostgREST timestamptz. Returns the epoch on anything unparseable,
+    so a malformed value ages a fallback row out rather than keeping it alive.
+    """
+    if isinstance(value, str) and value:
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            pass
+    return datetime.min.replace(tzinfo=timezone.utc)
 
 
 def upsert_job_matches(rows: List[Dict[str, Any]]) -> None:
@@ -578,8 +648,33 @@ def upsert_job_matches(rows: List[Dict[str, Any]]) -> None:
     client = get_supabase_client()
     try:
         client.table("job_matches").upsert(rows, on_conflict="user_id,job_id").execute()
+        return
     except Exception:
-        logger.exception("Failed to upsert job_matches (%d rows)", len(rows))
+        # Mirrors the read side: if the from_llm migration hasn't been applied,
+        # write the rest of the row rather than losing the verdict entirely.
+        # Only real verdicts are kept here - without the column there is no way
+        # to age a fallback out, and an immortal "AI reviewer was unavailable"
+        # is worse than re-running the call.
+        if not any("from_llm" in row for row in rows):
+            logger.exception("Failed to upsert job_matches (%d rows)", len(rows))
+            return
+        logger.warning(
+            "job_matches upsert with from_llm failed; retrying without it. "
+            "Apply database/job_matches_from_llm_migration.sql.",
+            exc_info=True,
+        )
+
+    legacy_rows = [
+        {k: v for k, v in row.items() if k != "from_llm"}
+        for row in rows
+        if row.get("from_llm", True)
+    ]
+    if not legacy_rows:
+        return
+    try:
+        client.table("job_matches").upsert(legacy_rows, on_conflict="user_id,job_id").execute()
+    except Exception:
+        logger.exception("Failed to upsert job_matches (%d rows)", len(legacy_rows))
 
 
 # --- Job feedback (Phase 4) DB Operations ---

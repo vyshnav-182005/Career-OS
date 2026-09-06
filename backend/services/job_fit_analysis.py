@@ -18,7 +18,7 @@ from backend.db.supabase_client import (
     get_job_by_id,
     get_profile_data,
     get_job_fit_analysis,
-    get_profile_updated_at,
+    get_profile_version,
     upsert_ats_score,
     upsert_optimized_resume_snapshot,
 )
@@ -34,12 +34,19 @@ class ProfileNotFoundError(Exception):
     """Raised when the user has no parsed profile yet."""
 
 
-def _cache_is_fresh(cached: Optional[Dict[str, Any]], profile_updated_at: Optional[str]) -> bool:
+def _cache_is_fresh(cached: Optional[Dict[str, Any]], profile_version: Optional[str]) -> bool:
+    """
+    A cached row is fresh only if it was generated from the profile's current
+    profile_version - an exact match, not a timestamp comparison. profiles.updated_at
+    is bumped by any write to the row (including a GitHub sync that described no
+    new projects), which would otherwise invalidate every job's cache on every sync
+    regardless of whether anything relevant to the resume actually changed.
+    """
     if not cached:
         return False
-    if not profile_updated_at:
+    if not profile_version:
         return True
-    return cached.get("updated_at", "") >= profile_updated_at
+    return cached.get("profile_version") == profile_version
 
 
 async def analyze_job_fit(user_id: str, job_id: str, force_refresh: bool = False) -> JobFitAnalysis:
@@ -61,8 +68,8 @@ async def analyze_job_fit(user_id: str, job_id: str, force_refresh: bool = False
     job_title, job_description = resolve_job_text(job)
 
     cached = None if force_refresh else get_job_fit_analysis(user_id, job_id)
-    profile_updated_at = get_profile_updated_at(user_id)
-    fresh = _cache_is_fresh(cached, profile_updated_at)
+    profile_version = get_profile_version(user_id)
+    fresh = _cache_is_fresh(cached, profile_version)
 
     optimized_resume: Optional[ParsedResume] = None
     if fresh and cached.get("optimized_resume_json"):
@@ -126,6 +133,7 @@ async def analyze_job_fit(user_id: str, job_id: str, force_refresh: bool = False
             job_id,
             optimized_resume.model_dump(),
             [p.model_dump() for p in optimized_projects],
+            profile_version,
         )
     except Exception:
         logger.warning(

@@ -105,30 +105,37 @@ async def _fetch_github_repos(github_url: str) -> list[dict] | None:
 
 async def _fetch_repo_readme(
     client: httpx.AsyncClient, owner: str, repo: str
-) -> str | None:
-    """The repo's README as text, or None when it has none / could not be read.
+) -> tuple[str | None, bool]:
+    """The repo's README as text, plus whether its absence is confirmed.
 
-    None is the "nothing to ground bullets in" answer: a repo without a README
-    is skipped rather than described from its name alone.
+    Returns (readme_text, confirmed_absent). confirmed_absent is True only for
+    a genuine 404 - GitHub telling us definitively there is no README. Any
+    other failure (rate limit, timeout, 5xx, network error) also returns
+    readme_text=None but with confirmed_absent=False, so the caller knows this
+    repo was never actually checked and must retry it next sync rather than
+    remembering it as "nothing here" forever.
     """
     try:
         response = await client.get(f"https://api.github.com/repos/{owner}/{repo}/readme")
+        if response.status_code == 404:
+            return None, True
         if response.status_code != 200:
-            # 404 is the common case (no README at all), and is not an error.
-            if response.status_code != 404:
-                logger.info(
-                    "README unavailable for %s/%s (%s)", owner, repo, response.status_code
-                )
-            return None
+            logger.info(
+                "README fetch failed for %s/%s (%s) - will retry next sync",
+                owner, repo, response.status_code,
+            )
+            return None, False
 
         payload = response.json() or {}
         content = payload.get("content")
         if not content or payload.get("encoding") != "base64":
-            return None
-        return base64.b64decode(content).decode("utf-8", errors="replace")
+            # GitHub answered but gave us nothing usable - this will never
+            # change on retry, so it counts as confirmed absence.
+            return None, True
+        return base64.b64decode(content).decode("utf-8", errors="replace"), False
     except Exception as e:
-        logger.info("Failed to fetch README for %s/%s: %s", owner, repo, e)
-        return None
+        logger.info("Failed to fetch README for %s/%s: %s - will retry next sync", owner, repo, e)
+        return None, False
 
 
 async def _fetch_repo_languages(
@@ -686,12 +693,16 @@ async def enrich_project_descriptions(profile_data: dict, repos: list[dict]) -> 
     sync_state = dict(profile_data.get("github_sync") or {})
     cache = dict(sync_state.get("readme_signatures") or {})
 
-    # Nothing pushed since we last read a repo means its README cannot have
-    # moved, so it is skipped before costing a request.
+    # Nothing pushed since we last settled this repo means its README cannot
+    # have moved, so it is skipped before costing a request. "Settled" means a
+    # real signature was written or absence was positively confirmed (404) -
+    # an entry left by a failed fetch (rate limit, timeout) has neither, so it
+    # is retried here rather than treated as permanently checked.
     pending: list[tuple[dict, dict]] = []
     for project, repo in candidates:
         cached = cache.get(_enrichment_cache_key(repo)) or {}
-        if cached.get("pushed_at") and cached["pushed_at"] == repo.get("pushed_at"):
+        settled = cached.get("signature") is not None or cached.get("confirmed_absent") is True
+        if settled and cached.get("pushed_at") == repo.get("pushed_at"):
             continue
         pending.append((project, repo))
 
@@ -702,16 +713,16 @@ async def enrich_project_descriptions(profile_data: dict, repos: list[dict]) -> 
 
     async def _context(
         client: httpx.AsyncClient, repo: dict
-    ) -> tuple[str | None, dict[str, int]]:
+    ) -> tuple[str | None, bool, dict[str, int]]:
         owner = (repo.get("owner") or {}).get("login") or _repo_owner(repo.get("html_url"))
         name = repo.get("name")
         if not owner or not name:
-            return None, {}
-        readme, languages = await asyncio.gather(
+            return None, True, {}
+        (readme, confirmed_absent), languages = await asyncio.gather(
             _fetch_repo_readme(client, owner, name),
             _fetch_repo_languages(client, owner, name),
         )
-        return readme, languages
+        return readme, confirmed_absent, languages
 
     async with httpx.AsyncClient(headers=_github_headers(), timeout=30.0) as client:
         fetched = await asyncio.gather(*[_context(client, repo) for _, repo in pending])
@@ -719,19 +730,29 @@ async def enrich_project_descriptions(profile_data: dict, repos: list[dict]) -> 
     to_generate: list[tuple[str, str, dict[str, int]]] = []
     generation_targets: list[tuple[dict, dict]] = []
 
-    for (project, repo), (readme, languages) in zip(pending, fetched):
+    for (project, repo), (readme, confirmed_absent, languages) in zip(pending, fetched):
         key = _enrichment_cache_key(repo)
         pushed_at = repo.get("pushed_at")
 
         if readme is None:
-            # Nothing to ground bullets in. Remember that we looked, so the
-            # next sync doesn't ask GitHub about this repo all over again.
-            cache[key] = {"signature": None, "pushed_at": pushed_at}
+            if confirmed_absent:
+                # GitHub positively confirmed there is nothing to ground
+                # bullets in - remember that so the next sync doesn't ask
+                # again until the repo itself changes.
+                cache[key] = {"signature": None, "pushed_at": pushed_at, "confirmed_absent": True}
+            # else: the fetch failed rather than confirmed absence (rate
+            # limit, timeout, transient error) - deliberately left uncached so
+            # the next sync retries instead of assuming forever there was
+            # nothing here.
             continue
 
         signature = _readme_signature(readme, languages)
-        already_described = (cache.get(key) or {}).get("signature") == signature
-        cache[key] = {"signature": signature, "pushed_at": pushed_at}
+        cached_entry = cache.get(key) or {}
+        already_described = (
+            cached_entry.get("signature") == signature
+            and not cached_entry.get("confirmed_absent")
+        )
+        cache[key] = {"signature": signature, "pushed_at": pushed_at, "confirmed_absent": False}
         if already_described:
             continue
 

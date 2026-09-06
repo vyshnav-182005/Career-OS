@@ -123,12 +123,18 @@ class RankJobsMalformedResponseTests(unittest.IsolatedAsyncioTestCase):
         # Fallback never rejects a job retrieval already deemed a real candidate.
         self.assertIn(result[0].verdict, {"strong", "possible"})
         self.assertIn("AI reviewer was unavailable", result[0].reason)
-        # A fallback must NOT be cached. The cache is keyed on profile_version and
-        # is consulted before the LLM, so a persisted fallback is served back on
-        # every later request and blocks the retry that would replace it - which
-        # is how a transient provider outage turned into permanently degraded
-        # results. Leaving the miss uncached lets the next request heal it.
-        upsert_mock.assert_not_called()
+        self.assertFalse(result[0].from_llm)
+
+        # A fallback IS cached, but tagged from_llm=False so the read side can
+        # age it out (FALLBACK_CACHE_TTL_SECONDS) instead of serving it until
+        # the profile changes. Not caching it at all was the previous fix and
+        # cost more than it saved: with nothing stored, every later request
+        # re-ran the whole LLM fan-out for these jobs, so an upstream blip made
+        # the Jobs page slow for as long as it lasted.
+        upsert_mock.assert_called_once()
+        row = upsert_mock.call_args[0][0][0]
+        self.assertIs(row["from_llm"], False)
+        self.assertEqual(row["profile_version"], "v1")
 
     async def test_real_llm_verdict_is_persisted(self):
         """The flip side of the test above: a genuine verdict is still cached,
@@ -148,6 +154,33 @@ class RankJobsMalformedResponseTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(persisted), 1)
         self.assertEqual(persisted[0]["job_id"], "job-1")
         self.assertEqual(persisted[0]["verdict"], "strong")
+        self.assertIs(persisted[0]["from_llm"], True)
+
+    async def test_cached_verdict_skips_the_llm_entirely(self):
+        """
+        The point of caching fallbacks: a second request for the same job does
+        not re-enter the LLM fan-out. Whether the cached row was a real verdict
+        or a still-fresh fallback, the request path serves it and moves on.
+        """
+        llm_mock = AsyncMock(return_value="not valid json at all")
+        cached_row = {
+            "job_id": "job-1",
+            "verdict": "possible",
+            "score": 70,
+            "reason": "Ranked from retrieval signals - the AI reviewer was unavailable for this job.",
+            "matched_skills": [],
+            "missing_skills": [],
+        }
+        with patch.object(job_matching_agent, "get_profile_version", return_value="v1"), \
+             patch.object(job_matching_agent, "get_cached_job_matches", return_value={"job-1": cached_row}), \
+             patch.object(job_matching_agent, "_call_llm", llm_mock), \
+             patch.object(job_matching_agent, "upsert_job_matches") as upsert_mock:
+            result = await rank_jobs("user-1", [_scored_job("job-1")], profile_data={})
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].verdict, "possible")
+        llm_mock.assert_not_awaited()
+        upsert_mock.assert_not_called()
 
     async def test_result_count_mismatch_is_treated_as_malformed(self):
         llm_mock = AsyncMock(return_value='{"results": []}')

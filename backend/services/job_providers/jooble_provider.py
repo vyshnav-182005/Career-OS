@@ -22,7 +22,7 @@ class JoobleProvider(BaseJobProvider):
     def fetch_jobs(self, query: str | None = None) -> List[NormalizedJob]:
         api_key = settings.job_api_key_2
         if not api_key:
-            logger.warning("Jooble API key (JOB_API_KEY_2) is not configured.")
+            logger.warning("Jooble API key (JOOBLE_API_KEY) is not configured.")
             return []
 
         url = f"https://jooble.org/api/{api_key}"

@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { BACKEND_UNREACHABLE, backendFetch, internalHeaders } from "@/lib/backendFetch";
 
+// Search answers in a couple of seconds, plus backendFetch's short connect
+// budget. Set explicitly so a platform default below that can't cut the proxy
+// off mid-request and turn a slow-but-succeeding search into an error.
+export const maxDuration = 30;
+
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
 

@@ -9,6 +9,7 @@ that's the whole point of this rewrite (see .agents/job-matching-rework-prompts.
 import logging
 import re
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import Any, Optional
 
@@ -27,6 +28,11 @@ from backend.services import taxonomy
 from backend.services.embeddings import generate_profile_embedding
 
 logger = logging.getLogger(__name__)
+
+# Returned by the vector leg when the profile has no embedding at all, which
+# the caller must surface as an error rather than backfill. Distinct from an
+# empty or null result, which just means that retriever found nothing.
+_NO_EMBEDDING = object()
 
 # Candidates requested per retriever before fusion.
 CANDIDATE_POOL_SIZE = 60
@@ -207,42 +213,63 @@ def retrieve_candidates(user_id: str, profile_data: Optional[dict] = None) -> Op
 
     search_intent = _coerce_search_intent(profile_data.get("search_intent"))
 
-    embedding = get_cached_profile_embedding(user_id)
-    if not embedding:
-        embedding = generate_profile_embedding(profile_data)
-    if not embedding:
-        return None
-
-    vector_jobs = match_jobs_v2(
-        embedding,
-        target_families=search_intent.role_families,
-        excluded_families=search_intent.excluded_families,
-        # NOT passed to SQL: job.skills is stored as raw provider text, never
-        # canonicalized at ingest time, so a literal array-overlap filter here
-        # would silently drop real matches on spelling alone ("reactjs" vs
-        # "React"). skill_overlap below does the canonicalized comparison instead.
-        must_have_skills=[],
-        min_posted_date=None,
-        # NOT passed to SQL: location string quality/format isn't validated
-        # yet, so hard-gating on it risks empty results for the wrong reason.
-        locations=[],
-        match_threshold=0.0,
-        match_count=CANDIDATE_POOL_SIZE,
-    ) or []
-
     lexical_terms = search_intent.must_have_skills or search_intent.nice_to_have_skills
     fts_query = _build_fts_query(lexical_terms)
-    lexical_jobs = (
-        search_jobs_fulltext(fts_query, target_families=search_intent.role_families, match_count=CANDIDATE_POOL_SIZE)
-        if fts_query
-        else []
-    ) or []
 
-    title_family_jobs = (
-        get_jobs_by_role_family(search_intent.role_families, match_count=CANDIDATE_POOL_SIZE)
-        if search_intent.role_families
-        else []
-    ) or []
+    # The three retrievers are independent of each other, and every one of them
+    # is a round trip to a Supabase region that is not local - measured at
+    # 0.26-0.72s each, which run back to back was the single largest block of
+    # time in a warm /jobs/recommended. Only the vector search depends on the
+    # embedding, so it is chained behind that lookup while the other two are
+    # already in flight. Fusion below is order-independent, so this changes
+    # timing only, never which jobs come back.
+    def _vector_jobs():
+        embedding = get_cached_profile_embedding(user_id)
+        if not embedding:
+            embedding = generate_profile_embedding(profile_data)
+        if not embedding:
+            # An explicit sentinel, not None: match_jobs_v2 returns whatever
+            # PostgREST hands back, which can itself be None. Using None for
+            # both would let a null RPC response be reported to the user as
+            # "your profile has no embedding" and throw away the lexical and
+            # title-family results that did come back.
+            return _NO_EMBEDDING
+        return match_jobs_v2(
+            embedding,
+            target_families=search_intent.role_families,
+            excluded_families=search_intent.excluded_families,
+            # NOT passed to SQL: job.skills is stored as raw provider text, never
+            # canonicalized at ingest time, so a literal array-overlap filter here
+            # would silently drop real matches on spelling alone ("reactjs" vs
+            # "React"). skill_overlap below does the canonicalized comparison instead.
+            must_have_skills=[],
+            min_posted_date=None,
+            # NOT passed to SQL: location string quality/format isn't validated
+            # yet, so hard-gating on it risks empty results for the wrong reason.
+            locations=[],
+            match_threshold=0.0,
+            match_count=CANDIDATE_POOL_SIZE,
+        )
+
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        vector_future = pool.submit(_vector_jobs)
+        lexical_future = pool.submit(
+            search_jobs_fulltext,
+            fts_query,
+            target_families=search_intent.role_families,
+            match_count=CANDIDATE_POOL_SIZE,
+        ) if fts_query else None
+        title_family_future = pool.submit(
+            get_jobs_by_role_family, search_intent.role_families, match_count=CANDIDATE_POOL_SIZE
+        ) if search_intent.role_families else None
+
+        vector_jobs = vector_future.result()
+        lexical_jobs = (lexical_future.result() if lexical_future else []) or []
+        title_family_jobs = (title_family_future.result() if title_family_future else []) or []
+
+    if vector_jobs is _NO_EMBEDDING:
+        return None
+    vector_jobs = vector_jobs or []
 
     labeled = {"vector": vector_jobs, "lexical": lexical_jobs, "title_family": title_family_jobs}
     jobs_by_id, sources_by_id = _merge_candidates(labeled)

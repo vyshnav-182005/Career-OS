@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     github_token: str = Field(default="", alias="GITHUB_TOKEN")
     adzuna_app_id: str = Field(default="", alias="ADZUNA_APP_ID")
     adzuna_app_key: str = Field(default="", alias="ADZUNA_APP_KEY")
-    job_api_key_2: str = Field(default="", alias="JOB_API_KEY_2")
+    job_api_key_2: str = Field(default="", alias="JOOBLE_API_KEY")
     # Comma-separated provider names; see services/job_providers/registry.py
     job_providers: str = Field(default="jooble,greenhouse,lever", alias="JOB_PROVIDERS")
     internal_api_secret: str = Field(default="", alias="INTERNAL_API_SECRET")

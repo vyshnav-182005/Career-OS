@@ -1,7 +1,16 @@
 import logging
+from typing import Optional
+
 from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
+
+# NOTE: torch is deliberately left on its default thread count here. Capping it
+# to free cores for the request path was tried and measured backwards: at 4
+# threads a 64-job batch took 3.05s against 1.19s at 20 (19ms -> 48ms per job),
+# so ingestion simply contended for 2.6x as long. The pressure ingestion puts on
+# a request is dominated by how long a run lasts, not how many cores it uses
+# while it lasts - so it is paced and serialised in routers/jobs.py instead.
 
 # Load the model lazily so we don't block app startup unless we need it
 _model = None
@@ -13,6 +22,12 @@ def get_model():
         _model = SentenceTransformer('all-MiniLM-L6-v2')
     return _model
 
+def build_job_embedding_text(title: str, description: str, skills: list[str]) -> str:
+    """Concatenates a job's key fields into one rich semantic representation."""
+    skills_str = ", ".join(skills) if skills else "No specific skills"
+    return f"Title: {title}\nSkills: {skills_str}\nDescription: {description or ''}"
+
+
 def generate_job_embedding(title: str, description: str, skills: list[str]) -> list[float]:
     """
     Generates a 384-dimensional vector embedding for a job.
@@ -20,19 +35,58 @@ def generate_job_embedding(title: str, description: str, skills: list[str]) -> l
     """
     try:
         model = get_model()
-        
-        # We concatenate key fields to create a rich semantic representation
-        skills_str = ", ".join(skills) if skills else "No specific skills"
-        text_to_embed = f"Title: {title}\nSkills: {skills_str}\nDescription: {description or ''}"
-        
-        # Generate embedding
         # output is a numpy array, we convert to list of floats for pgvector/Supabase
-        embedding = model.encode(text_to_embed)
+        embedding = model.encode(build_job_embedding_text(title, description, skills))
         return embedding.tolist()
     except Exception as e:
         logger.exception("Failed to generate embedding")
         # Return None so callers can exclude the field from DB payloads
         return None
+
+
+# Jobs per model.encode() call during ingestion. The transformer batches a list
+# far more efficiently than it handles the same texts one at a time, and a
+# provider fan-out routinely has hundreds of jobs to embed - which used to be
+# hundreds of separate encodes, each saturating every core for ~39ms while a
+# user's search waited behind it for CPU.
+EMBEDDING_BATCH_SIZE = 64
+
+
+def generate_job_embeddings(
+    jobs: list[tuple[str, str, list[str]]]
+) -> list[Optional[list[float]]]:
+    """
+    Batch form of generate_job_embedding: takes (title, description, skills)
+    tuples and returns one embedding per input, positionally aligned, with None
+    wherever the encode failed.
+
+    A failure is contained to its own batch rather than the whole run, so one
+    bad job doesn't cost the embeddings of everything ingested alongside it.
+    """
+    if not jobs:
+        return []
+
+    try:
+        model = get_model()
+    except Exception:
+        logger.exception("Failed to load embedding model for %d jobs", len(jobs))
+        return [None] * len(jobs)
+
+    results: list[Optional[list[float]]] = []
+    for start in range(0, len(jobs), EMBEDDING_BATCH_SIZE):
+        batch = jobs[start:start + EMBEDDING_BATCH_SIZE]
+        texts = [build_job_embedding_text(*job) for job in batch]
+        try:
+            encoded = model.encode(texts)
+            results.extend(vector.tolist() for vector in encoded)
+        except Exception:
+            logger.exception(
+                "Failed to generate embeddings for batch %d-%d of %d",
+                start + 1, start + len(batch), len(jobs),
+            )
+            results.extend([None] * len(batch))
+
+    return results
 
 
 # all-MiniLM-L6-v2 truncates at 256 word-pieces; cap well under that so

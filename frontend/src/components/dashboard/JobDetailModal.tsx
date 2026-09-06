@@ -34,7 +34,6 @@ export default function JobDetailModal({ job, hasProfile, onClose, autoGenerate 
   const [analysis, setAnalysis] = useState<JobFitAnalysis | null>(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
-  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
   // Guards the auto-start against React StrictMode's double effect invocation
   // in development, which would otherwise fire two generation workflows.
   const autoGenerateFired = useRef(false);
@@ -72,18 +71,6 @@ export default function JobDetailModal({ job, hasProfile, onClose, autoGenerate 
     handleGenerate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoGenerate, hasProfile]);
-
-  function toggleProject(name: string) {
-    setExpandedProjects((prev) => {
-      const next = new Set(prev);
-      if (next.has(name)) {
-        next.delete(name);
-      } else {
-        next.add(name);
-      }
-      return next;
-    });
-  }
 
   async function handleGenerate() {
     if (generating) return;
@@ -237,43 +224,21 @@ export default function JobDetailModal({ job, hasProfile, onClose, autoGenerate 
 
                 {analysis.optimized_projects.length > 0 && (
                   <div className={styles.optimizedProjects}>
-                    <h4>Optimized project bullets</h4>
-                    {analysis.optimized_projects.map((project) => {
-                      const expanded = expandedProjects.has(project.project_name);
-                      return (
-                        <div key={project.project_name} className={styles.projectCard}>
-                          <div className={styles.projectCardHeader}>
-                            <strong>{project.project_name}</strong>
-                            {project.technologies.length > 0 && (
-                              <div className={styles.projectTech}>
-                                {project.technologies.map((t) => (
-                                  <span key={t} className={styles.skillChip}>{t}</span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          <ul className={styles.bulletList}>
-                            {project.optimized_bullets.map((bullet, i) => (
-                              <li key={i}>{bullet}</li>
-                            ))}
-                          </ul>
-                          <button
-                            type="button"
-                            className={styles.toggleOriginalBtn}
-                            onClick={() => toggleProject(project.project_name)}
-                          >
-                            {expanded ? "Hide original bullets" : "Show original bullets"}
-                          </button>
-                          {expanded && (
-                            <ul className={`${styles.bulletList} ${styles.originalBulletList}`}>
-                              {project.original_bullets.map((bullet, i) => (
-                                <li key={i}>{bullet}</li>
+                    <h4>Projects tailored for this role</h4>
+                    {analysis.optimized_projects.slice(0, 4).map((project) => (
+                      <div key={project.project_name} className={styles.projectCard}>
+                        <div className={styles.projectCardHeader}>
+                          <strong>{project.project_name}</strong>
+                          {project.technologies.length > 0 && (
+                            <div className={styles.projectTech}>
+                              {project.technologies.map((t) => (
+                                <span key={t} className={styles.skillChip}>{t}</span>
                               ))}
-                            </ul>
+                            </div>
                           )}
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 )}
               </>

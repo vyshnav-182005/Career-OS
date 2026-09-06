@@ -19,7 +19,7 @@ from typing import Any, Optional
 from pydantic import BaseModel
 
 from backend.config import settings
-from backend.services.llm_client import NO_THINKING, build_client
+from backend.services.llm_client import NO_THINKING, build_async_client
 from backend.db.supabase_client import (
     get_cached_job_matches,
     get_profile_data,
@@ -44,10 +44,10 @@ TOP_CANDIDATES = 25
 # 0-1 verdict errors per 25 while batch=13 regressed to 2, so the small batch
 # is still doing work and stays.
 BATCH_SIZE = 4
-# Bounds each chunk's blocking LLM call in the request path; a slower
-# response falls back to feature ranking for that chunk immediately and
-# retries in the background instead. Chunks run concurrently, so this is
-# roughly the ceiling on the whole endpoint, not a per-chunk cost.
+# Bounds each chunk's LLM call in the request path; a slower response falls
+# back to feature ranking for that chunk immediately and retries in the
+# background instead. Chunks run concurrently, so this is roughly the ceiling
+# on the whole endpoint, not a per-chunk cost.
 #
 # Raised from 20s when the 8B model was retired: the replacement runs the same
 # 25-job fan-out in ~13s median but ~19s at the top of its range, which sat
@@ -56,6 +56,13 @@ BATCH_SIZE = 4
 # and puts "the AI reviewer was unavailable" on those cards - so the limit is
 # set above the observed spread rather than at the median.
 LLM_TIMEOUT_SECONDS = 30.0
+# Per-attempt ceiling, sized so the retry below fits inside LLM_TIMEOUT_SECONDS
+# instead of being unreachable. It previously sat at 60s - twice the outer
+# budget - which meant the outer timeout always fired first and the retry the
+# max_retries setting promised could never actually happen. Measured chunk
+# latency on the current model is ~2-10s, so 15s is well clear of a slow
+# success while still leaving room for a second attempt.
+LLM_REQUEST_TIMEOUT_SECONDS = 15.0
 DESCRIPTION_TRUNCATE = 600
 
 _VALID_VERDICTS = {"strong", "possible", "reject"}
@@ -161,30 +168,46 @@ JOB_MATCHING_MODEL = settings.model
 # Measured over the full 25-job fan-out, one retry left ~1 call in 7 failing
 # while two retries drove it to zero without moving the wall clock, since the
 # retried call overlaps the slower ones still in flight.
-LLM_MAX_RETRIES = 2
+#
+# One retry, not two: with LLM_REQUEST_TIMEOUT_SECONDS at 15s, two attempts
+# plus backoff is the whole 30s request budget. A third would only ever be
+# reached by the timeout killing it mid-flight. The background refresh below
+# runs without the outer timeout and is where a stubborn chunk gets its extra
+# attempts, off the request path.
+LLM_MAX_RETRIES = 1
 
 
 async def _call_llm(prompt: str) -> str:
-    client = build_client(timeout=60.0, max_retries=LLM_MAX_RETRIES)
+    """
+    Issues one chunk's request on the async client, so cancelling the awaiting
+    task actually aborts the HTTP request.
 
-    def _sync():
-        completion = client.chat.completions.create(
-            model=JOB_MATCHING_MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a Job Matching Agent. Always respond with valid JSON only, no markdown.",
-                },
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.2,
-            max_tokens=4096,
-            response_format={"type": "json_object"},
-            extra_body=NO_THINKING,
-        )
-        return completion.choices[0].message.content or ""
-
-    return await asyncio.to_thread(_sync)
+    This used to run the blocking client under asyncio.to_thread. A thread is
+    not cancellable: when the LLM_TIMEOUT_SECONDS wait_for above gave up, the
+    request kept running to its own 60s ceiling (x LLM_MAX_RETRIES attempts)
+    while holding a slot in asyncio's default executor. That pool is
+    min(32, cpu_count + 4) threads and this agent takes ceil(TOP_CANDIDATES /
+    BATCH_SIZE) of them per request, so a few overlapping slow page loads
+    exhausted it - after which new calls queued while their timeout clock was
+    already running and timed out having never been sent, guaranteeing the
+    fallback they were waiting to avoid.
+    """
+    client = build_async_client(timeout=LLM_REQUEST_TIMEOUT_SECONDS, max_retries=LLM_MAX_RETRIES)
+    completion = await client.chat.completions.create(
+        model=JOB_MATCHING_MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a Job Matching Agent. Always respond with valid JSON only, no markdown.",
+            },
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.2,
+        max_tokens=4096,
+        response_format={"type": "json_object"},
+        extra_body=NO_THINKING,
+    )
+    return completion.choices[0].message.content or ""
 
 
 def _parse_llm_results(raw_text: str, expected_count: int) -> Optional[list[dict]]:
@@ -315,6 +338,9 @@ def _to_row(user_id: str, job_id: str, ranked: RankedJob, profile_version: str) 
         "missing_skills": ranked.missing_skills,
         "profile_version": profile_version,
         "feature_scores": ranked.features.model_dump(),
+        # Read back by get_cached_job_matches, which serves a real verdict until
+        # the profile changes but ages a fallback out after a few minutes.
+        "from_llm": ranked.from_llm,
     }
 
 
@@ -406,10 +432,13 @@ async def _background_refresh_matches(
         rows = [
             _to_row(user_id, c.job.id, rj, profile_version)
             for c, rj in zip(candidates, ranked)
+            # Only real verdicts here. This task's whole purpose is to replace
+            # a fallback with a genuine one; writing another fallback would
+            # just push out its TTL and postpone the next honest retry.
             if c.job.id and rj.from_llm
         ]
         if rows:
-            upsert_job_matches(rows)
+            await asyncio.to_thread(upsert_job_matches, rows)
     except Exception:
         logger.exception("Background job-match refresh failed for user_id=%s", user_id)
 
@@ -419,6 +448,7 @@ async def rank_jobs(
     candidates: list[ScoredJob],
     profile_data: Optional[dict] = None,
     background_tasks: Any = None,
+    profile_version: Optional[str] = None,
 ) -> list[RankedJob]:
     """
     Verifies the top Phase 2 candidates in small concurrent LLM batches, using
@@ -431,12 +461,19 @@ async def rank_jobs(
         return []
     candidates = candidates[:TOP_CANDIDATES]
 
+    # These are blocking DB clients called from an async function, so each one
+    # runs on the event loop unless handed to a thread - which stalls every
+    # other request in the process while it waits on a non-local region.
     if profile_data is None:
-        profile_data = get_profile_data(user_id)
-    profile_version = get_profile_version(user_id)
+        profile_data = await asyncio.to_thread(get_profile_data, user_id)
+    # Callers that can fetch this concurrently with their own work pass it in;
+    # it is one more round trip to a non-local region and nothing above depends
+    # on it, so serialising it here just adds to the user's wait.
+    if profile_version is None:
+        profile_version = await asyncio.to_thread(get_profile_version, user_id)
 
     job_ids = [c.job.id for c in candidates if c.job.id]
-    cached = get_cached_job_matches(user_id, job_ids, profile_version)
+    cached = await asyncio.to_thread(get_cached_job_matches, user_id, job_ids, profile_version)
 
     ranked: list[Optional[RankedJob]] = [None] * len(candidates)
     miss_indices: list[int] = []
@@ -459,21 +496,28 @@ async def rank_jobs(
             )
 
         if profile_version:
-            # Only real LLM verdicts may enter the cache. A fallback row is the
-            # record of work that did not happen, and the cache is keyed on
-            # profile_version - so persisting one pins "the AI reviewer was
-            # unavailable" to that job until the user's profile changes, long
-            # after the outage that caused it. That is exactly what happened
-            # when the previous model was retired and every call returned 410.
-            # Leaving the miss uncached costs one retry on the next request and
-            # lets the results heal on their own.
+            # Both kinds of result are cached, tagged with which they are.
+            #
+            # A fallback must not be cached the way a real verdict is: the key
+            # is profile_version, so it would pin "the AI reviewer was
+            # unavailable" to that job until the user next edits their profile,
+            # long after the outage that caused it. But refusing to cache it at
+            # all - the previous fix - means every subsequent page load re-runs
+            # the entire LLM fan-out for those jobs, so one bad minute upstream
+            # makes the Jobs page slow for as long as it lasts, and a fan-out
+            # that keeps failing never stops being retried in the request path.
+            #
+            # get_cached_job_matches resolves it by reading from_llm: a real
+            # verdict lives until the profile changes, a fallback is served for
+            # FALLBACK_CACHE_TTL_SECONDS and then retried. Repeat loads stay
+            # fast and the results still heal on their own.
             to_persist = [
                 _to_row(user_id, candidates[i].job.id, ranked[i], profile_version)
                 for i in miss_indices
-                if candidates[i].job.id and ranked[i] is not None and ranked[i].from_llm
+                if candidates[i].job.id and ranked[i] is not None
             ]
             if to_persist:
-                upsert_job_matches(to_persist)
+                await asyncio.to_thread(upsert_job_matches, to_persist)
 
     return [rj for rj in ranked if rj is not None]
 
