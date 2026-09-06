@@ -8,7 +8,7 @@ from backend.models.schemas import OptimizationRequest, OptimizationResponse
 from backend.agents.resume_optimization_agent import run_resume_optimization
 from backend.services.resume_renderer import render_resume_to_html
 from backend.services.job_context import resolve_job_text
-from backend.services.ats_scoring import extract_optimized_projects
+from backend.services.ats_scoring import extract_optimized_projects, verify_experience_grounding
 from backend.db.supabase_client import (
     get_job_by_id,
     get_job_fit_analysis,
@@ -61,10 +61,24 @@ def _get_fresh_cached_resume(user_id: str, job_id: str) -> ParsedResume | None:
         return None
 
 
-def _persist_optimized_resume(user_id: str, job_id: str, optimized_resume: ParsedResume) -> None:
+def _verify_experience(optimized_resume: ParsedResume, profile_data: dict | None) -> None:
+    """Replaces ungrounded rewritten responsibilities with the user's own before the
+    tailored resume is rendered or cached."""
+    original_experience = (profile_data or {}).get("original_resume", {}).get("experience", [])
+    if not original_experience:
+        return
+    optimized_resume.experience = verify_experience_grounding(
+        original_experience, optimized_resume.experience
+    )
+
+
+def _persist_optimized_resume(
+    user_id: str, job_id: str, optimized_resume: ParsedResume, profile_data: dict | None = None
+) -> None:
     """Caches the tailored resume + derived per-project bullets for reuse across the
     'Analyze fit' and 'Generate Optimized Resume' flows."""
-    profile_data = get_profile_data(user_id)
+    if profile_data is None:
+        profile_data = get_profile_data(user_id)
     original_projects = (profile_data or {}).get("original_resume", {}).get("projects", [])
     optimized_projects = extract_optimized_projects(original_projects, optimized_resume.projects)
     try:
@@ -125,8 +139,13 @@ async def optimize_resume_service(request: OptimizationRequest) -> OptimizationR
                 message="Failed to optimize resume. Check logs for details."
             )
 
+        profile_data = get_profile_data(request.user_id)
+        _verify_experience(optimized_resume, profile_data)
+
         if request.job_id:
-            _persist_optimized_resume(request.user_id, request.job_id, optimized_resume)
+            _persist_optimized_resume(
+                request.user_id, request.job_id, optimized_resume, profile_data
+            )
 
     # 2. Render optimized resume to HTML using standard template
     html_content = render_resume_to_html(optimized_resume)

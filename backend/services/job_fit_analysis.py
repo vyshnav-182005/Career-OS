@@ -8,7 +8,12 @@ from backend.agents.resume_optimization_agent import (
     run_resume_optimization,
 )
 from backend.services.job_context import resolve_job_text
-from backend.services.ats_scoring import compute_ats_score, extract_optimized_projects
+from backend.services.ats_scoring import (
+    compute_ats_score,
+    extract_optimized_projects,
+    log_optimization_skill_delta,
+    verify_experience_grounding,
+)
 from backend.db.supabase_client import (
     get_job_by_id,
     get_profile_data,
@@ -102,8 +107,18 @@ async def analyze_job_fit(user_id: str, job_id: str, force_refresh: bool = False
             message="Failed to analyze job fit. Check logs for details.",
         )
 
-    original_projects = profile_data.get("original_resume", {}).get("projects", [])
+    original_resume = profile_data.get("original_resume", {}) or {}
+    original_projects = original_resume.get("projects", [])
     optimized_projects = extract_optimized_projects(original_projects, optimized_resume.projects)
+
+    # Experience bullets get the same anti-hallucination check the project
+    # bullets go through before anything is persisted or shown.
+    optimized_resume.experience = verify_experience_grounding(
+        original_resume.get("experience") or [], optimized_resume.experience
+    )
+
+    # Log-only feedback signal: did tailoring actually improve keyword coverage?
+    log_optimization_skill_delta(optimized_resume.model_dump(), ats_score, user_id, job_id)
 
     try:
         upsert_optimized_resume_snapshot(

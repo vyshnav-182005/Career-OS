@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Any, Dict, List, Optional
 
-from backend.models.resume import Project
+from backend.models.resume import Experience, Project
 from backend.models.schemas import ATSScore, OptimizedProject
 from backend.agents.ats_scoring_agent import run_ats_scoring
 from backend.services import taxonomy
@@ -11,6 +11,8 @@ from backend.services.text_cleaning import clean_html_text
 logger = logging.getLogger(__name__)
 
 MAX_BULLETS_PER_PROJECT = 4
+# Technologies named in a bullet synthesized for a project with no description.
+MAX_SYNTHESIZED_TECHNOLOGIES = 4
 GROUNDING_OVERLAP_RATIO = 0.3
 GROUNDING_MIN_OVERLAP_WORDS = 3
 
@@ -62,9 +64,15 @@ def _normalize_name(name: Optional[str]) -> str:
     return (name or "").strip().lower()
 
 
-def flatten_profile_skill_terms(profile_data: Dict[str, Any]) -> set:
-    """Collects the user's actual skill/technology terms from their profile for matching against a JD."""
-    original = (profile_data or {}).get("original_resume", {}) or {}
+def flatten_resume_skill_terms(resume: Dict[str, Any]) -> set:
+    """
+    Collects every skill/technology term stated anywhere in one resume dict.
+
+    Split out of flatten_profile_skill_terms so the same flattening can be run
+    against a tailored resume (which has no "original_resume" wrapper) when
+    re-scoring it after optimization.
+    """
+    original = resume or {}
     terms = set()
 
     for category in original.get("skills") or []:
@@ -87,6 +95,11 @@ def flatten_profile_skill_terms(profile_data: Dict[str, Any]) -> set:
 
     terms.discard("")
     return terms
+
+
+def flatten_profile_skill_terms(profile_data: Dict[str, Any]) -> set:
+    """Collects the user's actual skill/technology terms from their profile for matching against a JD."""
+    return flatten_resume_skill_terms((profile_data or {}).get("original_resume", {}) or {})
 
 
 def _skill_covered(skill: str, normalized_profile_terms: set) -> bool:
@@ -165,6 +178,81 @@ def verify_bullet_grounding(bullet: str, original_bullets: List[str], technologi
     return ratio >= GROUNDING_OVERLAP_RATIO or len(overlap) >= GROUNDING_MIN_OVERLAP_WORDS
 
 
+def _synthesize_project_bullet(name: str, technologies: List[str]) -> Optional[str]:
+    """
+    Last-resort bullet for a project that has no original description to ground
+    against. Restates only the project's own already-trusted technologies list,
+    so it is true by construction and doesn't need grounding verification.
+    Returns None when there is nothing factual to restate.
+    """
+    techs = [t.strip() for t in technologies if t and t.strip()]
+    if not techs:
+        return None
+    return f"Built {name} using {', '.join(techs[:MAX_SYNTHESIZED_TECHNOLOGIES])}."
+
+
+def verify_experience_grounding(
+    original_experience: List[Dict[str, Any]], optimized_experience: List[Experience]
+) -> List[Experience]:
+    """
+    The experience-side counterpart of extract_optimized_projects: pairs each
+    tailored experience entry back to the user's canonical one (by company +
+    title, falling back to company alone so a reworded title doesn't erase a
+    real job) and runs every rewritten responsibility through the same overlap
+    check, falling back to the original responsibility at that position when a
+    line isn't grounded. Entries with no canonical match are dropped rather
+    than trusted, the same way unmatched projects are.
+    """
+    by_company_title: Dict[tuple, Dict[str, Any]] = {}
+    by_company: Dict[str, Dict[str, Any]] = {}
+    by_title: Dict[str, Dict[str, Any]] = {}
+    for entry in original_experience or []:
+        company = _normalize_name(entry.get("company"))
+        title = _normalize_name(entry.get("title"))
+        if not company and not title:
+            continue
+        by_company_title.setdefault((company, title), entry)
+        if company:
+            by_company.setdefault(company, entry)
+        else:
+            by_title.setdefault(title, entry)
+
+    verified: List[Experience] = []
+
+    for opt_entry in optimized_experience or []:
+        company = _normalize_name(opt_entry.company)
+        title = _normalize_name(opt_entry.title)
+        original = by_company_title.get((company, title))
+        if original is None:
+            # A resume entry that never named a company can only be matched on title.
+            original = by_company.get(company) if company else by_title.get(title)
+        if original is None:
+            logger.warning(
+                "experience entry %r / %r has no canonical match, dropping",
+                opt_entry.company,
+                opt_entry.title,
+            )
+            continue
+
+        original_bullets = list(original.get("responsibilities") or [])
+
+        verified_bullets: List[str] = []
+        for i, bullet in enumerate(opt_entry.responsibilities or []):
+            # Technologies live on projects, not experience, so responsibilities
+            # are grounded against the original responsibilities alone.
+            if verify_bullet_grounding(bullet, original_bullets, []):
+                verified_bullets.append(bullet)
+            elif i < len(original_bullets):
+                verified_bullets.append(original_bullets[i])
+
+        if not verified_bullets:
+            verified_bullets = original_bullets
+
+        verified.append(opt_entry.model_copy(update={"responsibilities": verified_bullets}))
+
+    return verified
+
+
 def extract_optimized_projects(
     original_projects: List[Dict[str, Any]], optimized_projects: List[Project]
 ) -> List[OptimizedProject]:
@@ -199,10 +287,25 @@ def extract_optimized_projects(
         if not verified_bullets and original_bullets:
             verified_bullets = original_bullets[:MAX_BULLETS_PER_PROJECT]
 
+        project_name = original.get("name") or opt_project.name or "Untitled Project"
+
+        if not verified_bullets:
+            # A project with no original bullets can never clear grounding (there
+            # is nothing to overlap against), which used to drop it silently.
+            # Restate its technologies instead -- true by construction -- and
+            # only drop it when there is no factual content at all to restate.
+            synthesized = _synthesize_project_bullet(project_name, technologies)
+            if synthesized:
+                verified_bullets = [synthesized]
+            else:
+                logger.warning(
+                    "project %r has no groundable content, dropping", project_name
+                )
+
         if verified_bullets:
             results.append(
                 OptimizedProject(
-                    project_name=original.get("name") or opt_project.name or "Untitled Project",
+                    project_name=project_name,
                     technologies=technologies,
                     original_bullets=original_bullets,
                     optimized_bullets=verified_bullets,
@@ -213,19 +316,70 @@ def extract_optimized_projects(
         # The agent dropped every project (parsing edge case) — surface the user's
         # own top projects unmodified rather than returning nothing.
         for original in original_projects[:3]:
+            name = original.get("name") or "Untitled Project"
+            technologies = list(original.get("technologies") or [])
             bullets = list(original.get("description") or [])[:MAX_BULLETS_PER_PROJECT]
-            if not bullets:
-                continue
+            optimized_bullets = bullets
+            if not optimized_bullets:
+                synthesized = _synthesize_project_bullet(name, technologies)
+                if not synthesized:
+                    logger.warning("project %r has no groundable content, dropping", name)
+                    continue
+                optimized_bullets = [synthesized]
             results.append(
                 OptimizedProject(
-                    project_name=original.get("name") or "Untitled Project",
-                    technologies=list(original.get("technologies") or []),
+                    project_name=name,
+                    technologies=technologies,
                     original_bullets=bullets,
-                    optimized_bullets=bullets,
+                    optimized_bullets=optimized_bullets,
                 )
             )
 
     return results
+
+
+def log_optimization_skill_delta(
+    optimized_resume: Dict[str, Any],
+    ats_score: Optional[ATSScore],
+    user_id: str,
+    job_id: Optional[str],
+) -> Optional[int]:
+    """
+    Re-scores skill coverage against the tailored resume's own terms and logs the
+    change from the pre-optimization score. Purely a feedback signal confirming
+    that tailoring actually moves the number -- it never changes the response --
+    so any failure here is swallowed rather than surfaced.
+
+    Returns the post-optimization skill_match_pct, or None when it couldn't be
+    computed (no ATS score to compare against, or the JD stated no skills).
+    """
+    if not ats_score:
+        return None
+
+    required = list(ats_score.required_skills_covered) + list(ats_score.required_skills_missing)
+    preferred = list(ats_score.preferred_skills_covered) + list(ats_score.preferred_skills_missing)
+    if not required and not preferred:
+        return None
+
+    try:
+        coverage = compute_skill_coverage(
+            required, preferred, flatten_resume_skill_terms(optimized_resume or {})
+        )
+    except Exception:
+        logger.warning(
+            "Post-optimization skill re-scoring failed for user_id=%s job_id=%s", user_id, job_id
+        )
+        return None
+
+    after = coverage["skill_match_pct"]
+    logger.info(
+        "optimization changed skill_match_pct from %s to %s for user_id=%s job_id=%s",
+        ats_score.skill_match_pct,
+        after,
+        user_id,
+        job_id,
+    )
+    return after
 
 
 def extract_job_skill_terms(job: Dict[str, Any]) -> List[str]:
