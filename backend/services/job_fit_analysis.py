@@ -1,10 +1,12 @@
-import asyncio
 import logging
 from typing import Any, Dict, Optional
 
 from backend.models.resume import ParsedResume
 from backend.models.schemas import ATSScore, JobFitAnalysis
-from backend.agents.resume_optimization_agent import run_resume_optimization
+from backend.agents.resume_optimization_agent import (
+    keywords_from_ats_score,
+    run_resume_optimization,
+)
 from backend.services.job_context import resolve_job_text
 from backend.services.ats_scoring import compute_ats_score, extract_optimized_projects
 from backend.db.supabase_client import (
@@ -73,20 +75,26 @@ async def analyze_job_fit(user_id: str, job_id: str, force_refresh: bool = False
         except Exception:
             ats_score = None
 
-    # Whichever pieces are missing are independent LLM calls -- run them
-    # concurrently (scheduled as tasks immediately) rather than one after another,
-    # since this endpoint's whole point is to be fast enough to run on modal open.
-    resume_task = None if optimized_resume is not None else asyncio.ensure_future(
-        run_resume_optimization(user_id, job_title, job_description)
-    )
-    ats_task = None if ats_score is not None else asyncio.ensure_future(
-        compute_ats_score(profile_data, job_title, job_description)
-    )
+    # These two used to run concurrently, but the optimizer now consumes the ATS
+    # agent's required/preferred skill classification instead of re-deriving
+    # keywords from the JD prose, so scoring has to land first. Its lists are
+    # handed straight to the optimizer -- passing them (even empty, when scoring
+    # failed) is what stops the agent from paying for a second classification.
+    if ats_score is None:
+        ats_score = await compute_ats_score(profile_data, job_title, job_description)
 
-    if resume_task is not None:
-        optimized_resume = await resume_task
-    if ats_task is not None:
-        ats_score = await ats_task
+    if optimized_resume is None:
+        required_skills, preferred_skills = keywords_from_ats_score(
+            ats_score.model_dump() if ats_score else None
+        )
+        optimized_resume = await run_resume_optimization(
+            user_id,
+            job_title,
+            job_description,
+            job_id=job_id,
+            required_skills=required_skills,
+            preferred_skills=preferred_skills,
+        )
 
     if not optimized_resume:
         return JobFitAnalysis(

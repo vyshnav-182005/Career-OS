@@ -113,7 +113,10 @@ async def optimize_resume_service(request: OptimizationRequest) -> OptimizationR
         optimized_resume = await run_resume_optimization(
             user_id=request.user_id,
             job_title=job_title,
-            job_description=job_description
+            job_description=job_description,
+            # Lets the agent reuse the ATS keyword classification cached by an
+            # earlier "Analyze fit" for this job instead of re-running it.
+            job_id=request.job_id,
         )
 
         if not optimized_resume:
